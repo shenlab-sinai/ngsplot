@@ -1,0 +1,10 @@
+- May 8, 2012
+
+* Make sure read and process paired-end reads correctly.
+* Make sure read and process gapped alignment correctly.
+* When a mate pair overlaps, make sure the overlapped region is not double-counted.
+* Automatically recognize Bowtie/Tophat alignment and convert all NA's to a proper number. (DONE DIRTY)
+* Check index file for BAM, generate one if not present. (DONE)
+* Read short reads chromosome by chromosome as implemented by SHAO. This should be the default. (DONE)
+* Parallelize both reading and coverage-calculating. (DONE)
+

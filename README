@@ -1,0 +1,5 @@
+Add path_to_ngsplot/bin to your PATH.
+Set environment variable NGSPLOT to path_to_ngsplot.
+
+Use cov.calc to calculate genomic coverage for each NGS sample. It will generate a binary R data file.
+Then use ngs.plot to plot the genomic region as needed. It will produce a .png image file and a .txt text file containing the plotting data.

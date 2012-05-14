@@ -1,0 +1,7 @@
+# If you want to specify the gene list as "genome", use "-1".
+# Use TAB to separate the three columns: coverage file<TAB>gene list<TAB>title
+# "title" will be shown in the figure's legend.
+H3K4me3.cov.RD	-1	"H3K4me3 IP"
+Input.cov.RD	-1	"DNA Input"
+Pol2.cov.RD	high.exp.list	"Pol II High Exp"
+H3K27me3.cov.RD	low.exp.list	"H3K27me3 Low Exp"

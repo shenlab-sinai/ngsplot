@@ -22,7 +22,7 @@ cmd.help <- function(){
 	cat("-Q     Mapping quality requirement(optional, default=20)\n")
 	cat("-V     Calculate genome vs. intragenic ratio of the summation of coverage(default=0, off. Very time consuming!)\n")
 	cat("       This ratio value can later be used to adjust coveage in plotting. Can be useful when comparing heterochromatic marks with DNA Input.\n")
-	cat("-P     By default, only one core is used. Set it as 0, then all detected cores are used.\n")
+	cat("-P     Number of the cores to be used. By default, only one core is used. Set it as 0, then all detected cores are used.\n")
 	cat("\n")
 }
 
@@ -139,10 +139,6 @@ getAllReads <- function(crns, bamfile, mapqual, fraglen, ...){
 	suppressWarnings(gc())
 	names(all.reads) <- crns
 	all.reads
-	# all.reads <- lapply(crns, function(crn) {
-	# suppressWarnings(gc())
-	# return(getReads(crn, bam.info, bamfile, mapqual, fraglen, ...))
- #    })
 }
 
 # Read alignment file.
@@ -166,8 +162,6 @@ if(readformat == 'export'){
 	# Read big bam file.
 	if(!file.exists(paste(readfile, ".bai", sep=""))){
 		indexBam(readfile)
-		# system(paste("samtools index ", readfile, sep=""))
-		# Sys.sleep(1)
 		}
 	readfile.bamfile <- BamFile(readfile)
 	readfile.info <- seqinfo(readfile.bamfile)
@@ -190,9 +184,6 @@ names(mc.reads.coverage) <- names(read.coverage)
 read.coverage.n <- GenomeData(mc.reads.coverage)
 rm(mc.reads.coverage)
 suppressWarnings(gc())
-## tmp <- lapply(read.coverage, function(r) r/nreads*1e6)
-## read.coverage.n <- GenomeData(tmp)
-## read.coverage.n <- GenomeData(lapply(read.coverage, function(r) r/nreads*1e6))
 
 # Calculate genome vs. intragenic ratio of coverage.
 if('-V' %in% names(args.tbl)){	# fragment length.

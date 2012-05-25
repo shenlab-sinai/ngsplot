@@ -145,8 +145,6 @@ if(readformat == 'export'){
 	# Read big bam file.
 	if(!file.exists(paste(readfile, ".bai", sep=""))){
 		indexBam(readfile)
-		# system(paste("samtools index ", readfile, sep=""))
-		# Sys.sleep(1)
 		}
 	readfile.bamfile <- BamFile(readfile)
 	readfile.info <- seqinfo(readfile.bamfile)

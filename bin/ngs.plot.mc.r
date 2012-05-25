@@ -1,4 +1,4 @@
-#!/usr/local/bin/Rscript --vanilla
+#!/usr/bin/env Rscript
 #
 # Program: ngs.plot.r
 # Purpose: Plot sequencing coverages at different genomic regions.
@@ -37,7 +37,7 @@ cmd.help <- function(){
 	cat("-M     Smooth method, choose from: mean, median(default=mean)\n")
 	cat("-H     Use shaded area for coverage plots instead of curves. set it as [0, 1) for degree of opacity (default=0, i.e. off). suggested value: <0.5\n")
 	cat("-E     By default, do NOT calculate weighted coverage for splined curves using gene length. However, this can be useful, e.g. when comparing enrichment of a histone mark under two conditions. Can be turned on by setting -E to 1.\n")
-	cat("-P     By default, only one core is used. Set it as 0, then all detected cores are used.\n")
+	cat("-P     Number of the cores to be used. By default, only one core is used. Set it as 0, then all detected cores are used.\n")
 	cat("\n")
 }
 

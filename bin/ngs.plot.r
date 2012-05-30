@@ -14,7 +14,7 @@
 
 # Deal with command line arguments.
 cmd.help <- function(){
-	cat("\nUsage: ngs.plot.r -C cov_file -R region_2_plot -O out_base_name [-FI forbid_image] [-F reg_further_info] [-D database_2_use] [-T title] [-G gene_list] [-I interval_size] [-L flanking_size] [-N flanking_factor] [-S random_sample_rate] [-A smooth_function_radius] [-M smooth_method] [-H shaded_area] [-E weigh_genelen]\n")
+	cat("\nUsage: ngs.plot.r -C cov_file -R region_2_plot -O out_base_name [-FI forbid_image] [-F reg_further_info] [-D database_2_use] [-T title] [-G gene_list] [-I interval_size] [-L flanking_size] [-N flanking_factor] [-S random_sample_rate] [-A smooth_function_radius] [-M smooth_method] [-H shaded_area] [-E weigh_genelen] [-P cores_number]\n")
 	cat("\n")
 	cat("-C     Coverage file to plot or for multiplot, a *.txt file(see multiplot.example.txt)\n")
 	cat("-R     Genomic region, can be: tss, tes, genebody, exon, cgi or customized *.bed file\n")
@@ -37,6 +37,7 @@ cmd.help <- function(){
 	cat("-M     Smooth method, choose from: mean, median(default=mean)\n")
 	cat("-H     Use shaded area for coverage plots instead of curves. set it as [0, 1) for degree of opacity (default=0, i.e. off). suggested value: <0.5\n")
 	cat("-E     By default, do NOT calculate weighted coverage for splined curves using gene length. However, this can be useful, e.g. when comparing enrichment of a histone mark under two conditions. Can be turned on by setting -E to 1.\n")
+	cat("-P     Number of the cores to be used. By default, only one core is used. Set it as 0, then all detected cores are used.\n")
 	cat("\n")
 }
 
@@ -143,14 +144,20 @@ if(reg2plot == 'tss' || reg2plot == 'tes'){	# determine the set of genomic coord
 		finfo <- 'ProximalPromoter'
 	}
 	genome.coord <- genemodel$cgi
-}else if(length(grep('.bed$', reg2plot))>0){
+}else{	# if not above, then BED file.
 	bed.coord <- read.table(reg2plot, sep="\t")
-	if(ncol(bed.coord)==3){
-		genome.coord <- data.frame(chrom=bed.coord[, 1], start=bed.coord[, 2]+1, end=bed.coord[, 3], gid=NA, gname='N', tid='N', strand='+', byname.uniq=T, bygid.uniq=NA)
-	}else if(ncol(bed.coord)==6){
-		genome.coord <- data.frame(chrom=bed.coord[, 1], start=bed.coord[, 2]+1, end=bed.coord[, 3], gid=NA, gname=bed.coord[, 4], tid=bed.coord[, 5], strand=bed.coord[, 6], byname.uniq=T, bygid.uniq=NA)
-	}else{
-		stop('Input must be BED3 or BED6 format!')
+	if(ncol(bed.coord) <3){
+		stop('Input file must contain at least 3 columns!')
+	}
+	genome.coord <- data.frame(chrom=bed.coord[, 1], start=bed.coord[, 2]+1, end=bed.coord[, 3], gid=NA, gname='N', tid='N', strand='+', byname.uniq=T, bygid.uniq=NA)
+	if(ncol(bed.coord) >=4){
+		genome.coord$gname <- bed.coord[, 4]
+	}
+	if(ncol(bed.coord) >=5){
+		genome.coord$tid <- bed.coord[, 5]
+	}
+	if(ncol(bed.coord) >=6){
+		genome.coord$strand <- bed.coord[, 6]
 	}
 	reg2plot <- 'bed'	# rename for information retrieval
 }
@@ -235,6 +242,13 @@ if('-E' %in% names(args.tbl)){	# weighted coverage.
 }else{
 	weight.genlen <- as.integer(0)
 }
+
+if('-P' %in% names(args.tbl)){	# set cores number.
+	stopifnot(as.integer(args.tbl['-P']) >= 0)
+	cores.number <- as.integer(args.tbl['-P'])
+}else{
+	cores.number <- as.integer(1)
+}
 # Create the matrix to store plotting data.
 if(rnaseq.gb){
 	regcovMat <- matrix(0, nrow=intsize, ncol=nrow(ctg.tbl))
@@ -248,8 +262,9 @@ colnames(regcovMat) <- ctg.tbl$title
 
 ##### Start the plotting routines ####
 # Load required libraries.
-library(ShortRead)
-library(BSgenome)
+require(ShortRead)||{source("http://bioconductor.org/biocLite.R");biocLite(ShortRead);TRUE}
+require(BSgenome)||{source("http://bioconductor.org/biocLite.R");biocLite(BSgenome);TRUE}
+require(doMC)
 
 # Function to check if the range exceeds coverage vector boundaries.
 checkBound <- function(start, end, range, chrlen){
@@ -291,6 +306,7 @@ extrCovSec <- function(chrcov, start, end, ninterp, flanking, strand, weight){
 	}
 }
 
+
 # Extract and concatenate coverages for a mRNA using exon model. Then do interpolation.
 extrCovExons <- function(chrcov, ranges, ninterp, strand, weight){
 	cov <- as.vector(seqselect(chrcov, ranges))
@@ -315,13 +331,55 @@ extrCovMidp <- function(chrcov, midp, flanking, strand){
 	}
 }
 
+do.par.cov <- function(k, plot.coord, read.coverage.n, rnaseq.gb,
+                     flankfactor, reg2plot, genemodel, weight.genlen,
+                     intsize, old_flanksize, flanksize){
+	chrom <- as.character(plot.coord[k, ]$chrom)
+	if(!chrom %in% names(read.coverage.n)) return(NULL)
+	strand <- plot.coord[k, ]$strand
+	if(flankfactor > 0 && !rnaseq.gb){
+		flanksize <- floor((plot.coord[k, ]$end - plot.coord[k, ]$start + 1)*flankfactor)
+	}
+	if((reg2plot == 'tss' && strand == '+') || (reg2plot == 'tes' && strand == '-')){
+		if(!checkBound(plot.coord[k, ]$start, plot.coord[k, ]$start, flanksize, length(read.coverage.n[[chrom]])))
+			return(NULL)
+		result <- extrCovMidp(read.coverage.n[[chrom]], plot.coord[k, ]$start, flanksize, strand)
+	}else if(reg2plot == 'tss' && strand == '-' || reg2plot == 'tes' && strand == '+'){
+		if(!checkBound(plot.coord[k, ]$end, plot.coord[k, ]$end, flanksize, length(read.coverage.n[[chrom]])))
+			return(NULL)
+		result <- extrCovMidp(read.coverage.n[[chrom]], plot.coord[k, ]$end, flanksize, strand)
+	}else{
+		if(!checkBound(plot.coord[k, ]$start, plot.coord[k, ]$end, flanksize, length(read.coverage.n[[chrom]])))
+			return(NULL)
+		if(rnaseq.gb){	# RNA-seq plot using exon model.
+			exon.ranges <- genemodel$exonmodel[[plot.coord$tid[k]]]$ranges
+			result <- extrCovExons(read.coverage.n[[chrom]], exon.ranges, intsize, strand, weight.genlen)
+		}else{
+			if(flankfactor > 0){	# one section coverage.
+				result <- extrCovSec(read.coverage.n[[chrom]], plot.coord[k, ]$start, plot.coord[k, ]$end, intsize+2*old_flanksize, flanksize, strand, weight.genlen)
+			}else{	# three section coverage.
+				result <- extrCov3Sec(read.coverage.n[[chrom]], plot.coord[k, ]$start, plot.coord[k, ]$end, intsize, flanksize, strand, weight.genlen)
+			}
+		}
+	}
+	result
+}
+
 i <- 1	# index for unique coverage files.
 old_flanksize <- flanksize
+if(cores.number == 0){
+	registerDoMC()
+} else {
+	registerDoMC(cores.number)
+}
 while(i <= length(cov.u)){	# go through all unique coverage files.
 	same.cov.r <- which(ctg.tbl$cov == cov2load)
-	for(j in 1:length(same.cov.r)){	# go through all gene lists associated with each coverage.
+	for(j in 1:length(same.cov.r)) {	# go through all
+                                        # gene lists associated with
+                                        # each coverage.
 		r <- same.cov.r[j]	# row number.
-		lname <- ctg.tbl$glist[r]	# gene list name: used to subset the genome.
+		lname <- ctg.tbl$glist[r]	# gene list name: used to subset
+                                     # the genome.
 		if(lname == '-1'){	# use genome as gene list.
 			if(samprate < 1){
 				plot.coord <- genome.coord[samp.i, ]
@@ -337,38 +395,19 @@ while(i <= length(cov.u)){	# go through all unique coverage files.
 			}
 			plot.coord <- genome.coord[subset.idx, ]
 		}
-		nplot <- 0	# book-keep the number of regions drawn(for averaging).
-		for(k in 1:nrow(plot.coord)){	# go through all regions.
-			chrom <- as.character(plot.coord[k, ]$chrom)
-			if(!chrom %in% names(read.coverage.n))	# check chromosome name first.
-				next
-			strand <- plot.coord[k, ]$strand
-			if(flankfactor > 0 && !rnaseq.gb){
-				flanksize <- floor((plot.coord[k, ]$end - plot.coord[k, ]$start + 1)*flankfactor)
+		nplot <- 0	# book-keep the number of regions drawn(for
+                      # averaging).
+		fin.result <- foreach(k=1:nrow(plot.coord)) %dopar% {	# go through all
+                                        				# regions.
+          		do.par.cov(k, plot.coord, read.coverage.n, rnaseq.gb,
+				flankfactor, reg2plot, genemodel, weight.genlen,
+				intsize, old_flanksize, flanksize)
+		}
+		for (result in fin.result){
+			if (!is.null(result)){
+				regcovMat[,r] <- regcovMat[,r] + result
+				nplot <- nplot + 1
 			}
-			if((reg2plot == 'tss' && strand == '+') || (reg2plot == 'tes' && strand == '-')){
-				if(!checkBound(plot.coord[k, ]$start, plot.coord[k, ]$start, flanksize, length(read.coverage.n[[chrom]])))
-					next
-				regcovMat[, r] <- regcovMat[, r] + extrCovMidp(read.coverage.n[[chrom]], plot.coord[k, ]$start, flanksize, strand)
-			}else if(reg2plot == 'tss' && strand == '-' || reg2plot == 'tes' && strand == '+'){
-				if(!checkBound(plot.coord[k, ]$end, plot.coord[k, ]$end, flanksize, length(read.coverage.n[[chrom]])))
-					next
-				regcovMat[, r] <- regcovMat[, r] + extrCovMidp(read.coverage.n[[chrom]], plot.coord[k, ]$end, flanksize, strand)
-			}else{
-				if(!checkBound(plot.coord[k, ]$start, plot.coord[k, ]$end, flanksize, length(read.coverage.n[[chrom]])))
-					next
-				if(rnaseq.gb){	# RNA-seq plot using exon model.
-					exon.ranges <- genemodel$exonmodel[[plot.coord$tid[k]]]$ranges
-					regcovMat[, r] <- regcovMat[, r] + extrCovExons(read.coverage.n[[chrom]], exon.ranges, intsize, strand, weight.genlen)
-				}else{
-					if(flankfactor > 0){	# one section coverage.
-						regcovMat[, r] <- regcovMat[, r] + extrCovSec(read.coverage.n[[chrom]], plot.coord[k, ]$start, plot.coord[k, ]$end, intsize+2*old_flanksize, flanksize, strand, weight.genlen)
-					}else{	# three section coverage.
-						regcovMat[, r] <- regcovMat[, r] + extrCov3Sec(read.coverage.n[[chrom]], plot.coord[k, ]$start, plot.coord[k, ]$end, intsize, flanksize, strand, weight.genlen)
-					}
-				}
-			}
-			nplot <- nplot + 1
 		}
 		if(nplot > 0)
 			regcovMat[, r] <- regcovMat[, r] / nplot

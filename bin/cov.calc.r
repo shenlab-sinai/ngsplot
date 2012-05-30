@@ -12,7 +12,7 @@
 #
 
 cmd.help <- function(){
-	cat("\nUsage: cov.calc -G genome_name -R alignedread_file -X align_format -C cov_file [-F frag_len] [-Q mapping_quality] [-V calc_gig_ratio]\n")
+	cat("\nUsage: cov.calc.r -G genome_name -R alignedread_file -X align_format -C cov_file [-F frag_len] [-Q mapping_quality] [-V calc_gig_ratio]\n")
 	cat("\n")
 	cat("-G     Genome name, currently supported: mm9, hg19, rn4\n")
 	cat("-R     Alignment file name\n")
@@ -22,6 +22,7 @@ cmd.help <- function(){
 	cat("-Q     Mapping quality requirement(optional, default=20)\n")
 	cat("-V     Calculate genome vs. intragenic ratio of the summation of coverage(default=0, off. Very time consuming!)\n")
 	cat("       This ratio value can later be used to adjust coveage in plotting. Can be useful when comparing heterochromatic marks with DNA Input.\n")
+	cat("-P     Number of the cores to be used. By default, only one core is used. Set it as 0, then all detected cores are used.\n")
 	cat("\n")
 }
 
@@ -69,6 +70,13 @@ if('-Q' %in% names(args.tbl)){	# map quality.
 }
 mapqual <- as.integer(mapqual)
 
+if('-P' %in% names(args.tbl)){	# set cores number.
+	stopifnot(as.integer(args.tbl['-P']) >= 0)
+	cores.number <- as.integer(args.tbl['-P'])
+}else{
+	cores.number <- as.integer(1)
+}
+
 # Load chromosome length info for the specified genome.
 load(paste(progpath, 'database/genome.size.RData', sep=''))
 if(genome == 'mm9'){
@@ -85,6 +93,13 @@ if(genome == 'mm9'){
 require(ShortRead)||{source("http://bioconductor.org/biocLite.R");biocLite("ShortRead");TRUE}
 require(BSgenome)||{source("http://bioconductor.org/biocLite.R");biocLite("BSgenome");TRUE}
 require(Rsamtools)||{source("http://bioconductor.org/biocLite.R");biocLite("Rsamtools");TRUE}
+require(doMC)||{install.packages("doMC", dep=T);TRUE}
+
+if(cores.number == 0){
+	registerDoMC()
+} else {
+	registerDoMC(cores.number)
+}
 
 # Read the big bam file.
 NullGR <- function() {
@@ -121,10 +136,12 @@ getReads <- function(crn, bam.info, bamfile, mapqual, fraglen, ...){
 
 getAllReads <- function(crns, bamfile, mapqual, fraglen, ...){
 	bam.info <- seqinfo(bamfile)
-	all.reads <- lapply(crns, function(crn) {
+	all.reads <- foreach(k=1:length(crns)) %dopar% {
+		getReads(crns[[k]], bam.info, bamfile, mapqual, fraglen, ...)
+	}
 	suppressWarnings(gc())
-	return(getReads(crn, bam.info, bamfile, mapqual, fraglen, ...))
-    })
+	names(all.reads) <- crns
+	all.reads
 }
 
 # Read alignment file.
@@ -148,7 +165,7 @@ if(readformat == 'export'){
 	# Read big bam file.
 	if(!file.exists(paste(readfile, ".bai", sep=""))){
 		indexBam(readfile)
-		}
+	}
 	header <- scanBamHeader(readfile)
 	try.mapping <- try(strsplit(header[[1]]$text$'@PG'[[1]], ':')[[1]][2])
 	if (class(try.mapping) != "try-error"){
@@ -170,7 +187,13 @@ if(readformat == 'export'){
 # Calculate genomic coverage.
 read.coverage <- coverage(read.filtered, width=chrlens, extend = fraglen - width(read.filtered))
 nreads <- length(read.filtered)
-read.coverage.n <- GenomeData(lapply(read.coverage, function(r) r/nreads*1e6))
+mc.reads.coverage <- foreach(k=1:length(read.coverage)) %dopar% {
+	read.coverage[[k]]/nreads*1e6
+}
+names(mc.reads.coverage) <- names(read.coverage)
+read.coverage.n <- GenomeData(mc.reads.coverage)
+rm(mc.reads.coverage)
+suppressWarnings(gc())
 
 # Calculate genome vs. intragenic ratio of coverage.
 if('-V' %in% names(args.tbl)){	# fragment length.

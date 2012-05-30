@@ -109,7 +109,7 @@ NullGR <- function() {
 }
 
 getReads <- function(crn, bam.info, bamfile, mapqual, fraglen, ...){
-	need.bam.what <- c('pos', 'qwidth', 'mapq')
+	need.bam.what <- c('strand', 'pos', 'qwidth', 'mapq')
 	which <- RangesList(IRanges(start=0, end=seqlengths(bam.info)[crn]))
 	names(which) <- crn
 	param <- ScanBamParam(which=which, what=need.bam.what)
@@ -124,11 +124,14 @@ getReads <- function(crn, bam.info, bamfile, mapqual, fraglen, ...){
 		return(NullGR())
 	}else{
 	reads.df <- as.data.frame(reads.list)
-	reads.df$mapq[is.na(reads.df$mapq)] <- 254
+	if (mapping.method %in% c("TopHat", "Bowtie")){
+		reads.df$mapq[is.na(reads.df$mapq)] <- 254
+	}
+	reads.df <- reads.df[!is.na(reads.df["pos"]),]
 	reads.df <- reads.df[reads.df["mapq"] >= mapqual,]
 	reads.df["width"] <- fraglen
-	reads <- GRanges(seqnames=crn, ranges=IRanges(start=reads.df$pos, width=reads.df$qwidth), score=reads.df$mapq)
-      }
+	reads <- GRanges(seqnames=crn, ranges=IRanges(start=reads.df$pos, width=reads.df$qwidth), score=reads.df$mapq, strand=Rle(reads.df$strand))
+    }
 }
 
 getAllReads <- function(crns, bamfile, mapqual, fraglen, ...){
@@ -162,7 +165,14 @@ if(readformat == 'export'){
 	# Read big bam file.
 	if(!file.exists(paste(readfile, ".bai", sep=""))){
 		indexBam(readfile)
-		}
+	}
+	header <- scanBamHeader(readfile)
+	try.mapping <- try(strsplit(header[[1]]$text$'@PG'[[1]], ':')[[1]][2])
+	if (class(try.mapping) != "try-error"){
+		mapping.method <<- try.mapping
+	} else {
+		mapping.method <<- "default"
+	}
 	readfile.bamfile <- BamFile(readfile)
 	readfile.info <- seqinfo(readfile.bamfile)
 	crns <- seqnames(readfile.info)

@@ -187,6 +187,9 @@ if('-I' %in% names(args.tbl)){	# interval region size.
 	int.tbl <- c(3000,250,500,1000)
 	names(int.tbl) <- c('genebody','exon','cgi','bed')
 	intsize <- int.tbl[reg2plot]
+        if((reg2plot == 'bed') && ((genome.coord$end - genome.coord$start)==0)){
+        intsize <- 1
+        }
 }
 if(reg2plot == 'tss' || reg2plot == 'tes'){
 	intsize <- 1

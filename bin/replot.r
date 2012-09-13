@@ -55,18 +55,25 @@ rnaseq.gb <- as.logical(p['rnaseq.gb'])
 if('width' %in% names(p)){
 	png.width <- as.integer(p['width'])
 }else{
-	png.width <- 1000
+	png.width <- 2000
 }
 if('height' %in% names(p)){
 	png.height <- as.integer(p['height'])
 }else{
-	png.height <- 900
+	png.height <- 1800
 }
 regcovMat <- as.matrix(read.delim(matfile, comment.char='#'))
 title2plot <- colnames(regcovMat)
 
+sefile <- gsub(".txt", "_stderror.txt", matfile)
+if(file.exists(sefile)){
+	confiMat <- as.matrix(read.delim(sefile, comment.char='#'))
+}else{
+	confiMat <- NULL
+}
+
 # Plot into png image file.
 out.png <- paste(basename, '.png', sep='')
-plotmat(out.png, png.width, png.height, 24, 
+plotmat(out.png, png.width, png.height, 48, 
 	reg2plot, flanksize, intsize, flankfactor, shade.alp, rnaseq.gb,
-	regcovMat, title2plot)
+	regcovMat, title2plot, confiMat)

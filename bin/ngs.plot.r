@@ -16,7 +16,7 @@
 cmd.help <- function(){
 	cat("\n")
 	cat("Usage: ngs.plot.r -R region_2_plot -C cov_file -O out_base_name [-F reg_further_info] [-D database_choice] [-T title] [-G gene_list] [-I interval_size] [-L flanking_size] [-N flanking_factor]\n")
-	cat("       More optional parameters: [-FI forbid_image] [-S random_sample_rate] [-A smooth_function_radius] [-M smooth_method] [-H shaded_area] [-E weigh_genelen] [-P cores_number]\n")
+	cat("       More optional parameters: [-FI forbid_image] [-S random_sample_rate] [-A smooth_function_radius] [-M smooth_method] [-H shaded_area] [-E weigh_genelen] [-P cores_number] [-SE standard_error_points]\n")
 	cat("\nMandatory parameters:\n")
 	cat("  -R     Genomic regions to plot, can be: tss, tes, genebody, exon, cgi or a customized BED file.\n")
 	cat("  -C     Coverage file or for multiple plot, a configuration file(must be *.txt, see multiplot.example.txt).\n")
@@ -48,6 +48,7 @@ cmd.help <- function(){
 	cat("           Interpreted as the degree of opacity.\n")
 	cat("  -E     Calculate weighted coverage according to internal size, must be: 0 or 1(default=0, i.e. Off).\n")
 	cat("           Can be useful, e.g. if you believe longer gene should weigh heavier than shorter gene.\n")
+	cat("  -SE     Number of the points to be used to calculate standard error. By default, 200 points are used. Set it as 0, then no standard error shades added.\n")
 	cat("\n")
 }
 
@@ -262,6 +263,17 @@ if('-P' %in% names(args.tbl)){	# set cores number.
 }else{
 	cores.number <- as.integer(1)
 }
+
+if('-SE' %in% names(args.tbl)){	# set number of points to calculate standard errors.
+	stopifnot(as.integer(args.tbl['-SE']) >= 0)
+	stderror.number <- as.integer(args.tbl['-SE'])
+	confiMat <- matrix(0, nrow=stderror.number, ncol=nrow(ctg.tbl))
+}else{
+	stderror.number <- as.integer(200)
+	confiMat <- matrix(0, nrow=stderror.number, ncol=nrow(ctg.tbl))
+}
+colnames(confiMat) <- ctg.tbl$title
+
 # Create the matrix to store plotting data.
 if(rnaseq.gb){
 	regcovMat <- matrix(0, nrow=intsize, ncol=nrow(ctg.tbl))
@@ -278,6 +290,9 @@ colnames(regcovMat) <- ctg.tbl$title
 require(ShortRead)||{source("http://bioconductor.org/biocLite.R");biocLite(ShortRead);TRUE}
 require(BSgenome)||{source("http://bioconductor.org/biocLite.R");biocLite(BSgenome);TRUE}
 require(doMC)
+
+# Function to calculate standard error
+std.error <- function(x){ sd(x)/sqrt(length(x)) }
 
 # Function to check if the range exceeds coverage vector boundaries.
 checkBound <- function(start, end, range, chrlen){
@@ -408,22 +423,30 @@ while(i <= length(cov.u)){	# go through all unique coverage files.
 			}
 			plot.coord <- genome.coord[subset.idx, ]
 		}
-		nplot <- 0	# book-keep the number of regions drawn(for
-                      # averaging).
 		fin.result <- foreach(k=1:nrow(plot.coord)) %dopar% {	# go through all
                                         				# regions.
           		do.par.cov(k, plot.coord, read.coverage.n, rnaseq.gb,
 				flankfactor, reg2plot, genemodel, weight.genlen,
 				intsize, old_flanksize, flanksize)
 		}
-		for (result in fin.result){
-			if (!is.null(result)){
-				regcovMat[,r] <- regcovMat[,r] + result
-				nplot <- nplot + 1
-			}
+		if(stderror.number!=0){
+			stderror.tmp <- matrix(0, nrow=0, ncol=stderror.number)
+			stderror.step <- length(regcovMat[,r])/(stderror.number)
+			stderror.pos <- round((0:stderror.number)*stderror.step)
+		}else{
+			stderror.tmp <- NULL
 		}
+		fin.result <- lapply(fin.result, na.omit)
+		nplot <- length(fin.result) # book-keep the number of regions drawn(for
+                      # averaging).
+		result.matrix <- do.call("rbind", fin.result)
+		regcovMat[,r] <- t(apply(result.matrix, 2, sum))
+		if(stderror.number!=0) {stderror.tmp <- result.matrix[, stderror.pos]}
 		if(nplot > 0)
 			regcovMat[, r] <- regcovMat[, r] / nplot
+			if(stderror.number!=0){
+				 confiMat[, r] <- apply(stderror.tmp, 2, std.error)
+			}
 	}
 	i <- i+1
 	if(i <= length(cov.u)){	# load a new coverage file.
@@ -438,17 +461,23 @@ if(smooth.radius > 0){
 	regcovMat <- smoothplot(regcovMat, smooth.radius, smooth.method)
 }
 
-default.width <- 1000
-default.height <- 900
+default.width <- 2000
+default.height <- 1800
 if(!fi_tag){
 	out.png <- paste(basename, '.png', sep='')
 	# Plot the matrix!
-	plotmat(out.png, default.width, default.height, 24, 
-		reg2plot, flanksize, intsize, flankfactor, shade.alp, rnaseq.gb,
-		regcovMat, ctg.tbl$title)
+	if(stderror.number==0){
+		plotmat(out.png, default.width, default.height, 48, 
+			reg2plot, flanksize, intsize, flankfactor, shade.alp, rnaseq.gb,
+			regcovMat, ctg.tbl$title, confiMat=NULL)
+	}else{
+		plotmat(out.png, default.width, default.height, 48, 
+			reg2plot, flanksize, intsize, flankfactor, shade.alp, rnaseq.gb,
+			regcovMat, ctg.tbl$title, confiMat)
+	}
 }
 
-# Save plotting data to a text file.
+# Save plotting data of reads density to a text file.
 out.txt <- paste(basename, '.txt', sep='')
 out.header <- c('#Do NOT change the following lines if you want to re-draw the image with replot.r! If you change the matrix values, cut and paste the commented lines into your new file and run replot.r.',
 	paste('#reg2plot:', reg2plot, sep=''),
@@ -460,4 +489,10 @@ out.header <- c('#Do NOT change the following lines if you want to re-draw the i
 	paste('#width:', default.width, sep=''),
 	paste('#height:', default.height, sep=''))
 writeLines(out.header, out.txt)
-write.table(regcovMat, append=T, file=out.txt, row.names=F, sep="\t", quote=F)
+suppressWarnings(write.table(regcovMat, append=T, file=out.txt, row.names=F, sep="\t", quote=F))
+
+# Save plotting data of standard error to a text file.
+out.txt <- paste(basename, '_stderror.txt', sep='')
+out.header <- c('#Do NOT change the following lines if you want to re-draw the image with replot.r! ')
+writeLines(out.header, out.txt)
+suppressWarnings(write.table(confiMat, append=T, file=out.txt, row.names=F, sep="\t", quote=F))

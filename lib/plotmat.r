@@ -1,6 +1,11 @@
+col2alpha <- function(col2use, alpha){
+	 col2use <- apply(col2rgb(col2use), 2, function(x){rgb(x[1], x[2], x[3], alpha=alpha*255, maxColorValue=255)})
+	 col2use
+}
+
 plotmat <- function(png.name, width, height, pointsize, 
 	reg2plot, flanksize, intsize, flankfactor, shade.alp, rnaseq.gb,
-	regcovMat, title2plot){
+	regcovMat, title2plot, confiMat=NULL){
 	
 	# Plot into png image file.
 	# Set the antialiasing.
@@ -29,10 +34,11 @@ plotmat <- function(png.name, width, height, pointsize,
 	} else {
 		col2use <- rainbow(ncurve)
 	}
+	col2use <- col2alpha(col2use, 0.8)
 	# Draw curves.
 	ytext <- "Normalized Coverage(RPM)"
 	xrange <- ((-flanksize-(intsize-1)/2) : (flanksize+(intsize-1)/2))
-	matplot(xrange, regcovMat, xaxt='n', type="l", col=col2use, lty="solid", lwd=5,
+	matplot(xrange, regcovMat, xaxt='n', type="l", col=col2use, lty="solid", lwd=7,
 		xlab='DNA basepair(or interpolated)', ylab=ytext)
 	# Handle ticks.
 	if(reg2plot == 'tss' || reg2plot == 'tes'){
@@ -77,8 +83,20 @@ plotmat <- function(png.name, width, height, pointsize,
 			polygon(v.x, v.y, density=-1, border=NA, col=p.col)
 		}
 	}
+	if(!is.null(confiMat)){
+		for(i in 1:ncol(confiMat)){
+			step <- length(regcovMat[,i])/length(confiMat[,i])
+			pos <- xrange[round((0:length(confiMat[,i]))*step)]
+			pos.y <- round((0:length(confiMat[,i]))*step)
+			v.x <- c(pos, rev(pos))
+			v.y <- c((regcovMat[pos.y,i] + confiMat[,i]), rev(regcovMat[pos.y,i] - confiMat[,i]))
+			col.rgb <- col2rgb(col2use[i])
+			p.col <- rgb(col.rgb[1,1], col.rgb[2,1], col.rgb[3,1], alpha=0.2*255, maxColorValue=255)
+			polygon(v.x, v.y, density=-1, border=NA, col=p.col)
+			}
+	}
 	legend("topright", title2plot, text.col=col2use)
-	abline(v=-(intsize-1)/2, col="gray", lwd=3)
-	abline(v=(intsize-1)/2, col="gray", lwd=3)
+	abline(v=-(intsize-1)/2, col="gray", lwd=5)
+	abline(v=(intsize-1)/2, col="gray", lwd=5)
 	dev.off()
 }

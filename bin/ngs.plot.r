@@ -126,6 +126,13 @@ if('-D' %in% names(args.tbl)){	# database.
 	genemodel <- refseq
 }
 
+chromFormat <- function(crn, ...){
+	crn <- sub('.fa$', '', crn)
+	nochr.i <- grep('^chr', crn, invert=T)
+	crn[nochr.i] <- paste('chr', crn[nochr.i], sep='')
+	crn
+}
+
 if(reg2plot == 'tss' || reg2plot == 'tes'){	# determine the set of genomic coordinates.
 	genome.coord <- genemodel$genebody
 }else if(reg2plot == 'genebody'){
@@ -160,7 +167,7 @@ if(reg2plot == 'tss' || reg2plot == 'tes'){	# determine the set of genomic coord
 	if(ncol(bed.coord) <3){
 		stop('Input file must contain at least 3 columns!')
 	}
-	genome.coord <- data.frame(chrom=bed.coord[, 1], start=bed.coord[, 2]+1, end=bed.coord[, 3], gid=NA, gname='N', tid='N', strand='+', byname.uniq=T, bygid.uniq=NA)
+	genome.coord <- data.frame(chrom=chromFormat(bed.coord[, 1]), start=bed.coord[, 2]+1, end=bed.coord[, 3], gid=NA, gname='N', tid='N', strand='+', byname.uniq=T, bygid.uniq=NA)
 	if(ncol(bed.coord) >=4){
 		genome.coord$gname <- bed.coord[, 4]
 	}

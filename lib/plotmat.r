@@ -6,7 +6,8 @@ col2alpha <- function(col2use, alpha){
 plotmat <- function(png.name, width, height, pointsize, 
 	reg2plot, flanksize, intsize, flankfactor, shade.alp, rnaseq.gb,
 	regcovMat, title2plot, confiMat=NULL){
-	
+	ppi <- 256
+
 	# Plot into png image file.
 	# Set the antialiasing.
 	type <- NULL
@@ -17,13 +18,15 @@ plotmat <- function(png.name, width, height, pointsize,
 	} else if (capabilities()["X11"]) {
 		type <- "Xlib"
 	}
-	
+	svg(png.name, width=width/ppi, height=height/ppi, antialias='gray')
+
 	# Set the output type based on capabilities.
-	if (is.null(type)){
-		png(png.name, width, height, pointsize=pointsize)
-	} else {
-		png(png.name, width, height, pointsize=pointsize, type=type)
-	}
+	# if (is.null(type)){
+	# 	png(png.name, width, height, pointsize=pointsize)
+
+	# } else {
+	# 	png(png.name, width, height, pointsize=pointsize, type=type)
+	# }
 
 	# Choose colors.
 	ncurve <- ncol(regcovMat)
@@ -38,7 +41,7 @@ plotmat <- function(png.name, width, height, pointsize,
 	# Draw curves.
 	ytext <- "Normalized Coverage(RPM)"
 	xrange <- ((-flanksize-(intsize-1)/2) : (flanksize+(intsize-1)/2))
-	matplot(xrange, regcovMat, xaxt='n', type="l", col=col2use, lty="solid", lwd=7,
+	matplot(xrange, regcovMat, xaxt='n', type="l", col=col2use, lty="solid", lwd=3,
 		xlab='DNA basepair(or interpolated)', ylab=ytext)
 	# Handle ticks.
 	if(reg2plot == 'tss' || reg2plot == 'tes'){
@@ -71,7 +74,7 @@ plotmat <- function(png.name, width, height, pointsize,
 			}
 		}
 	}
-	axis(1, at=tick.pos, labels=tick.lab)
+	axis(1, at=tick.pos, labels=tick.lab, lwd=3, lwd.ticks=3)
 	# Add shaded area.
 	if(shade.alp > 0){
 		for(i in 1:ncol(regcovMat)){
@@ -96,7 +99,7 @@ plotmat <- function(png.name, width, height, pointsize,
 			}
 	}
 	legend("topright", title2plot, text.col=col2use)
-	abline(v=-(intsize-1)/2, col="gray", lwd=5)
-	abline(v=(intsize-1)/2, col="gray", lwd=5)
+	abline(v=-(intsize-1)/2, col="gray", lwd=2)
+	abline(v=(intsize-1)/2, col="gray", lwd=2)
 	dev.off()
 }

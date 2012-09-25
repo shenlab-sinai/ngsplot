@@ -73,7 +73,7 @@ if(file.exists(sefile)){
 }
 
 # Plot into png image file.
-out.png <- paste(basename, '.png', sep='')
+out.png <- paste(basename, '.svg', sep='')
 plotmat(out.png, png.width, png.height, 48, 
 	reg2plot, flanksize, intsize, flankfactor, shade.alp, rnaseq.gb,
 	regcovMat, title2plot, confiMat)

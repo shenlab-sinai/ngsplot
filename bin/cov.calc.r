@@ -97,10 +97,10 @@ if(genome == 'mm9'){
 }
 
 # Load required libraries.
-require(ShortRead)||{source("http://bioconductor.org/biocLite.R");biocLite("ShortRead");TRUE}
-require(BSgenome)||{source("http://bioconductor.org/biocLite.R");biocLite("BSgenome");TRUE}
-require(Rsamtools)||{source("http://bioconductor.org/biocLite.R");biocLite("Rsamtools");TRUE}
-require(doMC)||{install.packages("doMC", dep=T);TRUE}
+require(ShortRead)||{source("http://bioconductor.org/biocLite.R");biocLite("ShortRead");require(ShortRead)}
+require(BSgenome)||{source("http://bioconductor.org/biocLite.R");biocLite("BSgenome");require(BSgenome)}
+require(Rsamtools)||{source("http://bioconductor.org/biocLite.R");biocLite("Rsamtools");require(Rsamtools)}
+require(doMC)||{install.packages("doMC", dep=T);require(doMC)}
 
 if(cores.number == 0){
 	registerDoMC()

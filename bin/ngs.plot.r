@@ -294,8 +294,8 @@ colnames(regcovMat) <- ctg.tbl$title
 
 ##### Start the plotting routines ####
 # Load required libraries.
-require(ShortRead)||{source("http://bioconductor.org/biocLite.R");biocLite(ShortRead);TRUE}
-require(BSgenome)||{source("http://bioconductor.org/biocLite.R");biocLite(BSgenome);TRUE}
+require(ShortRead)||{source("http://bioconductor.org/biocLite.R");biocLite(ShortRead);require(ShortRead)}
+require(BSgenome)||{source("http://bioconductor.org/biocLite.R");biocLite(BSgenome);require(BSgenome)}
 require(doMC)
 
 # Function to calculate standard error
@@ -471,7 +471,7 @@ if(smooth.radius > 0){
 default.width <- 2000
 default.height <- 1800
 if(!fi_tag){
-	out.png <- paste(basename, '.png', sep='')
+	out.png <- paste(basename, '.svg', sep='')
 	# Plot the matrix!
 	if(stderror.number==0){
 		plotmat(out.png, default.width, default.height, 48, 

@@ -62,12 +62,12 @@ if('height' %in% names(p)){
 }else{
 	plot.height <- 1800
 }
-regcovMat <- as.matrix(read.delim(matfile, comment.char='#'))
+regcovMat <- as.matrix(read.delim(matfile, comment.char='#', check.names=F))
 title2plot <- colnames(regcovMat)
 
 sefile <- gsub(".txt", "_stderror.txt", matfile)
 if(file.exists(sefile)){
-	confiMat <- as.matrix(read.delim(sefile, comment.char='#'))
+	confiMat <- as.matrix(read.delim(sefile, comment.char='#', check.names=F))
 }else{
 	confiMat <- NULL
 }

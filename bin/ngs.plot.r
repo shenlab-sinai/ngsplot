@@ -20,7 +20,7 @@ cmd.help <- function(){
 	cat("\nMandatory parameters:\n")
 	cat("  -R     Genomic regions to plot, can be: tss, tes, genebody, exon, cgi or a customized BED file.\n")
 	cat("  -C     Coverage file or for multiple plot, a configuration file(must be *.txt, see multiplot.example.txt).\n")
-	cat("  -O     Basename for output(WITHOUT suffix). Two files will be generated: png image and text file.\n")
+	cat("  -O     Basename for output(WITHOUT suffix). Two files will be generated: pdf image and text file.\n")
 	cat("\nOptional parameters that should be provided in configuration file for multiplot:\n")
 	cat("  -G     Gene list to subset regions(default=whole genome).\n")
 	cat("  -T     Image title(default=Noname), will be used in figure legend.\n")
@@ -40,7 +40,7 @@ cmd.help <- function(){
 	cat("  -S     Randomly sample the regions for plot, must be:(0, 1] (default=1, i.e. all regions).\n")
 	cat("  -P     Number of CPUs to be used(default=1). Set it 0 to use all detected CPUs.\n")
 	cat("\nMisc. parameters:\n")
-	cat("  -FI    Forbid png image output if set to 1(default=0). This can be useful if you run on a server without graphic output.\n")
+	cat("  -FI    Forbid pdf image output if set to 1(default=0). This can be useful if you run on a server without graphic output.\n")
 	cat("  -M     Smooth method, choose from: mean(default), median\n")
 	cat("  -A     Radius used by smooth function, must be:[0, 1)(default=0, i.e. Off). Suggested value: <=0.05.\n")
 	cat("           Interpreted as a fraction of the entire plot. Larger value means smoother plot.\n")
@@ -471,14 +471,14 @@ if(smooth.radius > 0){
 default.width <- 2000
 default.height <- 1800
 if(!fi_tag){
-	out.png <- paste(basename, '.svg', sep='')
+	out.plot <- paste(basename, '.pdf', sep='')
 	# Plot the matrix!
 	if(stderror.number==0){
-		plotmat(out.png, default.width, default.height, 48, 
+		plotmat(out.plot, default.width, default.height, 48, 
 			reg2plot, flanksize, intsize, flankfactor, shade.alp, rnaseq.gb,
 			regcovMat, ctg.tbl$title, confiMat=NULL)
 	}else{
-		plotmat(out.png, default.width, default.height, 48, 
+		plotmat(out.plot, default.width, default.height, 48, 
 			reg2plot, flanksize, intsize, flankfactor, shade.alp, rnaseq.gb,
 			regcovMat, ctg.tbl$title, confiMat)
 	}

@@ -3,12 +3,12 @@ col2alpha <- function(col2use, alpha){
 	 col2use
 }
 
-plotmat <- function(png.name, width, height, pointsize, 
+plotmat <- function(plot.name, width, height, pointsize, 
 	reg2plot, flanksize, intsize, flankfactor, shade.alp, rnaseq.gb,
 	regcovMat, title2plot, confiMat=NULL){
 	ppi <- 256
 
-	# Plot into png image file.
+	# Plot into image file.
 	# Set the antialiasing.
 	type <- NULL
 	if (capabilities()["aqua"]) {
@@ -18,14 +18,14 @@ plotmat <- function(png.name, width, height, pointsize,
 	} else if (capabilities()["X11"]) {
 		type <- "Xlib"
 	}
-	svg(png.name, width=width/ppi, height=height/ppi, antialias='gray')
+	pdf(plot.name, width=width/ppi, height=height/ppi)
 
 	# Set the output type based on capabilities.
 	# if (is.null(type)){
-	# 	png(png.name, width, height, pointsize=pointsize)
+	# 	png(plot.name, width, height, pointsize=pointsize)
 
 	# } else {
-	# 	png(png.name, width, height, pointsize=pointsize, type=type)
+	# 	png(plot.name, width, height, pointsize=pointsize, type=type)
 	# }
 
 	# Choose colors.
@@ -98,8 +98,8 @@ plotmat <- function(png.name, width, height, pointsize,
 			polygon(v.x, v.y, density=-1, border=NA, col=p.col)
 			}
 	}
-	legend("topright", title2plot, text.col=col2use)
 	abline(v=-(intsize-1)/2, col="gray", lwd=2)
 	abline(v=(intsize-1)/2, col="gray", lwd=2)
+	legend("topright", title2plot, text.col=col2use)
 	dev.off()
 }

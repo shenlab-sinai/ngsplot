@@ -19,4 +19,7 @@ coordinat.pl up.tss_group_exp.both.significant.bed  exon:promoter  up.tss.signif
 
 coordinat.pl down.tss_group_exp.both.significant.bed  exon:promoter  down.tss.significant.bed
 
+### rm the tmp files
+rm  merged.bed  up.tss_group_exp.diff   down.tss_group_exp.diff  promoters.significant.diff  up.tss_group_exp.both.significant.diff   down.tss_group_exp.both.significant.diff   up.tss_group_exp.both.significant.bed    down.tss_group_exp.both.significant.bed  
+
 

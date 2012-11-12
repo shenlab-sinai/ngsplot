@@ -3,12 +3,11 @@ col2alpha <- function(col2use, alpha){
 	 col2use
 }
 
-plotmat <- function(plot.name, width, height, pointsize, 
+plotmat <- function(png.name, width, height, pointsize, 
 	reg2plot, flanksize, intsize, flankfactor, shade.alp, rnaseq.gb,
 	regcovMat, title2plot, confiMat=NULL){
-	ppi <- 256
-
-	# Plot into image file.
+	
+	# Plot into png image file.
 	# Set the antialiasing.
 	type <- NULL
 	if (capabilities()["aqua"]) {
@@ -18,15 +17,13 @@ plotmat <- function(plot.name, width, height, pointsize,
 	} else if (capabilities()["X11"]) {
 		type <- "Xlib"
 	}
-	pdf(plot.name, width=width/ppi, height=height/ppi)
-
+	
 	# Set the output type based on capabilities.
-	# if (is.null(type)){
-	# 	png(plot.name, width, height, pointsize=pointsize)
-
-	# } else {
-	# 	png(plot.name, width, height, pointsize=pointsize, type=type)
-	# }
+	if (is.null(type)){
+		png(png.name, width, height, pointsize=pointsize)
+	} else {
+		png(png.name, width, height, pointsize=pointsize, type=type)
+	}
 
 	# Choose colors.
 	ncurve <- ncol(regcovMat)
@@ -41,8 +38,9 @@ plotmat <- function(plot.name, width, height, pointsize,
 	# Draw curves.
 	ytext <- "Normalized Coverage(RPM)"
 	xrange <- ((-flanksize-(intsize-1)/2) : (flanksize+(intsize-1)/2))
-	matplot(xrange, regcovMat, xaxt='n', type="l", col=col2use, lty="solid", lwd=3,
-		xlab='DNA basepair(or interpolated)', ylab=ytext)
+	matplot(xrange, regcovMat, xaxt='n', type="l", col=col2use, lty="solid", lwd=7,
+		#xlab='DNA basepair(or interpolated)', ylab=ytext,
+		frame.plot=F, ann=F)
 	# Handle ticks.
 	if(reg2plot == 'tss' || reg2plot == 'tes'){
 		mid.lab <- ifelse(reg2plot == 'tss', 'TSS', 'TES')
@@ -74,7 +72,7 @@ plotmat <- function(plot.name, width, height, pointsize,
 			}
 		}
 	}
-	axis(1, at=tick.pos, labels=tick.lab, lwd=3, lwd.ticks=3)
+	axis(1, at=tick.pos, labels=tick.lab)
 	# Add shaded area.
 	if(shade.alp > 0){
 		for(i in 1:ncol(regcovMat)){
@@ -96,10 +94,10 @@ plotmat <- function(plot.name, width, height, pointsize,
 			col.rgb <- col2rgb(col2use[i])
 			p.col <- rgb(col.rgb[1,1], col.rgb[2,1], col.rgb[3,1], alpha=0.2*255, maxColorValue=255)
 			polygon(v.x, v.y, density=-1, border=NA, col=p.col)
-		}
+			}
 	}
-	abline(v=-(intsize-1)/2, col="gray", lwd=2)
-	abline(v=(intsize-1)/2, col="gray", lwd=2)
-	legend("topright", title2plot, text.col=col2use)
+	#legend("topright", title2plot, text.col=col2use)
+	abline(v=-(intsize-1)/2, col="gray", lwd=5)
+	abline(v=(intsize-1)/2, col="gray", lwd=5)
 	dev.off()
 }

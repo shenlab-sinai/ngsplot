@@ -1,0 +1,38 @@
+if [ $# -lt 2 ]
+then
+	echo "Usage: $0 cufflinks.gtf output_directory"
+	exit 0
+fi
+
+mkdir -p $2
+
+# Generate merged BED file first from GTF.
+gtf2tree.pl  $1  $2/merged.bed
+
+# Alternative exons.
+get_difflist.pl  isoform_exp.diff  Control:Treat  $2/up.isoform_exp.diff   $2/down.isoform_exp.diff
+
+parse_diff.pl  splicing.diff  $2/splicing.significant.diff
+
+for i in variant  altBoth  altDonor  altAcceptor; do alter2bed.pl $2/merged.bed  $2/splicing.significant.diff  $2/up.isoform_exp.diff  ${i}  $2/up.alternative_splicing.${i}.significant.bed;done
+
+for i in variant  altBoth  altDonor  altAcceptor; do alter2bed.pl $2/merged.bed  $2/splicing.significant.diff $2/down.isoform_exp.diff  ${i}  $2/down.alternative_splicing.${i}.significant.bed;done
+
+
+# Alternative promoters.
+get_difflist.pl  tss_group_exp.diff   Control:Treat  $2/up.tss_group_exp.diff   $2/down.tss_group_exp.diff
+
+parse_diff.pl  promoters.diff  $2/promoters.significant.diff
+
+combine_diff.pl $2/promoters.significant.diff  $2/up.tss_group_exp.diff  $2/up.tss_group_exp.both.significant.diff
+
+combine_diff.pl $2/promoters.significant.diff  $2/down.tss_group_exp.diff  $2/down.tss_group_exp.both.significant.diff
+
+difflist2bed.pl  $2/merged.bed  $2/up.tss_group_exp.both.significant.diff   $2/up.tss_group_exp.both.significant.bed 
+
+difflist2bed.pl  $2/merged.bed  $2/down.tss_group_exp.both.significant.diff  $2/down.tss_group_exp.both.significant.bed
+
+coordinat.pl $2/up.tss_group_exp.both.significant.bed  exon:promoter  $2/up.tss.significant.bed
+
+coordinat.pl $2/down.tss_group_exp.both.significant.bed  exon:promoter  $2/down.tss.significant.bed
+

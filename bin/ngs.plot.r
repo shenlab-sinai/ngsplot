@@ -48,7 +48,7 @@ cmd.help <- function(){
 	cat("           Interpreted as the degree of opacity.\n")
 	cat("  -E     Calculate weighted coverage according to internal size, must be: 0 or 1(default=0, i.e. Off).\n")
 	cat("           Can be useful, e.g. if you believe longer gene should weigh heavier than shorter gene.\n")
-	cat("  -SE     Number of the points to be used to calculate standard error. By default, 200 points are used. Set it as 0, then no standard error shades added.\n")
+	cat("  -SE    Number of standard errors to calculate. Default=200, set to 0 to turn off.\n")
 	cat("\n")
 }
 
@@ -274,10 +274,10 @@ if('-P' %in% names(args.tbl)){	# set cores number.
 if('-SE' %in% names(args.tbl)){	# set number of points to calculate standard errors.
 	stopifnot(as.integer(args.tbl['-SE']) >= 0)
 	stderror.number <- as.integer(args.tbl['-SE'])
-	confiMat <- matrix(0, nrow=stderror.number, ncol=nrow(ctg.tbl))
+	confiMat <- matrix(0, nrow=stderror.number+1, ncol=nrow(ctg.tbl))
 }else{
 	stderror.number <- as.integer(200)
-	confiMat <- matrix(0, nrow=stderror.number, ncol=nrow(ctg.tbl))
+	confiMat <- matrix(0, nrow=stderror.number+1, ncol=nrow(ctg.tbl))
 }
 colnames(confiMat) <- ctg.tbl$title
 
@@ -299,7 +299,7 @@ require(BSgenome)||{source("http://bioconductor.org/biocLite.R");biocLite(BSgeno
 require(doMC)
 
 # Function to calculate standard error
-std.error <- function(x){ sd(x)/sqrt(length(x)) }
+calcSem <- function(x){ sd(x, na.rm=T)/sqrt(length(x)) }
 
 # Function to check if the range exceeds coverage vector boundaries.
 checkBound <- function(start, end, range, chrlen){
@@ -407,12 +407,16 @@ if(cores.number == 0){
 } else {
 	registerDoMC(cores.number)
 }
+# Setup SEM sample points.
+if(stderror.number > 0){
+	stderror.pos <- round(seq(1, nrow(regcovMat), length.out=stderror.number+1))
+}
 while(i <= length(cov.u)){	# go through all unique coverage files.
 	same.cov.r <- which(ctg.tbl$cov == cov2load)
 	for(j in 1:length(same.cov.r)) {	# go through all
                                         # gene lists associated with
                                         # each coverage.
-		r <- same.cov.r[j]	# row number.
+		r <- same.cov.r[j]	# row number corresponds to config file.
 		lname <- ctg.tbl$glist[r]	# gene list name: used to subset
                                      # the genome.
 		if(lname == '-1'){	# use genome as gene list.
@@ -422,7 +426,7 @@ while(i <= length(cov.u)){	# go through all unique coverage files.
 				plot.coord <- subset(genome.coord, byname.uniq)
 			}
 		}else{	# read gene list from text file.
-			gene.list <- read.table(lname, as.is=T)$V1
+			gene.list <- read.table(lname, as.is=T, comment.char='#')$V1
 			subset.idx <- c(which(genome.coord$gname %in% gene.list & genome.coord$byname.uniq),
 				which(genome.coord$tid %in% gene.list))
 			if(!all(is.na(genome.coord$gid))){
@@ -430,30 +434,21 @@ while(i <= length(cov.u)){	# go through all unique coverage files.
 			}
 			plot.coord <- genome.coord[subset.idx, ]
 		}
+		# Extract coverage into "fin.result".
 		fin.result <- foreach(k=1:nrow(plot.coord)) %dopar% {	# go through all
                                         				# regions.
-          		do.par.cov(k, plot.coord, read.coverage.n, rnaseq.gb,
+        	do.par.cov(k, plot.coord, read.coverage.n, rnaseq.gb,
 				flankfactor, reg2plot, genemodel, weight.genlen,
 				intsize, old_flanksize, flanksize)
 		}
-		if(stderror.number!=0){
-			stderror.tmp <- matrix(0, nrow=0, ncol=stderror.number)
-			stderror.step <- length(regcovMat[,r])/(stderror.number)
-			stderror.pos <- round((0:stderror.number)*stderror.step)
+		result.matrix <- do.call("rbind", fin.result)	# then assemble into a matrix.
+		regcovMat[, r] <- apply(result.matrix, 2, function(x) mean(x, na.rm=T))	# calc avg. profile.
+		# Calculate SEM if needed. Shut off SEM in single gene case.
+		if(length(fin.result) > 1 && stderror.number > 0){
+			confiMat[, r] <- apply(result.matrix[, stderror.pos], 2, calcSem)
 		}else{
-			stderror.tmp <- NULL
+			confiMat[, r] <- 0
 		}
-		fin.result <- lapply(fin.result, na.omit)
-		nplot <- length(fin.result) # book-keep the number of regions drawn(for
-                      # averaging).
-		result.matrix <- do.call("rbind", fin.result)
-		regcovMat[,r] <- t(apply(result.matrix, 2, sum))
-		if(stderror.number!=0) {stderror.tmp <- result.matrix[, stderror.pos]}
-		if(nplot > 0)
-			regcovMat[, r] <- regcovMat[, r] / nplot
-			if(stderror.number!=0){
-				 confiMat[, r] <- apply(stderror.tmp, 2, std.error)
-			}
 	}
 	i <- i+1
 	if(i <= length(cov.u)){	# load a new coverage file.

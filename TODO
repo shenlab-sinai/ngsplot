@@ -1,3 +1,7 @@
+- Nov 12, 2012
+* Turn off std error when there is one gene. (DONE)
+* Add example data, gene lists.
+
 - May 8, 2012
 
 * Make sure read and process paired-end reads correctly.

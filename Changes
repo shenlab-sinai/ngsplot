@@ -1,0 +1,7 @@
+Revision history for ngs.plot.
+
+1.04  Nov 12, 2012 
+	- Automatic turning off SEM when there is only gene given in gene list.
+	- Misc. re-organization of ngs.plot.r code.
+	- Added example gene list.
+	- Added script "alt_reg_cufflinks" which extracts all alternative regions in one command.

@@ -1,0 +1,10 @@
+# Put one gene/transcript per line. You can use gene/transcript ID or symbol 
+# from RefSeq and Ensembl and even mix them!
+# Be reminded that IDs/symbols are case-sensitive.
+# ngs.plot will calculate an averaged profile for what you put here.
+Itm2a
+Sergef
+Dhx9
+Fam109a
+Olfr1018
+Ssu72

@@ -2,5 +2,7 @@ This is the README for ngs.plot: An easy-to-use visualization tool for global en
 
 The command options can be displayed when you type the program name without any argument. 
 
-For installation and detailed usage, please refer to our online page: http://code.google.com/p/ngsplot/
+There are some toy examples for you to run through the pipeline under the "example" folder. Please also read "example/README.txt".
+
+For installation and detailed usage, please refer to our online manual: http://code.google.com/p/ngsplot/
 

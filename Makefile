@@ -4,6 +4,12 @@ LIB=lib/parse.args.r lib/plotmat.r lib/sep.filename.r lib/smoothplot.r
 OTHERS=database example README Changes
 
 ngsplot.tar.gz: 
-	tar czvf ngsplot.tar.gz $(BINCUFF) $(BINNGSP) $(LIB) $(OTHERS)
+	rm -rf ngsplot-dist
+	mkdir -p ngsplot-dist/bin ngsplot-dist/lib
+	cp -r $(BINCUFF) $(BINNGSP) ngsplot-dist/bin
+	cp -r $(LIB) ngsplot-dist/lib
+	cp -r $(OTHERS) ngsplot-dist
+	tar czvf ngsplot-dist.tar.gz ngsplot-dist
+	rm -rf ngsplot-dist
 clean:
-	rm -rf ngsplot.tar.gz
+	rm -rf ngsplot-dist.tar.gz

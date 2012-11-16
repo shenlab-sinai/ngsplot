@@ -2,6 +2,7 @@ This folder contains two toy examples for you to get a sense of ngs.plot workflo
 User can also use these examples to check the completion of installation.
 
 ========Example for ChIP-seq data:========
+
 chipseq_mm9_ch19.bam is the alignment file (mm9, chr19 only) for histone mark 
 H3K4me3 in BAM format, derived from mouse neurons. Here we demonstrate how to 
 draw a TSS plot in two simple steps:
@@ -18,6 +19,7 @@ convenience and power of ngs.plot.
 
 
 ========Example for RNA-seq data:========
+
 rnaseq_rn4_chr20.bam is an RNA-seq alignment file (rn4, chr20 only). We are 
 going to draw a genebody plot in two simple steps:
 
@@ -44,6 +46,19 @@ gene/transcript symbol/ID per line. Both RefSeq and Ensembl annotations are
 accepted. You can even mix heterogeneous symbols/IDs. An example is given in 
 "example.gene.list.txt".
 
+
+========Extract alternative spliced regions from Cufflinks results:========
+
+Cufflinks must have been run with cuffmerge and cuffcompare to generate a full
+set of *.diff files and a GTF file representing the assembled transcripts.
+Make sure all files are under the same folder, then issue a command like:
+
+alt_reg_cufflinks mycuff.gtf res_output
+
+it will generate a bunch of files which contain information such as the
+genomic coordinates of alternatively spliced exons, TSS. The BED files can
+then be used in ngs.plot to investigate epigenomic changes. A toy example is 
+given in "cufflinks_eg" folder. 
 
 
 For more details of the usage, please visit project website:

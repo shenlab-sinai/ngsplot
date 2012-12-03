@@ -198,7 +198,11 @@ if(readformat == 'export'){
 }
 
 # Calculate genomic coverage.
-read.coverage <- coverage(read.filtered, width=chrlens)
+if(readformat == 'export'){
+	read.coverage <- coverage(read.filtered, width=chrlens, extend=fraglen - width(read.filtered))
+}else{
+	read.coverage <- coverage(read.filtered, width=chrlens)
+}
 nreads <- length(read.filtered)
 mc.reads.coverage <- foreach(k=1:length(read.coverage)) %dopar% {
 	read.coverage[[k]]/nreads*1e6

@@ -139,11 +139,11 @@ getReads <- function(crn, bam.info, bamfile, mapqual, fraglen, ...){
 
 	# Set the length of the reads to the fragment length.
 	reads.df["width"] <- fraglen
-	reads.df$pos[reads.df$strand=="-"] = reads.df$pos[reads.df$strand=="-"] + reads.df$qwidth[reads.df$strand=="-"] - fraglen - 1
+	reads.df$pos[reads.df$strand=="-"] = reads.df$pos[reads.df$strand=="-"] + reads.df$qwidth[reads.df$strand=="-"] - fraglen
 	# Avoid the reversed strand reads reach out of the bound.
-	reads.df$pos[reads.df$pos<0] <- 0
+	reads.df$pos[reads.df$pos < 1] <- 1
 	
-	reads <- GRanges(seqnames=crn, ranges=IRanges(start=reads.df$pos, width=fraglen), score=reads.df$mapq, strand=Rle(reads.df$strand))
+	reads <- GRanges(seqnames=Rle(crn), ranges=IRanges(start=reads.df$pos, width=fraglen), score=reads.df$mapq, strand=Rle(reads.df$strand))
     }
 }
 
@@ -198,7 +198,7 @@ if(readformat == 'export'){
 }
 
 # Calculate genomic coverage.
-read.coverage <- ShortRead::coverage(read.filtered, width=chrlens, extend = fraglen - width(read.filtered))
+read.coverage <- coverage(read.filtered, width=chrlens)
 nreads <- length(read.filtered)
 mc.reads.coverage <- foreach(k=1:length(read.coverage)) %dopar% {
 	read.coverage[[k]]/nreads*1e6

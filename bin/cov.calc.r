@@ -136,7 +136,9 @@ getReads <- function(crn, bam.info, bamfile, mapqual, fraglen, ...){
 	}
 	reads.df <- reads.df[!is.na(reads.df["pos"]),]
 	reads.df <- reads.df[reads.df["mapq"] >= mapqual,]
-	reads.df["width"] <- fraglen
+	#reads.df["width"] <- fraglen
+
+	# Should use AlignedRead class instead of GRanges.
 	reads <- GRanges(seqnames=crn, ranges=IRanges(start=reads.df$pos, width=reads.df$qwidth), score=reads.df$mapq, strand=Rle(reads.df$strand))
     }
 }
@@ -192,7 +194,7 @@ if(readformat == 'export'){
 }
 
 # Calculate genomic coverage.
-read.coverage <- coverage(read.filtered, width=chrlens, extend = fraglen - width(read.filtered))
+read.coverage <- ShortRead::coverage(read.filtered, width=chrlens, extend = fraglen - width(read.filtered))
 nreads <- length(read.filtered)
 mc.reads.coverage <- foreach(k=1:length(read.coverage)) %dopar% {
 	read.coverage[[k]]/nreads*1e6

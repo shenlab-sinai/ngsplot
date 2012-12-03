@@ -136,10 +136,14 @@ getReads <- function(crn, bam.info, bamfile, mapqual, fraglen, ...){
 	}
 	reads.df <- reads.df[!is.na(reads.df["pos"]),]
 	reads.df <- reads.df[reads.df["mapq"] >= mapqual,]
-	#reads.df["width"] <- fraglen
 
-	# Should use AlignedRead class instead of GRanges.
-	reads <- GRanges(seqnames=crn, ranges=IRanges(start=reads.df$pos, width=reads.df$qwidth), score=reads.df$mapq, strand=Rle(reads.df$strand))
+	# Set the length of the reads to the fragment length.
+	reads.df["width"] <- fraglen
+	reads.df$pos[reads.df$strand=="-"] = reads.df$pos[reads.df$strand=="-"] + reads.df$qwidth[reads.df$strand=="-"] - fraglen - 1
+	# Avoid the reversed strand reads reach out of the bound.
+	reads.df$pos[reads.df$pos<0] <- 0
+	
+	reads <- GRanges(seqnames=crn, ranges=IRanges(start=reads.df$pos, width=fraglen), score=reads.df$mapq, strand=Rle(reads.df$strand))
     }
 }
 

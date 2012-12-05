@@ -7,20 +7,52 @@ fi
 mkdir -p $2
 
 # Generate merged BED file first from GTF.
-gtf2tree.pl  $1  $2/merged.bed
+awk '{if($3 == "exon")print $0}'  $1  > $2/merged.gtf.all
+#awk '{if($2 == "protein_coding" )print $0}'  $2/merged.gtf.all  >  $2/merged.gtf 
+mv  $2/merged.gtf.all  $2/merged.gtf
+gtf2tree.pl  $2/merged.gtf  $2/merged.bed.tmp
+sort  $2/merged.bed.tmp|uniq >  $2/merged.bed
 
 # Alternative exons.
-get_difflist.pl  isoform_exp.diff  Control:Treat  $2/up.isoform_exp.diff   $2/down.isoform_exp.diff
+get_difflist.pl  isoform_exp.diff  Control:Treat   4   $2/up.isoform_exp.diff   $2/down.isoform_exp.diff
+
+#awk '{if($9 > 1)print $0}'  $2/up.isoform_exp.diff  >  $2/up.isoform_exp.diff.tmp
+#cp  $2/up.isoform_exp.diff  $2/up.isoform_exp.diff.bk
+#mv  $2/up.isoform_exp.diff.tmp  $2/up.isoform_exp.diff
+
+#awk '{if($8 > 1)print $0}'  $2/down.isoform_exp.diff  >  $2/down.isoform_exp.diff.tmp
+#cp  $2/down.isoform_exp.diff  $2/down.isoform_exp.diff.bk
+#mv  $2/down.isoform_exp.diff.tmp    $2/down.isoform_exp.diff
+
 
 parse_diff.pl  splicing.diff  $2/splicing.significant.diff
 
-for i in variant  altBoth  altDonor  altAcceptor; do alter2bed.pl $2/merged.bed  $2/splicing.significant.diff  $2/up.isoform_exp.diff  ${i}  $2/up.alternative_splicing.${i}.significant.bed;done
+for i in variant  altBoth  altDonor  altAcceptor; do alter2bed.pl  $2/merged.bed  $2/splicing.significant.diff  $2/up.isoform_exp.diff  ${i}  $2/up.alternative_splicing.${i}.significant.bed.tmp; awk '{split($4,a,":");print $1"\t"$2"\t"$3"\t"a[1]"\t.\t"$6}'  $2/up.alternative_splicing.${i}.significant.bed.tmp |sort|uniq > $2/up.alternative_splicing.${i}.significant.bed; rm  $2/up.alternative_splicing.${i}.significant.bed.tmp ;done
 
-for i in variant  altBoth  altDonor  altAcceptor; do alter2bed.pl $2/merged.bed  $2/splicing.significant.diff $2/down.isoform_exp.diff  ${i}  $2/down.alternative_splicing.${i}.significant.bed;done
+
+
+for i in variant  altBoth  altDonor  altAcceptor; do alter2bed.pl  $2/merged.bed  $2/splicing.significant.diff  $2/down.isoform_exp.diff  ${i}  $2/down.alternative_splicing.${i}.significant.bed.tmp; awk '{split($4,a,":");print $1"\t"$2"\t"$3"\t"a[1]"\t.\t"$6}'  $2/down.alternative_splicing.${i}.significant.bed.tmp |sort|uniq > $2/down.alternative_splicing.${i}.significant.bed;rm  $2/down.alternative_splicing.${i}.significant.bed.tmp;done
+
+
+
+### rm the tmp files
+rm  $2/up.isoform_exp.diff   $2/down.isoform_exp.diff   $2/splicing.significant.diff
+
 
 
 # Alternative promoters.
-get_difflist.pl  tss_group_exp.diff   Control:Treat  $2/up.tss_group_exp.diff   $2/down.tss_group_exp.diff
+get_difflist.pl  tss_group_exp.diff   Control:Treat  4  $2/up.tss_group_exp.diff   $2/down.tss_group_exp.diff
+
+
+#awk '{if($9 > 1)print $0}'  $2/up.tss_group_exp.diff  > $2/up.tss_group_exp.diff.tmp
+#cp  $2/up.tss_group_exp.diff  $2/up.tss_group_exp.diff.bk
+#mv $2/up.tss_group_exp.diff.tmp  $2/up.tss_group_exp.diff
+
+
+#awk '{if($8 > 1)print $0}'  $2/down.tss_group_exp.diff >  $2/down.tss_group_exp.diff.tmp
+#cp  $2/down.tss_group_exp.diff  $2/down.tss_group_exp.diff.bk
+#mv  $2/down.tss_group_exp.diff.tmp  $2/down.tss_group_exp.diff
+
 
 parse_diff.pl  promoters.diff  $2/promoters.significant.diff
 
@@ -35,4 +67,12 @@ difflist2bed.pl  $2/merged.bed  $2/down.tss_group_exp.both.significant.diff  $2/
 coordinat.pl $2/up.tss_group_exp.both.significant.bed  exon:promoter  $2/up.tss.significant.bed
 
 coordinat.pl $2/down.tss_group_exp.both.significant.bed  exon:promoter  $2/down.tss.significant.bed
+
+
+for i in up.tss.significant.bed  down.tss.significant.bed; do  awk '{print $1"\t"$2"\t"$3"\t.\t.\t"$6}'  $2/${i}  |sort|uniq >  $2/${i}.tmp; mv  $2/${i}.tmp  $2/${i}; done
+
+### rm the tmp files
+rm  $2/merged.gtf  $2/merged.bed  $2/merged.bed.tmp  $2/up.tss_group_exp.diff   $2/down.tss_group_exp.diff  $2/promoters.significant.diff  $2/up.tss_group_exp.both.significant.diff   $2/down.tss_group_exp.both.significant.diff   $2/up.tss_group_exp.both.significant.bed    $2/down.tss_group_exp.both.significant.bed
+
+
 

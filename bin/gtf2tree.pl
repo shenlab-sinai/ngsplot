@@ -94,11 +94,20 @@ while(my($gene_id, $gene_struct) = each %gene_table){
             for my $i(0..$#tss_ids){
                my $tss_idA = $tss_ids[$i]; 
                my @trans_ids = keys %{$gene_struct->{tss}{$tss_idA}->{transcripts}};
+
+               # Sort exons by start position
+                foreach my $transcript(@trans_ids){
+                        my @sorted_exons = sort {$a->{'start'} <=> $b->{'start'}} @{$gene_struct->{tss}{$tss_idA}->{transcripts}{$transcript}{exons}};
+                        $gene_struct->{tss}{$tss_idA}->{transcripts}{$transcript}{exons} = [@sorted_exons];
+                }
+
+                
                    if(@trans_ids > 1){
                      for my $i(0..$#trans_ids-1){
                          for my $j(1..$#trans_ids){
                                 my $idA = $trans_ids[$i]; 
-                                my $idB = $trans_ids[$j]; 
+                                my $idB = $trans_ids[$j];
+                
                                 &anno_exon($gene_struct->{tss}{$tss_idA}->{transcripts}{$idA}{exons}, $gene_struct->{tss}{$tss_idA}->{transcripts}{$idB}{exons}, $strand);
                                 &anno_exon($gene_struct->{tss}{$tss_idA}->{transcripts}{$idB}{exons}, $gene_struct->{tss}{$tss_idA}->{transcripts}{$idA}{exons}, $strand);
                           }
@@ -111,6 +120,12 @@ while(my($gene_id, $gene_struct) = each %gene_table){
         }else{
             my $tss_idA = $tss_ids[0];
             my @trans_ids = keys %{$gene_struct->{tss}{$tss_idA}->{transcripts}};
+            # Sort exons by start position
+            foreach my $transcript(@trans_ids){
+                my @sorted_exons = sort {$a->{'start'} <=> $b->{'start'}} @{$gene_struct->{tss}{$tss_idA}->{transcripts}{$transcript}{exons}};
+                $gene_struct->{tss}{$tss_idA}->{transcripts}{$transcript}{exons} = [@sorted_exons];
+            }
+
                 if(@trans_ids > 1){
                      for my $i(0..$#trans_ids-1){
                          for my $j(($i+1)..$#trans_ids){

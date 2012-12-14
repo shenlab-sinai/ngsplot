@@ -2,6 +2,7 @@ Revision history for ngs.plot.
 
 1.05  Dec 3, 2012
 	- Fix bugs in calculating physical coverage 
+	- Fix bugs in the scripts that are used to extract exons from Cufflinks.
 
 1.04  Nov 12, 2012 
 	- Automatic turning off SEM when there is only single gene given in gene list.

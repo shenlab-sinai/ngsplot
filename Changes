@@ -1,5 +1,12 @@
 Revision history for ngs.plot.
 
+Recent:
+	- Misc. code cleaning up
+	- More usage of parallel processing
+	- Added new heatmap function
+	- A number of code restructure: new coverage.r; changed plotmat.r to plotlib.r; merged smoothplot.r with plotlib.r.
+	- Added column subset function in replot.r.
+
 1.05  Dec 3, 2012
 	- Fix bugs in calculating physical coverage 
 	- Fix bugs in the scripts that are used to extract exons from Cufflinks.

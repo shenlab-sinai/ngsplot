@@ -17,14 +17,14 @@ cmd.help <- function(){
 	cat("\n")
 	cat("Usage: ngs.plot.r -R region_2_plot -C cov_file -O out_base_name [-F reg_further_info] [-D database_choice] [-T title] [-G gene_list] [-I interval_size] [-L flanking_size] [-N flanking_factor]\n")
 	cat("       More optional parameters: [-FI forbid_image] [-S random_sample_rate] [-A smooth_function_radius] [-M smooth_method] [-H shaded_area] [-E weigh_genelen] [-P cores_number] [-SE standard_error_points]\n")
-	cat("\nMandatory parameters:\n")
+	cat("\n## Mandatory parameters:\n")
 	cat("  -R     Genomic regions to plot, can be: tss, tes, genebody, exon, cgi or a customized BED file.\n")
 	cat("  -C     Coverage file or for multiple plot, a configuration file(must be *.txt, see multiplot.example.txt).\n")
 	cat("  -O     Basename for output(WITHOUT suffix). Two files will be generated: pdf image and text file.\n")
-	cat("\nOptional parameters that should be provided in configuration file for multiplot:\n")
+	cat("\n## Optional parameters that should be provided in configuration file for multiplot:\n")
 	cat("  -G     Gene list to subset regions(default=whole genome).\n")
 	cat("  -T     Image title(default=Noname), will be used in figure legend.\n")
-	cat("\nImportant optional parameters:\n")
+	cat("\n## Important optional parameters:\n")
 	cat("  -F     If you select genebody, exon or cgi, further information can be provided:\n")
 	cat("           for genebody: chipseq(default), rnaseq.\n")
 	cat("             RNA-seq is handled differently from ChIP-seq to cope with intronic regions.\n")
@@ -36,11 +36,13 @@ cmd.help <- function(){
 	cat("  -I     Internal region size(ignored for tss and tes, default for others: genebody=3kb;exon=250;cgi=500;bed=1kb).\n")
 	cat("  -L     Flanking region size(default: tss,tes,genebody,bed=1kb;exon=500;cgi=500).\n")
 	cat("  -N     Flanking region factor(any numeric >0, will override flanking size if specified).\n")
-	cat("           if set, flanking region has floating size with internal size.\n")
+	cat("           If set, flanking region has floating size with internal size.\n")
 	cat("  -S     Randomly sample the regions for plot, must be:(0, 1] (default=1, i.e. all regions).\n")
-	cat("  -P     Number of CPUs to be used(default=1). Set it 0 to use all detected CPUs.\n")
-	cat("\nMisc. parameters:\n")
-	cat("  -FI    Forbid pdf image output if set to 1(default=0). This can be useful if you run on a server without graphic output.\n")
+	cat("  -P     Number of CPUs to be used(default=1). Set 0 to use all detected CPUs.\n")
+	cat("  -HM    Number of columns for each heatmap(default=100). Set 0 to turn off heatmap.\n")
+	cat("           Generating heatmaps means longer running time and higher memory requirement.\n")
+	cat("\n## Misc. parameters:\n")
+	cat("  -FI    Forbid image output if set to 1(default=0). This can be useful if you run on a server without graphic output.\n")
 	cat("  -M     Smooth method, choose from: mean(default), median\n")
 	cat("  -A     Radius used by smooth function, must be:[0, 1)(default=0, i.e. Off). Suggested value: <=0.05.\n")
 	cat("           Interpreted as a fraction of the entire plot. Larger value means smoother plot.\n")
@@ -52,17 +54,20 @@ cmd.help <- function(){
 	cat("\n")
 }
 
+
+###########################################################################
+#################### Deal with program input arguments ####################
 args <- commandArgs(T)
 progpath <- Sys.getenv('NGSPLOT')
 if(progpath == ""){
-	stop("Set environment variable NGSPLOT before run the program. See README for details.\n")
+	stop("Set environment variable NGSPLOT before run the program. \
+		  See README for details.\n")
 }else{
 	if(substr(progpath, nchar(progpath), nchar(progpath)) != '/'){	# add trailing slash.
 		progpath <- paste(progpath, '/', sep='')
 	}
 }
 source(paste(progpath, 'lib/parse.args.r', sep=''))
-source(paste(progpath, 'lib/plotmat.r', sep=''))
 args.tbl <- parse.args(args, c('-C', '-R', '-O'))
 if(is.null(args.tbl)){
 	cmd.help()
@@ -74,7 +79,8 @@ basename <- args.tbl['-O']
 
 # Determine coverage-title-genelist relationship.
 if(length(grep('.txt$', covfile))>0){
-	ctg.tbl <- read.table(covfile, sep="\t", col.names=c('cov','glist','title'), as.is=T)
+	ctg.tbl <- read.table(covfile, sep="\t", 
+				col.names=c('cov','glist','title'), as.is=T)
 }else{
 	if('-G' %in% names(args.tbl)){
 		glist <- args.tbl['-G']
@@ -86,11 +92,13 @@ if(length(grep('.txt$', covfile))>0){
 	}else{
 		title <- 'Noname'
 	}
-	ctg.tbl <- data.frame(cov=covfile, glist=glist, title=title, stringsAsFactors=F)
+	ctg.tbl <- data.frame(cov=covfile, glist=glist, title=title, 
+							stringsAsFactors=F)
 }
 
 # Collapse coverage files to speed up loading.
 cov.u <- unique(ctg.tbl$cov)
+
 
 # Load the 1st coverage. The genome name is then used for loading gene models.
 cov2load <- cov.u[1]
@@ -105,15 +113,24 @@ if(genome == 'mm9'){	# load genome: refseq, ensembl, cgiUCSC
 	stop(paste('Unsupported genome: ', genome, '. Stop.\n', sep=''))
 }
 
-## Figuring out configuration for various data structures. ##
-if('-FI' %in% names(args.tbl)){	# image output forbidden tag.
+#### Image output forbidden tag. ####
+if('-FI' %in% names(args.tbl)){	
 	stopifnot(as.integer(args.tbl['-FI']) >= 0)
 	fi_tag <- as.integer(args.tbl['-FI'])
 }else{
 	fi_tag <- as.integer(0)
 }
 
-if('-D' %in% names(args.tbl)){	# database.
+#### Create heatmap tag. ####
+if('-HM' %in% names(args.tbl)){	
+	stopifnot(as.integer(args.tbl['-HM']) >= 0)
+	hm_cols <- as.integer(args.tbl['-HM'])
+}else{
+	hm_cols <- as.integer(100)
+}
+
+#### Database. ####
+if('-D' %in% names(args.tbl)){	
 	database <- as.character(args.tbl['-D'])
 	if(database == 'refseq'){	# choose database.
 		genemodel <- refseq
@@ -126,6 +143,7 @@ if('-D' %in% names(args.tbl)){	# database.
 	genemodel <- refseq
 }
 
+# Function to remove ".fa" if needed, or to add "chr" if absent.
 chromFormat <- function(crn, ...){
 	crn <- sub('.fa$', '', crn)
 	nochr.i <- grep('^chr', crn, invert=T)
@@ -133,7 +151,8 @@ chromFormat <- function(crn, ...){
 	crn
 }
 
-if(reg2plot == 'tss' || reg2plot == 'tes'){	# determine the set of genomic coordinates.
+#### Determine the set of genomic coordinates. ####
+if(reg2plot == 'tss' || reg2plot == 'tes'){	
 	genome.coord <- genemodel$genebody
 }else if(reg2plot == 'genebody'){
 	if('-F' %in% names(args.tbl)){
@@ -147,7 +166,8 @@ if(reg2plot == 'tss' || reg2plot == 'tes'){	# determine the set of genomic coord
 }else if(reg2plot == 'exon'){
 	if('-F' %in% names(args.tbl)){
 		finfo <- as.character(args.tbl['-F'])
-		exon.allowed <- c('canonical', 'variant', 'promoter', 'polyA', 'altAcceptor', 'altDonor', 'altBoth')
+		exon.allowed <- c('canonical', 'variant', 'promoter', 'polyA', 
+							'altAcceptor', 'altDonor', 'altBoth')
 		stopifnot(finfo %in% exon.allowed)
 	}else{
 		finfo <- 'canonical'
@@ -156,7 +176,9 @@ if(reg2plot == 'tss' || reg2plot == 'tes'){	# determine the set of genomic coord
 }else if(reg2plot == 'cgi'){
 	if('-F' %in% names(args.tbl)){
 		finfo <- as.character(args.tbl['-F'])
-		cgi.allowed <- c("Genebody", "Genedesert", "OtherIntergenic", "Pericentromere", "Promoter1k", "Promoter3k", "ProximalPromoter")
+		cgi.allowed <- c("Genebody", "Genedesert", "OtherIntergenic", 
+							"Pericentromere", "Promoter1k", "Promoter3k", 
+							"ProximalPromoter")
 		stopifnot(finfo %in% cgi.allowed)
 	}else{
 		finfo <- 'ProximalPromoter'
@@ -167,7 +189,10 @@ if(reg2plot == 'tss' || reg2plot == 'tes'){	# determine the set of genomic coord
 	if(ncol(bed.coord) <3){
 		stop('Input file must contain at least 3 columns!')
 	}
-	genome.coord <- data.frame(chrom=chromFormat(bed.coord[, 1]), start=bed.coord[, 2]+1, end=bed.coord[, 3], gid=NA, gname='N', tid='N', strand='+', byname.uniq=T, bygid.uniq=NA)
+	genome.coord <- data.frame(chrom=chromFormat(bed.coord[, 1]), 
+						start=bed.coord[, 2]+1, end=bed.coord[, 3], 
+						gid=NA, gname='N', tid='N', strand='+', 
+						byname.uniq=T, bygid.uniq=NA)
 	if(ncol(bed.coord) >=4){
 		genome.coord$gname <- bed.coord[, 4]
 	}
@@ -188,15 +213,16 @@ if(reg2plot == 'exon' || reg2plot == 'cgi'){	# subset specific region.
 	genome.coord <- genome.coord[[finfo]]
 }
 
-if('-I' %in% names(args.tbl)){	# interval region size.
+#### Interval region size. ####
+if('-I' %in% names(args.tbl)){	
 	stopifnot(as.integer(args.tbl['-I']) > 0)
 	intsize <- args.tbl['-I']
 }else{
 	int.tbl <- c(3000,250,500,1000)
 	names(int.tbl) <- c('genebody','exon','cgi','bed')
 	intsize <- int.tbl[reg2plot]
-        if((reg2plot == 'bed') && ((genome.coord$end - genome.coord$start)==0)){
-        intsize <- 1
+        if(reg2plot == 'bed' && genome.coord$end == genome.coord$start){
+	        intsize <- 1
         }
 }
 if(reg2plot == 'tss' || reg2plot == 'tes'){
@@ -204,7 +230,8 @@ if(reg2plot == 'tss' || reg2plot == 'tes'){
 }
 intsize <- as.integer(intsize)
 
-if('-L' %in% names(args.tbl)){	# flanking region size.
+#### Flanking region size. ####
+if('-L' %in% names(args.tbl)){	
 	stopifnot(as.integer(args.tbl['-L']) >= 0)
 	flanksize <- args.tbl['-L']
 }else{
@@ -214,7 +241,8 @@ if('-L' %in% names(args.tbl)){	# flanking region size.
 }
 flanksize <- as.integer(flanksize)
 
-if('-N' %in% names(args.tbl) && !('-L' %in% names(args.tbl))){	# flanking size factor.
+#### Flanking size factor. ####
+if('-N' %in% names(args.tbl) && !('-L' %in% names(args.tbl))){	
 	stopifnot(as.numeric(args.tbl['-N']) >= 0)
 	flankfactor <- as.numeric(args.tbl['-N'])
 	flanksize <- floor(intsize*flankfactor)
@@ -225,7 +253,8 @@ if(rnaseq.gb){	# RNA-seq plotting.
 	flanksize <- 0
 }
 
-if('-S' %in% names(args.tbl)){	# random sampling rate.
+#### Random sampling rate. ####
+if('-S' %in% names(args.tbl)){	
 	samprate <- as.numeric(args.tbl['-S'])
 	stopifnot(samprate > 0 && samprate <= 1)
 	recs <- which(genome.coord$byname.uniq)	# records to sample from.
@@ -236,42 +265,48 @@ if('-S' %in% names(args.tbl)){	# random sampling rate.
 	samprate <- 1.0
 }
 
-if('-H' %in% names(args.tbl)){	# shaded area alpha.
+#### Shaded area alpha. ####
+if('-H' %in% names(args.tbl)){	
 	shade.alp <- as.numeric(args.tbl['-H'])
-	stopifnot(shade.alp >= 0 || shade.alp < 1)
+	stopifnot(shade.alp >= 0 && shade.alp < 1)
 }else{
 	shade.alp <- 0
 }
 
-if('-A' %in% names(args.tbl)){	# smooth function radius.
+#### Smooth function radius. ####
+if('-A' %in% names(args.tbl)){	
 	smooth.radius <- as.numeric(args.tbl['-A'])
 	stopifnot(smooth.radius >= 0 && smooth.radius < 1)
 }else{
 	smooth.radius <- .0
 }
 
-if('-M' %in% names(args.tbl)){	# smoothing method.
+#### Smoothing method. ####
+if('-M' %in% names(args.tbl)){	
 	smooth.method <- as.character(args.tbl['-M'])
 	stopifnot(smooth.method == 'mean' || smooth.method == 'median')
 }else{
 	smooth.method <- 'mean'
 }
 
-if('-E' %in% names(args.tbl)){	# weighted coverage.
+#### Weighted coverage. ####
+if('-E' %in% names(args.tbl)){	
 	stopifnot(as.integer(args.tbl['-E']) >= 0)
 	weight.genlen <- as.integer(args.tbl['-E'])
 }else{
 	weight.genlen <- as.integer(0)
 }
 
-if('-P' %in% names(args.tbl)){	# set cores number.
+##### Set cores number. ####
+if('-P' %in% names(args.tbl)){
 	stopifnot(as.integer(args.tbl['-P']) >= 0)
 	cores.number <- as.integer(args.tbl['-P'])
 }else{
 	cores.number <- as.integer(1)
 }
 
-if('-SE' %in% names(args.tbl)){	# set number of points to calculate standard errors.
+#### Set number of points to calculate standard errors. ####
+if('-SE' %in% names(args.tbl)){	
 	stopifnot(as.integer(args.tbl['-SE']) >= 0)
 	stderror.number <- as.integer(args.tbl['-SE'])
 	confiMat <- matrix(0, nrow=stderror.number+1, ncol=nrow(ctg.tbl))
@@ -280,6 +315,9 @@ if('-SE' %in% names(args.tbl)){	# set number of points to calculate standard err
 	confiMat <- matrix(0, nrow=stderror.number+1, ncol=nrow(ctg.tbl))
 }
 colnames(confiMat) <- ctg.tbl$title
+if(stderror.number == 0){
+	confiMat <- NULL
+}
 
 # Create the matrix to store plotting data.
 if(rnaseq.gb){
@@ -289,136 +327,64 @@ if(rnaseq.gb){
 }
 colnames(regcovMat) <- ctg.tbl$title
 
-## End configuration ##
+############### End arguments configuration #####################
+#################################################################
 
 
-##### Start the plotting routines ####
+
+
 # Load required libraries.
-require(ShortRead)||{source("http://bioconductor.org/biocLite.R");biocLite(ShortRead);require(ShortRead)}
-require(BSgenome)||{source("http://bioconductor.org/biocLite.R");biocLite(BSgenome);require(BSgenome)}
+require(ShortRead) || {
+	source("http://bioconductor.org/biocLite.R")
+	biocLite(ShortRead)
+	require(ShortRead)
+}
+require(BSgenome) || {
+	source("http://bioconductor.org/biocLite.R")
+	biocLite(BSgenome)
+	require(BSgenome)
+}
 require(doMC)
 
-# Function to calculate standard error
-calcSem <- function(x){ sd(x, na.rm=T)/sqrt(length(x)) }
-
-# Function to check if the range exceeds coverage vector boundaries.
-checkBound <- function(start, end, range, chrlen){
-	if(end + range > chrlen ||
-		start - range < 1)
-		return(FALSE)	# out of boundary.
-	else
-		return(TRUE)
-}
-
-# Extract and interpolate coverage vector from a genomic region with 3 sections:
-# 5' raw region, variable middle region and 3' raw region.
-extrCov3Sec <- function(chrcov, start, end, ninterp, flanking, strand, weight){
-	left.cov <- as.vector(seqselect(chrcov, start - flanking, start - 1))
-	right.cov <- as.vector(seqselect(chrcov, end + 1, end + flanking))
-	middle.cov <- as.vector(seqselect(chrcov, start, end))
-	middle.cov.intp <- spline(1:length(middle.cov), middle.cov, n=ninterp)$y
-	if(weight){
-		middle.cov.intp <- (length(middle.cov) / ninterp) * middle.cov.intp
-	}
-	if(strand == '+'){
-		return(c(left.cov, middle.cov.intp, right.cov))
-	}else{
-		return(rev(c(left.cov, middle.cov.intp, right.cov)))
-	}
-}
-
-# Extract and interpolate coverage vector from a genomic region.
-extrCovSec <- function(chrcov, start, end, ninterp, flanking, strand, weight){
-	cov <- as.vector(seqselect(chrcov, start - flanking, end + flanking))
-	cov.intp <- spline(1:length(cov), cov, n=ninterp)$y
-	if(weight){
-		cov.intp <- (length(cov) / ninterp) * cov.intp
-	}
-	if(strand == '+'){
-		return(cov.intp)
-	}else{
-		return(rev(cov.intp))
-	}
-}
-
-
-# Extract and concatenate coverages for a mRNA using exon model. Then do interpolation.
-extrCovExons <- function(chrcov, ranges, ninterp, strand, weight){
-	cov <- as.vector(seqselect(chrcov, ranges))
-	cov.intp <- spline(1:length(cov), cov, n=ninterp)$y
-	if(weight){
-		cov.intp <- (length(cov) / ninterp) * cov.intp
-	}
-	if(strand == '+'){
-		return(cov.intp)
-	}else{
-		return(rev(cov.intp))
-	}
-}
-
-# Extract coverage vector from a genomic region with a middle point and symmetric flanking regions.
-extrCovMidp <- function(chrcov, midp, flanking, strand){
-	res.cov <- as.vector(seqselect(chrcov, midp - flanking, midp + flanking))
-	if(strand == '+'){
-		return(res.cov)
-	}else{
-		return(rev(res.cov))
-	}
-}
-
-do.par.cov <- function(k, plot.coord, read.coverage.n, rnaseq.gb,
-                     flankfactor, reg2plot, genemodel, weight.genlen,
-                     intsize, old_flanksize, flanksize){
-	chrom <- as.character(plot.coord[k, ]$chrom)
-	if(!chrom %in% names(read.coverage.n)) return(NULL)
-	strand <- plot.coord[k, ]$strand
-	if(flankfactor > 0 && !rnaseq.gb){
-		flanksize <- floor((plot.coord[k, ]$end - plot.coord[k, ]$start + 1)*flankfactor)
-	}
-	if((reg2plot == 'tss' && strand == '+') || (reg2plot == 'tes' && strand == '-')){
-		if(!checkBound(plot.coord[k, ]$start, plot.coord[k, ]$start, flanksize, length(read.coverage.n[[chrom]])))
-			return(NULL)
-		result <- extrCovMidp(read.coverage.n[[chrom]], plot.coord[k, ]$start, flanksize, strand)
-	}else if(reg2plot == 'tss' && strand == '-' || reg2plot == 'tes' && strand == '+'){
-		if(!checkBound(plot.coord[k, ]$end, plot.coord[k, ]$end, flanksize, length(read.coverage.n[[chrom]])))
-			return(NULL)
-		result <- extrCovMidp(read.coverage.n[[chrom]], plot.coord[k, ]$end, flanksize, strand)
-	}else{
-		if(!checkBound(plot.coord[k, ]$start, plot.coord[k, ]$end, flanksize, length(read.coverage.n[[chrom]])))
-			return(NULL)
-		if(rnaseq.gb){	# RNA-seq plot using exon model.
-			exon.ranges <- genemodel$exonmodel[[plot.coord$tid[k]]]$ranges
-			result <- extrCovExons(read.coverage.n[[chrom]], exon.ranges, intsize, strand, weight.genlen)
-		}else{
-			if(flankfactor > 0){	# one section coverage.
-				result <- extrCovSec(read.coverage.n[[chrom]], plot.coord[k, ]$start, plot.coord[k, ]$end, intsize+2*old_flanksize, flanksize, strand, weight.genlen)
-			}else{	# three section coverage.
-				result <- extrCov3Sec(read.coverage.n[[chrom]], plot.coord[k, ]$start, plot.coord[k, ]$end, intsize, flanksize, strand, weight.genlen)
-			}
-		}
-	}
-	result
-}
-
-i <- 1	# index for unique coverage files.
-old_flanksize <- flanksize
 if(cores.number == 0){
 	registerDoMC()
 } else {
 	registerDoMC(cores.number)
 }
+
+
+source(paste(progpath, 'lib/coverage.r', sep=''))
+source(paste(progpath, 'lib/plotlib.r', sep=''))
+
+
 # Setup SEM sample points.
 if(stderror.number > 0){
 	stderror.pos <- round(seq(1, nrow(regcovMat), length.out=stderror.number+1))
 }
-while(i <= length(cov.u)){	# go through all unique coverage files.
-	same.cov.r <- which(ctg.tbl$cov == cov2load)
-	for(j in 1:length(same.cov.r)) {	# go through all
-                                        # gene lists associated with
-                                        # each coverage.
-		r <- same.cov.r[j]	# row number corresponds to config file.
-		lname <- ctg.tbl$glist[r]	# gene list name: used to subset
-                                     # the genome.
+
+# Function to calculate standard error
+calcSem <- function(x){ sd(x, na.rm=T)/sqrt(length(x)) }
+
+
+# Genomic enrichment for all profiles in the config. Use this for heatmaps.
+# Pre-allocate list size to improve efficiency.
+enrichList <- as.list(rep(NA, nrow(ctg.tbl)))
+
+
+old_flanksize <- flanksize # still needed?
+
+# Go through all remaining unique coverage files.
+# for(i in 2:length(cov.u)){
+i <- 1
+while(i <= length(cov.u)){
+	# "same.cov.r" contains the row numbers of the config file.
+	same.cov.r <- which(ctg.tbl$cov == cov2load) # "cov2load" is set before. 
+
+	# Go through all gene lists associated with each coverage.
+	# "r" is also the column position of the plot matrix.
+  	foreach(r=iter(same.cov.r)) %do% {
+
+		lname <- ctg.tbl$glist[r]	# retrieve gene list names.
 		if(lname == '-1'){	# use genome as gene list.
 			if(samprate < 1){
 				plot.coord <- genome.coord[samp.i, ]
@@ -427,61 +393,118 @@ while(i <= length(cov.u)){	# go through all unique coverage files.
 			}
 		}else{	# read gene list from text file.
 			gene.list <- read.table(lname, as.is=T, comment.char='#')$V1
-			subset.idx <- c(which(genome.coord$gname %in% gene.list & genome.coord$byname.uniq),
-				which(genome.coord$tid %in% gene.list))
+			subset.idx <- c(which(genome.coord$gname %in% gene.list & 
+									genome.coord$byname.uniq),
+							which(genome.coord$tid %in% gene.list)
+							)
 			if(!all(is.na(genome.coord$gid))){
-				subset.idx <- c(subset.idx, which(genome.coord$gid %in% gene.list & genome.coord$bygid.uniq))
+				subset.idx <- c(subset.idx, 
+								which(genome.coord$gid %in% gene.list & 
+									genome.coord$bygid.uniq)
+								)
 			}
 			plot.coord <- genome.coord[subset.idx, ]
 		}
-		# Extract coverage into "fin.result".
-		fin.result <- foreach(k=1:nrow(plot.coord)) %dopar% {	# go through all
-                                        				# regions.
+
+		# Extract coverage and combine into a matrix.
+		# result.matrix <- foreach(k=1:nrow(plot.coord), 
+		# 				.combine='rbind', .multicombine=F) %dopar% {
+		cov.result <- foreach(k=1:nrow(plot.coord)) %dopar% {
         	do.par.cov(k, plot.coord, read.coverage.n, rnaseq.gb,
 				flankfactor, reg2plot, genemodel, weight.genlen,
 				intsize, old_flanksize, flanksize)
 		}
-		result.matrix <- do.call("rbind", fin.result)	# then assemble into a matrix.
-		regcovMat[, r] <- apply(result.matrix, 2, function(x) mean(x, na.rm=T))	# calc avg. profile.
+		result.matrix <- do.call('rbind', cov.result)
+
+		# Calc avg. profile.
+		regcovMat[, r] <- apply(result.matrix, 2, function(x) mean(x, na.rm=T))	
+
 		# Calculate SEM if needed. Shut off SEM in single gene case.
-		if(length(fin.result) > 1 && stderror.number > 0){
+		if(nrow(result.matrix) > 1 && stderror.number > 0){
 			confiMat[, r] <- apply(result.matrix[, stderror.pos], 2, calcSem)
-		}else{
-			confiMat[, r] <- 0
+		}
+
+		# Sample and book-keep this matrix for heatmap.
+		if(hm_cols){
+			enrichList[[r]] <- spline_mat(result.matrix, hm_cols)
 		}
 	}
-	i <- i+1
-	if(i <= length(cov.u)){	# load a new coverage file.
+	# load a new coverage file.
+	i <- i + 1
+	if(i <= length(cov.u)){
 		cov2load <- cov.u[i]
 		load(cov2load)
 	}
 }
 flanksize <- old_flanksize	# recover the original flanksize.
+
 # Smooth plot if specified.
 if(smooth.radius > 0){
-	source(paste(progpath, 'lib/smoothplot.r', sep=''))
 	regcovMat <- smoothplot(regcovMat, smooth.radius, smooth.method)
 }
 
-default.width <- 2000
-default.height <- 1800
+# Create image file and plot data into it.
 if(!fi_tag){
+	# Average profile plot.
+	default.width <- 8	# in inches.
+	default.height <- 7
 	out.plot <- paste(basename, '.pdf', sep='')
-	# Plot the matrix!
-	if(stderror.number==0){
-		plotmat(out.plot, default.width, default.height, 48, 
-			reg2plot, flanksize, intsize, flankfactor, shade.alp, rnaseq.gb,
-			regcovMat, ctg.tbl$title, confiMat=NULL)
-	}else{
-		plotmat(out.plot, default.width, default.height, 48, 
-			reg2plot, flanksize, intsize, flankfactor, shade.alp, rnaseq.gb,
-			regcovMat, ctg.tbl$title, confiMat)
+	pdf(out.plot, width=default.width, height=default.height)
+	xticks <- gen_xticks(reg2plot, intsize, flanksize, flankfactor)
+	plotmat(regcovMat, ctg.tbl$title, xticks, shade.alp, confiMat)
+	dev.off()
+
+	# Heatmap.
+	if(hm_cols){
+		# Identify unique regions.
+		reg.list <- as.factor(ctg.tbl$glist)
+		uniq.reg <- levels(reg.list)
+		# Number of plots per region.
+		reg.np <- sapply(uniq.reg, function(r) sum(reg.list==r))
+		# Number of genes per region.
+		reg.ng <- sapply(uniq.reg, function(r){
+			ri <- which(reg.list==r)[1]
+			nrow(enrichList[[ri]])
+		})
+		# Setup image size.
+		unit.width <- 4	# in inches.
+		reduce.ratio <- 20 	# col to row reduction because #gene is large.
+		hm.width <- unit.width * max(reg.np)
+		ipl <- .2 # inches per line. Obtained from par->'mai', 'mar'.
+		m.bot <- 2; m.lef <- 1; m.top <- 2; m.rig <- 1 # margin size in lines.
+		# Convert #gene to image height.
+		reg.hei <- sapply(reg.ng, function(r){
+			r * unit.width / hm_cols / reduce.ratio + 
+				m.bot * ipl + m.top * ipl # margins are like intercepts.
+		})
+		hm.height <- sum(reg.hei)
+
+		# Setup output device.
+		out.hm <- paste(basename, '.hm.pdf', sep='')
+		pdf(out.hm, width=hm.width, height=hm.height)
+		par(mar=c(m.bot, m.lef, m.top, m.rig))
+
+		# Setup layout of the heatmaps.
+		lay.mat <- matrix(0, ncol=max(reg.np), nrow=length(reg.np))
+		f.sta <- 1 # figure number start.
+		for(i in 1:length(reg.np)){
+			f.end <- f.sta + reg.np[i] - 1 # figure number end.
+			lay.mat[i, 1:reg.np[i]] <- f.sta : f.end
+			f.sta <- f.sta + reg.np[i]
+		}
+		layout(lay.mat, heights=reg.hei)
+
+		plotheat(reg.list, uniq.reg, enrichList, ctg.tbl$title, xticks)
+		dev.off()
 	}
 }
 
 # Save plotting data of reads density to a text file.
 out.txt <- paste(basename, '.txt', sep='')
-out.header <- c('#Do NOT change the following lines if you want to re-draw the image with replot.r! If you change the matrix values, cut and paste the commented lines into your new file and run replot.r.',
+out.header <- c(
+	'#Do NOT change the following lines if you want to re-draw the image with \
+	 replot.r! If you change the matrix values, cut and paste the commented \
+	 lines into your new file and run replot.r.',
 	paste('#reg2plot:', reg2plot, sep=''),
 	paste('#flanksize:', flanksize, sep=''),
 	paste('#intsize:', intsize, sep=''),
@@ -491,10 +514,15 @@ out.header <- c('#Do NOT change the following lines if you want to re-draw the i
 	paste('#width:', default.width, sep=''),
 	paste('#height:', default.height, sep=''))
 writeLines(out.header, out.txt)
-suppressWarnings(write.table(regcovMat, append=T, file=out.txt, row.names=F, sep="\t", quote=F))
+suppressWarnings(write.table(regcovMat, append=T, file=out.txt, 
+					row.names=F, sep="\t", quote=F))
 
 # Save plotting data of standard error to a text file.
-out.txt <- paste(basename, '_stderror.txt', sep='')
-out.header <- c('#Do NOT change the following lines if you want to re-draw the image with replot.r! ')
-writeLines(out.header, out.txt)
-suppressWarnings(write.table(confiMat, append=T, file=out.txt, row.names=F, sep="\t", quote=F))
+if(!is.null(confiMat)){
+	out.txt <- paste(basename, '_stderror.txt', sep='')
+	out.header <- '#Do NOT change the following lines if you want to re-draw \
+					the image with replot.r!'
+	writeLines(out.header, out.txt)
+	suppressWarnings(write.table(confiMat, append=T, file=out.txt, 
+						row.names=F, sep="\t", quote=F))
+}

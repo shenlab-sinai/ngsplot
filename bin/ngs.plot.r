@@ -41,6 +41,8 @@ cmd.help <- function(){
 	cat("  -P   #CPUs to be used. Set 0 to use all detected\n")
 	# cat("  -PT  #data points to be used in plot(default=100)\n")
 	cat("## Misc. parameters:\n")
+	cat("  -GO  Gene order algorithm used in heatmaps: hc(default), total, max,\n")
+	cat("         prod, diff, pca and none(according to gene list supplied)\n")
 	cat("  -SE  Shall standard errors be plotted?(0 or 1)\n")
 	cat("  -RB  The fraction of extreme values to be trimmed on both ends\n")
 	cat("         default=0.05, set 0 to keep all data\n")
@@ -139,6 +141,7 @@ attach(argvar.list)
 # se: tag for plotting stand errors
 # robust: robust stat fraction
 # flood.frac: flooding fraction.
+# go.algo: gene order algorithm used in heatmaps.
 
 
 # Register doMC with CPU number.
@@ -268,7 +271,7 @@ if(!fi_tag){
 				})
 	# Setup image size.
 	unit.width <- 4	# in inches.
-	reduce.ratio <- 20 	# col to row reduction because #gene is large.
+	reduce.ratio <- 10 	# col to row reduction because #gene is large.
 	hm.width <- unit.width * max(reg.np)
 	ipl <- .2 # inches per line. Obtained from par->'mai', 'mar'.
 	m.bot <- 2; m.lef <- 1; m.top <- 2; m.rig <- 1 # margin size in lines.
@@ -294,7 +297,8 @@ if(!fi_tag){
 	}
 	layout(lay.mat, heights=reg.hei)
 
-	plotheat(reg.list, uniq.reg, enrichList, ctg.tbl$title, xticks, flood.frac)
+	plotheat(reg.list, uniq.reg, enrichList, go.algo, ctg.tbl$title, xticks, 
+			flood.frac)
 	dev.off()
 }
 

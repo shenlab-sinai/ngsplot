@@ -4,6 +4,7 @@ Recent:
 	- A lot of code cleanup, optimization and modularization.
 	- More usage of parallel processing
 	- Added new heatmap function
+	- Implemented 6 algorithms to order genes in heatmaps.
 	- A number of code restructure: new coverage.r; changed plotmat.r to plotlib.r; merged smoothplot.r with plotlib.r; new genedb.r;
 	- Added column subset function in replot.r.
 	- Used robust statistics as default for avg. profile plot.

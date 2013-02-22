@@ -180,6 +180,16 @@ setup_vars <- function(args.tbl, ctg.tbl){
 		vl$flood.frac <- .02  # <2% and >98% data will be illuminated equally.
 	}
 
+	#### Gene order algorithm ####
+	if('-GO' %in% names(args.tbl)){	
+		vl$go.algo <- args.tbl['-GO']
+		go.allowed <- c('total', 'max', 'prod', 'diff', 'hc', 'pca', 'none')
+		stopifnot(vl$go.algo %in% go.allowed)
+	} else {
+		vl$go.algo <- 'hc'  # hierarchical clustering.
+	}
+
+
 	vl
 }
 ############### End arguments configuration #####################

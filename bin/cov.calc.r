@@ -1,16 +1,4 @@
 #!/usr/bin/env Rscript  
-#
-# Program: cov.calc.r
-# Purpose: Calculate the genomic coverage for a NGS sample.
-# Arguments: genome name, aligned read file, output coverage file.
-#
-# -- by Li Shen, MSSM
-#    Nov 2011
-#
-# Developers: Li Shen, Ningyi Shao
-# Dept. of Neuroscience, Mount Sinai School of Medicine
-#
-
 cmd.help <- function(){
 	cat("\nUsage: cov.calc.r -G genome_name -R alignedread_file -X align_format -C cov_file [-F frag_len] [-Q mapping_quality] [-V calc_gig_ratio]\n")
 	cat("\n")
@@ -32,7 +20,6 @@ cmd.help <- function(){
 	cat("           Can be useful when comparing heterochromatic marks with DNA Input.\n")
 	cat("\n")
 }
-
 args <- commandArgs(T)
 progpath <- Sys.getenv('NGSPLOT')
 if(progpath == ""){
@@ -51,7 +38,6 @@ if(is.null(args.tbl)){
 genome <- args.tbl['-G']
 readfile <- args.tbl['-R']
 readformat <- args.tbl['-X']
-# Set alignment file format desc string.
 if(readformat == 'bam'){
 	typestr <- 'BAM'
 }else if(readformat == 'export'){
@@ -60,7 +46,6 @@ if(readformat == 'bam'){
 	stop('Unsupported alignment file.')
 }
 covfile <- args.tbl['-C']
-
 if('-F' %in% names(args.tbl)){	# fragment length.
 	stopifnot(as.integer(args.tbl['-F']) > 0)
 	fraglen <- args.tbl['-F']
@@ -68,7 +53,6 @@ if('-F' %in% names(args.tbl)){	# fragment length.
 	fraglen <- 100
 }
 fraglen <- as.integer(fraglen)
-
 if('-Q' %in% names(args.tbl)){	# map quality.
 	stopifnot(as.integer(args.tbl['-Q']) > 0)
 	mapqual <- args.tbl['-Q']
@@ -76,15 +60,12 @@ if('-Q' %in% names(args.tbl)){	# map quality.
 	mapqual <- 20
 }
 mapqual <- as.integer(mapqual)
-
 if('-P' %in% names(args.tbl)){	# set cores number.
 	stopifnot(as.integer(args.tbl['-P']) >= 0)
 	cores.number <- as.integer(args.tbl['-P'])
 }else{
 	cores.number <- as.integer(1)
 }
-
-# Load chromosome length info for the specified genome.
 load(paste(progpath, 'database/genome.size.RData', sep=''))
 if(genome == 'mm9'){
 	chrlens <- mm9.chrl
@@ -95,26 +76,20 @@ if(genome == 'mm9'){
 }else{
 	stop('Unsupported genome name! Exit.')
 }
-
-# Load required libraries.
 require(ShortRead)||{source("http://bioconductor.org/biocLite.R");biocLite("ShortRead");require(ShortRead)}
 require(BSgenome)||{source("http://bioconductor.org/biocLite.R");biocLite("BSgenome");require(BSgenome)}
 require(Rsamtools)||{source("http://bioconductor.org/biocLite.R");biocLite("Rsamtools");require(Rsamtools)}
 require(doMC)||{install.packages("doMC", dep=T);require(doMC)}
-
 if(cores.number == 0){
 	registerDoMC()
 } else {
 	registerDoMC(cores.number)
 }
-
-# Read the big bam file.
 NullGR <- function() {
 	NullGRanges <- GRanges(seqnames=character(), ranges=IRanges())
 	values(NullGRanges) <- DataFrame(score=integer())
 	NullGRanges
 }
-
 getReads <- function(crn, bam.info, bamfile, mapqual, fraglen, ...){
 	need.bam.what <- c('strand', 'pos', 'qwidth', 'mapq')
 	which <- RangesList(IRanges(start=0, end=seqlengths(bam.info)[crn]))
@@ -136,17 +111,13 @@ getReads <- function(crn, bam.info, bamfile, mapqual, fraglen, ...){
 	}
 	reads.df <- reads.df[!is.na(reads.df["pos"]),]
 	reads.df <- reads.df[reads.df["mapq"] >= mapqual,]
-
-	# Set the length of the reads to the fragment length.
 	reads.df["width"] <- fraglen
 	reads.df$pos[reads.df$strand=="-"] = reads.df$pos[reads.df$strand=="-"] + reads.df$qwidth[reads.df$strand=="-"] - fraglen
-	# Avoid the reversed strand reads reach out of the bound.
 	reads.df$pos[reads.df$pos < 1] <- 1
 	
 	reads <- GRanges(seqnames=Rle(crn), ranges=IRanges(start=reads.df$pos, width=fraglen), score=reads.df$mapq, strand=Rle(reads.df$strand))
     }
 }
-
 getAllReads <- function(crns, bamfile, mapqual, fraglen, ...){
 	bam.info <- seqinfo(bamfile)
 	all.reads <- foreach(k=1:length(crns)) %dopar% {
@@ -156,13 +127,10 @@ getAllReads <- function(crns, bamfile, mapqual, fraglen, ...){
 	names(all.reads) <- crns
 	all.reads
 }
-
-# Read alignment file.
 source(paste(progpath, 'lib/sep.filename.r', sep=''))
 sep.res <- sep.filename(readfile)
 if(readformat == 'export'){
 	read.aligned <- readAligned(sep.res$path, sep.res$name, type=typestr)
-	# Convert chromosome names to convention.
 	crn <- chromosome(read.aligned)
 	crn <- sub('.fa$', '', crn)
 	nochr.i <- grep('^chr', crn, invert=T)
@@ -170,12 +138,9 @@ if(readformat == 'export'){
 	read.aligned <- AlignedRead(sread=sread(read.aligned), id=id(read.aligned), quality=quality(read.aligned),
  		chromosome=as.factor(crn), position=position(read.aligned), strand=strand(read.aligned), 
  		alignQuality=alignQuality(read.aligned))
-	# Filter reads aligned to unconventional chromosomes.
 	read.filtered <- read.aligned[chromosome(read.aligned) %in% names(chrlens)]
-	# Filter reads based on mapping quality.
 	read.filtered <- read.filtered[which(quality(alignQuality(read.filtered)) >= mapqual)]	
 }else{
-	# Read big bam file.
 	if(!file.exists(paste(readfile, ".bai", sep=""))){
 		indexBam(readfile)
 	}
@@ -196,8 +161,6 @@ if(readformat == 'export'){
 	rm(read.aligned.list)
 	suppressWarnings(gc())
 }
-
-# Calculate genomic coverage.
 if(readformat == 'export'){
 	read.coverage <- coverage(read.filtered, width=chrlens, extend=fraglen - width(read.filtered))
 }else{
@@ -211,8 +174,6 @@ names(mc.reads.coverage) <- names(read.coverage)
 read.coverage.n <- GenomeData(mc.reads.coverage)
 rm(mc.reads.coverage)
 suppressWarnings(gc())
-
-# Calculate genome vs. intragenic ratio of coverage.
 if('-V' %in% names(args.tbl)){	# fragment length.
 	stopifnot(as.integer(args.tbl['-V']) >= 0)
 	calc.ratio <- as.integer(args.tbl['-V'])
@@ -244,9 +205,7 @@ if(calc.ratio){
 	cov.sum.genome <- sum(sapply(read.coverage.n, sum))
 	gig.ratio.refseq <- cov.sum.genome / cov.sum.refseq
 	gig.ratio.ensembl <- cov.sum.genome / cov.sum.ensembl
-	# Save coverage data. 
 	save(mapqual, readfile, fraglen, genome, nreads, read.coverage, read.coverage.n, gig.ratio.refseq, gig.ratio.ensembl, file=covfile)
 }else{
-	# Save coverage data. 
 	save(mapqual, readfile, fraglen, genome, nreads, read.coverage, read.coverage.n, file=covfile)
 }

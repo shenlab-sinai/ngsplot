@@ -1,11 +1,15 @@
 Revision history for ngs.plot.
 
 Recent:
-	- Misc. code cleaning up
+	- A lot of code cleanup, optimization and modularization.
 	- More usage of parallel processing
 	- Added new heatmap function
-	- A number of code restructure: new coverage.r; changed plotmat.r to plotlib.r; merged smoothplot.r with plotlib.r.
+	- A number of code restructure: new coverage.r; changed plotmat.r to plotlib.r; merged smoothplot.r with plotlib.r; new genedb.r;
 	- Added column subset function in replot.r.
+	- Used robust statistics as default for avg. profile plot.
+	- Reconstruction of the gene database and speedup coordinate loading by ~6 folds.
+
+
 
 1.05  Dec 3, 2012
 	- Fix bugs in calculating physical coverage 

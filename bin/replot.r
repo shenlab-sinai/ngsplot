@@ -1,14 +1,4 @@
 #!/usr/bin/env Rscript
-#
-# Program: replot.r
-# Purpose: Re-plot coverage from a data matrix that has already been calculated.
-# Arguments: text matrix file, output image name.
-#
-# -- by Li Shen, MSSM
-#    Jan 2012
-#
-
-# Deal with command line arguments.
 cmd.help <- function(){
 	cat("\nUsage: replot.r -M matrix_file -O image_name\n")
 	cat("\n")
@@ -18,7 +8,6 @@ cmd.help <- function(){
 	cat("-C 	Subset columns to plot using a string such as 1,2,4-6,9.")
 	cat("\n")
 }
-
 args <- commandArgs(T)
 progpath <- Sys.getenv('NGSPLOT')
 if(progpath == ""){
@@ -37,8 +26,6 @@ if(is.null(args.tbl)){
 }
 matfile <- args.tbl['-M']
 basename <- args.tbl['-O']
-
-# Read parameter settings from matrix file.
 para.max <- 20	# maximum parameter line number.
 p.settings <- readLines(matfile, para.max)
 p.settings <- p.settings[grep('^(\\s*)#([.\\w]+):([.\\w]+)$', p.settings, perl=T)]
@@ -63,8 +50,6 @@ if('height' %in% names(p)){
 }else{
 	plot.height <- 1800
 }
-
-# Read plotting matrix data.
 regcovMat <- as.matrix(read.delim(matfile, comment.char='#', check.names=F))
 sefile <- gsub(".txt", "_stderror.txt", matfile)
 if(file.exists(sefile)){
@@ -72,8 +57,6 @@ if(file.exists(sefile)){
 }else{
 	confiMat <- NULL
 }
-
-# Subset columns if necessary.
 if('-C' %in% names(args.tbl)){
 	colstr <- args.tbl['-C']
 	c2p <- sapply(unlist(strsplit(colstr, ',')), function(r){
@@ -90,11 +73,7 @@ if('-C' %in% names(args.tbl)){
 	regcovMat <- regcovMat[, c2p]
 	confiMat <- confiMat[, c2p]
 }
-
 title2plot <- colnames(regcovMat)
-
-
-# Plot into image file.
 out.plot <- paste(basename, '.pdf', sep='')
 plotmat(out.plot, plot.width, plot.height, 48, 
 	reg2plot, flanksize, intsize, flankfactor, shade.alp, rnaseq.gb,

@@ -274,10 +274,14 @@ OrderGenesHeatmap <- function(n, enrichCombined,
     if(method == 'hc') {  # hierarchical clustering
         # Filter genes with zero sd.
         g.sd <- apply(enrichCombined, 1, sd)
-        enrichCombined <- enrichCombined[g.sd > 0, ]
+        g.nz <- which(g.sd > 0)
+        g.ze <- which(g.sd == 0)
+        enrichCombined <- enrichCombined[g.nz, ]
         # Clustering and order genes.
         hc <- hclust(as.dist(1-cor(t(enrichCombined))), method='complete')
-        list(hc=hc$order)
+        # Notes: do NOT forget hc is applied to non-zero sd genes only.
+        # The original gene indices must be recovered before return values.
+        list(hc=c(g.nz[hc$order], g.ze))
     } else if(method == 'total') {  # overall enrichment of the 1st profile.
         list(total=order(rowSums(enrichCombined[, 1:npts])))
     } else if(method == 'max') {  # peak enrichment value of the 1st profile.
@@ -359,6 +363,15 @@ plotheat <- function(reg.list, uniq.reg, enrichList, go.algo, title2plot, xticks
         g.order <- OrderGenesHeatmap(length(plist), enrichCombined, go.algo)
         enrichCombined <- enrichCombined[g.order[[1]], ]
         # for now, just use the 1st gene order.
+
+
+        # # Filter genes with zero sd.
+        # g.sd <- apply(enrichCombined, 1, sd)
+        # enrichCombined <- enrichCombined[g.sd > 0, ]
+        # # Clustering and order genes.
+        # hc <- hclust(as.dist(1-cor(t(enrichCombined))), method='complete')
+        # enrichCombined <- enrichCombined[hc$order, ]
+
     
         # Split combined profiles back into individual heatmaps.
         foreach(j=1:length(plist)) %do% {

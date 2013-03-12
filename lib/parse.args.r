@@ -58,7 +58,6 @@ setupVars <- function(args.tbl, ctg.tbl){
     vl$genome <- args.tbl['-G']
     vl$reg2plot <- args.tbl['-R']
     vl$oname <- args.tbl['-O']
-    vl$bufsize <- 200  # buffer added to both ends of the coverage vector.
 
     #### Image output forbidden tag. ####
     if('-FI' %in% names(args.tbl)){ 
@@ -195,8 +194,10 @@ setupVars <- function(args.tbl, ctg.tbl){
         vl$fraglen <- as.integer(args.tbl['-FL'])
         stopifnot(vl$fraglen > 0)
     } else {
-        vl$fraglen <- 100
+        vl$fraglen <- 150
     }
+
+    vl$bufsize <- vl$fraglen  # buffer added to both ends of the coverage vec.
 
     #### Mapping quality cutoff ####
     if('-MQ' %in% names(args.tbl)) {

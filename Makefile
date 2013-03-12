@@ -18,6 +18,11 @@ OTHERS=database example README Changes
 # ngs.plot distribution folder
 DISTFOLDER=ngsplot
 
+# example bam files.
+BAM=example.bam
+
+all: ngsplot-dist.tar.gz example.bam.tar.gz
+
 ngsplot-dist.tar.gz: $(BINCUFF) $(BINNGSP) $(LIB) $(OTHERS)
 	rm -rf ${DISTFOLDER}
 	mkdir -p ${DISTFOLDER}/bin ${DISTFOLDER}/lib
@@ -31,6 +36,9 @@ ngsplot-dist.tar.gz: $(BINCUFF) $(BINNGSP) $(LIB) $(OTHERS)
 	# done
 	tar czvf $@ ${DISTFOLDER}
 	rm -rf ${DISTFOLDER}
+
+example.bam.tar.gz: $(BAM)
+	tar czvf $@ $(BAM)
 
 clean:
 	rm -rf ngsplot-dist.tar.gz

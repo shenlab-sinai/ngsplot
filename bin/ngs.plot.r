@@ -219,6 +219,27 @@ for(r in 1:nrow(ctg.tbl)) {
         chk.start <- chk.start + chk.size
     }
 
+
+    ########### For debug #############
+    # result.matrix <- matrix(0, nrow=nrow(coord.list[[reg]]), ncol=pts)
+    # for(c in 1:length(chkidx.list)) {
+    #     chk <- chkidx.list[[c]]
+    #     i <- chk[1]:chk[2]  # chunk: start -> end
+    #     cat(".")
+    #     # If RNA-seq, retrieve exon ranges.
+    #     if(rnaseq.gb) {
+    #         exonranges.list <- unlist(exonmodel[coord.list[[reg]][i, ]$tid])
+    #     } else {
+    #         exonranges.list <- NULL
+    #     }
+    #     result.matrix[i, ] <- doCov(coord.list[[reg]][i, ], chr.tag, reg2plot, 
+    #           pint, bam.file, sn.inbam, flanksize, flankfactor, bufsize, 
+    #           fraglen, map.qual, m.pts, f.pts, v.map.bowtie[bam.file], 
+    #           exonranges.list)
+    # }
+    ########### For debug #############
+
+
     # Extract coverage and combine into a matrix.
     result.matrix <- foreach(chk=chkidx.list, .combine='rbind', 
                              .multicombine=T) %dopar% {

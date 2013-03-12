@@ -1,5 +1,13 @@
 Revision history for ngs.plot.
 
+1.65  Mar 12, 2013
+    - This is an emergent bug fix version which addresses some problems when 
+      reading bam header information.
+    - If alignment algorithm cannot be determined, ngs.plot will try to 
+      automatically convert mapping scores of 255 to sth. meaningful.
+    - Uses a better way to read sequence names in a bam file.
+    - Buffer size is automatically set based on fragment length.
+
 1.64  Mar 7, 2013
     - Significant improvement to coverage calculation. The program now calculate
       coverage based on needs by extracting bam files on the go. This has 

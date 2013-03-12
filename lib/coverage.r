@@ -282,7 +282,9 @@ covBam <- function(bam.file, sn.inbam, granges, fraglen, map.qual=20, bowtie=F) 
         srg.qwidth <- sr.in.ranges[[scan.counter]]$qwidth
 
         # Special handling for bowtie mapping.
-        if(bowtie) {
+        # browser()
+        if(is.na(bowtie) && length(srg.mapq) > 0 && 
+           mean(is.na(srg.mapq)) > .8 || !is.na(bowtie) && bowtie) {
             srg.mapq[is.na(srg.mapq)] <- 254
         }
 
@@ -399,8 +401,9 @@ covBamExons <- function(bam.file, sn.inbam, granges.list, fraglen,
                                                    v.brk.right[scan.counter]])
 
         # Special handling for bowtie mapping.
-        if(bowtie) {
-            sr.pooled$mapq[is.na(sr.pooled$mapq)] <- 254
+        if(is.na(bowtie) && length(srg.mapq) > 0 && 
+           mean(is.na(srg.mapq)) > .8 || !is.na(bowtie) && bowtie) {
+            srg.mapq[is.na(srg.mapq)] <- 254
         }
 
         # Filter short reads by mapping quality.
@@ -452,11 +455,13 @@ headerIndexBam <- function(ctg.tbl) {
 
         # Derive mapping program.
         header <- scanBamHeader(bam.file)
-        map.prog <- try(strsplit(header[[1]]$text$'@PG'[[1]], ':')[[1]][2])
+        map.prog <- try(strsplit(header[[1]]$text$'@PG'[[1]], ':')[[1]][2], 
+                        silent=T)
         if(class(map.prog) != "try-error") {
             v.map.bowtie[i] <- ifelse(map.prog %in% c('Bowtie', 'TopHat'), T, F)
         } else {
-            v.map.bowtie[i] <- F
+            warning(sprintf("Alignment algorithm for: %s cannot be determined. Will automatically convert mapping scores 255.", bam.file))
+            v.map.bowtie[i] <- NA
         }
     }
     names(v.map.bowtie) <- cov.uniq
@@ -496,11 +501,13 @@ seqnamesBam <- function(ctg.tbl) {
 # genomic regions before scanBam or it terminates immaturely.
 #   ctg.tbl: coverage-genelist-title table.
 
+    # browser()
     cov.uniq <- unique(ctg.tbl$cov)
     sn.list <- lapply(scanBamHeader(cov.uniq), function(h) {
-            bh.txt <- unlist(h$text)
-            sn.txt <- bh.txt[grep('SN', bh.txt)]
-            sub('SN:', '', sn.txt)
+            names(h$targets)
+            # bh.txt <- unlist(h$text)
+            # sn.txt <- bh.txt[grep('SN', bh.txt)]
+            # sub('SN:', '', sn.txt)
         })
     names(sn.list) <- basename(names(sn.list))
 

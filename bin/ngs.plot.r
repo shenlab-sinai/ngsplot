@@ -3,58 +3,57 @@
 # Program: ngs.plot.r
 # Purpose: Plot sequencing coverages at different genomic regions.
 #          Allow overlaying various coverages with gene lists.
-# Arguments: coverage file, region to plot, title, output basename.
-#            user can also supply a text file describing the interaction between
-#            coveage files and gene lists; or a customized region list in BED
-#            format.
 #
 # -- by Li Shen, MSSM
-# Created:	  	Nov 2011.
-# Last Updated: Feb 2013.
+# Created:      Nov 2011.
+# Last Updated: Mar 2013.
 #
 
 
 # Deal with command line arguments.
 cmd.help <- function(){
-	cat("\n")
-	cat("Usage: ngs.plot.r -R region -C [cov|config]_file -O out_basename \
-		[Optional]\n")
-	cat("\n## Mandatory parameters:\n")
-	cat("  -R   Genomic regions to plot: tss, tes, genebody, exon, cgi or *.bed\n")
-	cat("  -C   Coverage file or a configuration file for multiplot\n")
-	cat("  -O   Basename for output\n")
-	cat("## Optional parameters related to configuration file:\n")
-	cat("  -G   Gene list to subset regions\n")
-	cat("  -T   Image title\n")
-	cat("## Important optional parameters:\n")
-	cat("  -F   Further information can be provided to subset regions:\n")
-	cat("         for genebody: chipseq(default), rnaseq.\n")
-	cat("         for exon: canonical(default), variant, promoter, polyA,\n")
-	cat("           altAcceptor, altDonor, altBoth.\n")
-	cat("         for cgi: ProximalPromoter(default), Promoter1k, Promoter3k,\n")
-	cat("           Genebody, Genedesert, OtherIntergenic, Pericentromere.\n")
-	cat("  -D   Gene database: refseq(default), ensembl\n")
-	cat("  -I   Shall interval be larger than flanking in plot?(0 or 1)\n")
-	cat("  -L   Flanking region size\n")
-	cat("  -N   Flanking region factor(will override flanking size)\n")
-	cat("  -S   Randomly sample the regions for plot, must be:(0, 1]\n")
-	cat("  -P   #CPUs to be used. Set 0 to use all detected\n")
-	# cat("  -PT  #data points to be used in plot(default=100)\n")
-	cat("## Misc. parameters:\n")
-	cat("  -GO  Gene order algorithm used in heatmaps: hc(default), total, max,\n")
-	cat("         prod, diff, pca and none(according to gene list supplied)\n")
-	cat("  -SE  Shall standard errors be plotted?(0 or 1)\n")
-	cat("  -RB  The fraction of extreme values to be trimmed on both ends\n")
-	cat("         default=0.05, set 0 to keep all data\n")
-	cat("  -FC  Flooding fraction:[0, 1), default=0.02\n")
-	cat("  -FI  Forbid image output if set to 1(default=0)\n")
-	cat("  -A   Radius used by smooth function, suggested value:[0, 0.05]\n")
-	cat("         default=0, i.e. no smoothing.")
-	cat("  -M   Smooth method: mean(default) or median\n")
-	cat("  -H   Opacity of shaded area, suggested value:[0, 0.5]\n")
-	cat("         default=0, i.e. no shading, just curves\n")
-	# cat("  -E   Calculate weighted coverage according to region size(experimental!)\n")
-	cat("\n")
+    cat("\nVisit http://code.google.com/p/ngsplot/wiki/ProgramArguments101 for details\n")
+    cat("\nUsage: ngs.plot.r -G genome -R region -C [cov|config]file\n")
+    cat("                  -O name [Options]\n")
+    cat("\n## Mandatory parameters:\n")
+    cat("  -G   Genome name, currently supported: mm9, hg19, rn4, sacCer3(ensembl only)\n")
+    cat("  -R   Genomic regions to plot: tss, tes, genebody, exon, cgi or *.bed\n")
+    cat("  -C   Indexed bam file or a configuration file for multiplot\n")
+    cat("  -O   Name for output: multiple files will be generated\n")
+    cat("## Optional parameters related to configuration file:\n")
+    cat("  -E   Gene list to subset regions\n")
+    cat("  -T   Image title\n")
+    cat("## Important optional parameters:\n")
+    cat("  -F   Further information can be provided to subset regions:\n")
+    cat("         for genebody: chipseq(default), rnaseq.\n")
+    cat("         for exon: canonical(default), variant, promoter, polyA,\n")
+    cat("           altAcceptor, altDonor, altBoth.\n")
+    cat("         for cgi: ProximalPromoter(default), Promoter1k, Promoter3k,\n")
+    cat("           Genebody, Genedesert, OtherIntergenic, Pericentromere.\n")
+    cat("  -D   Gene database: refseq(default), ensembl\n")
+    cat("  -I   Shall interval be larger than flanking in plot?(0 or 1)\n")
+    cat("  -L   Flanking region size\n")
+    cat("  -N   Flanking region factor(will override flanking size)\n")
+    cat("  -S   Randomly sample the regions for plot, must be:(0, 1]\n")
+    cat("  -P   #CPUs to use. Set 0(default) for auto detection\n")
+    # cat("  -PT  #data points to be used in plot(default=100)\n")
+    cat("## Misc. parameters:\n")
+    cat("  -GO  Gene order algorithm used in heatmaps: total(default), hc, max,\n")
+    cat("         prod, diff, pca and none(according to gene list supplied)\n")
+    cat("  -CS  Chunk size for loading genes in batch(default=100)\n")
+    cat("  -FL  Fragment length used to calculate physical coverage(default=100)\n")
+    cat("  -MQ  Mapping quality cutoff to filter reads(default=20)\n")
+    cat("  -SE  Shall standard errors be plotted?(0 or 1)\n")
+    cat("  -RB  The fraction of extreme values to be trimmed on both ends\n")
+    cat("         default=0, 0.05 means 5% of extreme values will be trimmed\n")
+    cat("  -FC  Flooding fraction:[0, 1), default=0.02\n")
+    cat("  -FI  Forbid image output if set to 1(default=0)\n")
+    cat("  -MW  Moving window width to smooth avg. profiles, must be integer\n")
+    cat("         1=no(default); 3=slightly; 5=somewhat; 9=quite; 13=super.\n")
+    cat("  -H   Opacity of shaded area, suggested value:[0, 0.5]\n")
+    cat("         default=0, i.e. no shading, just curves\n")
+    # cat("  -E   Calculate weighted coverage according to region size(experimental!)\n")
+    cat("\n")
 }
 
 
@@ -64,268 +63,271 @@ args <- commandArgs(T)
 
 # Program environment variable.
 progpath <- Sys.getenv('NGSPLOT')
-if(progpath == ""){
-	stop("Set environment variable NGSPLOT before run the program. \
-		  See README for details.\n")
-}else{  
-	if(substr(progpath, nchar(progpath), nchar(progpath)) != '/'){	
-		progpath <- paste(progpath, '/', sep='')  # add trailing slash.
-	}
+if(progpath == "") {
+    stop("Set environment variable NGSPLOT before run the program. \
+          See README for details.\n")
 }
 
 # Input argument parser.
-source(paste(progpath, 'lib/parse.args.r', sep=''))
-args.tbl <- parse.args(args, c('-C', '-R', '-O'))
+source(file.path(progpath, 'lib', 'parse.args.r'))
+args.tbl <- parseArgs(args, c('-G', '-C', '-R', '-O'))
 if(is.null(args.tbl)){
-	cmd.help()
-	stop('Error in parsing command line arguments. Stop.\n')
+    cmd.help()
+    stop('Error in parsing command line arguments. Stop.\n')
 }
 
 # Load required libraries.
-suppressMessages(require(ShortRead, warn.conflicts=F)) || {
-	source("http://bioconductor.org/biocLite.R")
-	biocLite(ShortRead)
-	if(!suppressMessages(require(ShortRead, warn.conflicts=F))){
-		stop('Loading package ShortRead failed!')
-	}
+cat("Loading R libraries")
+if(!suppressMessages(require(ShortRead, warn.conflicts=F))) {
+    source("http://bioconductor.org/biocLite.R")
+    biocLite(ShortRead)
+    if(!suppressMessages(require(ShortRead, warn.conflicts=F))) {
+        stop('Loading package ShortRead failed!')
+    }
 }
-suppressMessages(require(BSgenome, warn.conflicts=F)) || {
-	source("http://bioconductor.org/biocLite.R")
-	biocLite(BSgenome)
-	if(!suppressMessages(require(BSgenome, warn.conflicts=F))){
-		stop('Loading package BSgenome failed!')
-	}
+cat('.')
+if(!suppressMessages(require(BSgenome, warn.conflicts=F))) {
+    source("http://bioconductor.org/biocLite.R")
+    biocLite(BSgenome)
+    if(!suppressMessages(require(BSgenome, warn.conflicts=F))) {
+        stop('Loading package BSgenome failed!')
+    }
 }
-suppressMessages(require(doMC, warn.conflicts=F)) || {
-	install.packages('doMC')
-	if(!suppressMessages(require(doMC, warn.conflicts=F))){
-		stop('Loading package doMC failed!')
-	}
+cat('.')
+if(!suppressMessages(require(doMC, warn.conflicts=F))) {
+    install.packages('doMC')
+    if(!suppressMessages(require(doMC, warn.conflicts=F))) {
+        stop('Loading package doMC failed!')
+    }
 }
+cat('.')
+if(!suppressMessages(require(caTools, warn.conflicts=F))) {
+    install.packages('caTools')
+    if(!suppressMessages(require(caTools, warn.conflicts=F))) {
+        stop('Loading package caTools failed!')
+    }
+}
+cat('.')
+if(!suppressMessages(require(utils, warn.conflicts=F))) {
+    install.packages('utils')
+    if(!suppressMessages(require(utils, warn.conflicts=F))) {
+        stop('Loading package utils failed!')
+    }
+}
+cat('.')
+cat("Done\n")
 
 # Configuration: coverage-genelist-title relationships.
+cat("Configuring variables...")
 ctg.tbl <- ConfigTbl(args.tbl)
 
-# Collapse coverage files to speed up loading.
-cov.u <- unique(ctg.tbl$cov)
-
-# Load the 1st coverage. The genome name is then used for loading gene models.
-cov2load <- cov.u[1]
-load(cov2load)
-# if(genome == 'mm9'){
-# 	load(paste(progpath, 'database/mm9.RData', sep=''))
-# }else if(genome == 'hg19'){
-# 	load(paste(progpath, 'database/hg19.RData', sep=''))
-# }else if(genome == 'rn4'){
-# 	load(paste(progpath, 'database/rn4.RData', sep=''))
-# }else{
-# 	stop(paste('Unsupported genome: ', genome, '. Stop.\n', sep=''))
-# }
-
-
 # Setup variables from arguments.
-argvar.list <- setup_vars(args.tbl, ctg.tbl)
-attach(argvar.list)
-# This sets a large number of variables for use by the following procedures.
-# reg2plot: tss, tes, genebody, *.bed...
-# basename: output file basename
-# fi_tag: tag for forbidding image output
-# lgint: tag for large interval
-# flanksize: flanking region size
-# flankfactor: flanking region factor
-# samprate: sampling rate
-# shade.alp: shade area alpha
-# smooth.radius: smooth function radius
-# smooth.method: as is
-# cores.number: #CPUs
-# se: tag for plotting stand errors
-# robust: robust stat fraction
-# flood.frac: flooding fraction.
-# go.algo: gene order algorithm used in heatmaps.
+argvar.list <- setupVars(args.tbl, ctg.tbl)
+genome <- argvar.list$genome  # genome name, such as mm9, hg19, rn4.
+reg2plot <- argvar.list$reg2plot  # tss, tes, genebody, *.bed...
+oname <- argvar.list$oname  # output file root name
+fi_tag <- argvar.list$fi_tag  # tag for forbidding image output
+lgint <- argvar.list$lgint  # lgint: tag for large interval
+flanksize <- argvar.list$flanksize  # flanking region size
+flankfactor <- argvar.list$flankfactor  # flanking region factor
+samprate <- argvar.list$samprate  # sampling rate
+shade.alp <- argvar.list$shade.alp  # shade area alpha
+mw <- argvar.list$mw  # moving window width for smooth function.
+cores.number <- argvar.list$cores.number  # #CPUs
+se <- argvar.list$se  # se: tag for plotting stand errors
+robust <- argvar.list$robust  # robust stat fraction
+flood.frac <- argvar.list$flood.frac  # flooding fraction.
+go.algo <- argvar.list$go.algo  # gene order algorithm used in heatmaps.
+gcs <- argvar.list$gcs  # gcs: chunk size for grouping genes.
+fraglen <- argvar.list$fraglen  # fragment length for physical coverage.
+map.qual <- argvar.list$map.qual  # mapping quality cutoff.
+bufsize <- argvar.list$bufsize  # buffer is to ensure smooth coverage at both 
+                                # ends of the coverage vector.
 
 
 # Register doMC with CPU number.
 if(cores.number == 0){
-	registerDoMC()
+    registerDoMC()
 } else {
-	registerDoMC(cores.number)
+    registerDoMC(cores.number)
 }
 
-
 # Setup plot-related coordinates and variables.
-source(paste(progpath, 'lib/genedb.r', sep=''))
+source(file.path(progpath, 'lib', 'genedb.r'))
 plotvar.list <- SetupPlotCoord(args.tbl, ctg.tbl, progpath, genome, reg2plot, 
-								samprate)
-attach(plotvar.list)
-# This sets plot coordinates and a few variables.
-# coord.list: a list of coordinates as data.frame for all unique regions.
-# rnaseq.gb: tag for RNA-seq data.
-# reg.list: region list as factor vector.
-# uniq.reg: unique region list as character list.
-# pint: tag for point interval.
-# exonmodel: exon ranges if rnaseq.gb=True.
-
+                               samprate)
+coord.list <- plotvar.list$coord.list  # list of coordinates for unique regions.
+rnaseq.gb <- plotvar.list$rnaseq.gb  # tag for RNA-seq data.
+reg.list <- plotvar.list$reg.list  # region list as in config file.
+uniq.reg <- plotvar.list$uniq.reg  # unique region list.
+pint <- plotvar.list$pint  # tag for point interval.
+exonmodel <- plotvar.list$exonmodel  # exon ranges if rnaseq.gb=True.
 
 # Setup data points for plot.
-source(paste(progpath, 'lib/plotlib.r', sep=''))
+source(file.path(progpath, 'lib', 'plotlib.r'))
 pts.list <- SetPtsSpline(pint)
-attach(pts.list)
-# pts: data points for avg. profile and standard errors.
-# m.pts: middle data points. For pint, m.pts=1.
-# f.pts: flanking region data points.
+pts <- pts.list$pts  # data points for avg. profile and standard errors.
+m.pts <- pts.list$m.pts  # middle data points. For pint, m.pts=1.
+f.pts <- pts.list$f.pts  # flanking region data points.
 
 # Setup matrix for avg. profiles.
 regcovMat <- CreatePlotMat(pts, ctg.tbl)
-
 # Setup matrix for standard errors.
 confiMat <- CreateConfiMat(se, pts, ctg.tbl)
 
 # Genomic enrichment for all profiles in the config. Use this for heatmaps.
-# Pre-allocate list size to improve efficiency.
-enrichList <- as.list(rep(NA, nrow(ctg.tbl)))
+enrichList <- vector('list', nrow(ctg.tbl))
+cat("Done\n")
 
-###################################################
+#######################################################################
 # Here start to extract coverages for all genomic regions and calculate 
 # data for plotting.
 
 # Load coverage extraction lib.
-source(paste(progpath, 'lib/coverage.r', sep=''))
+cat("Analyze bam files and calculate coverage")
+source(file.path(progpath, 'lib', 'coverage.r'))
 
-i <- 1  # cov2load was previously loaded. 
-# Go through all remaining unique coverage files.
-while(i <= length(cov.u)){
-	# "same.cov.r" contains the row numbers of the config file.
-	same.cov.r <- which(ctg.tbl$cov == cov2load) # "cov2load" is set before. 
+# Determine if bowtie is used to generate the bam files.
+# Index bam files if not done yet.
+v.map.bowtie <- headerIndexBam(ctg.tbl)
 
-	# Go through all gene lists associated with each coverage.
-	# "r" is also the column position of the plot matrix.
-  	foreach(r=iter(same.cov.r)) %do% {
-		reg <- ctg.tbl$glist[r]	# retrieve gene list names.
+# Retrieve chromosome names for each bam file.
+sn.list <- seqnamesBam(ctg.tbl)
 
-		# Extract coverage and combine into a matrix.
-		result.matrix <- foreach(rec=iter(coord.list[[reg]], by='row'), 
-							.combine='rbind', .multicombine=T, 
-							.maxcombine=1000) %dopar% {
-			# Convert coord record to exon ranges.
-			if(rnaseq.gb) {
-				exon.ranges <- exonmodel[[rec$tid]]$ranges
-			} else {
-				exon.ranges <- NULL
-			}
-        	do.par.cov(rec, read.coverage.n, flanksize, flankfactor, 
-        				m.pts, f.pts, reg2plot, pint, exon.ranges)
-		}
-		# result.matrix <- do.call('rbind', cov.result)
+# Calculate library size from bam files for normalization.
+v.lib.size <- libSizeBam(ctg.tbl)
 
-		# Calc avg. profile.
-		regcovMat[, r] <- apply(result.matrix, 2, function(x) mean(x, 
-								trim=robust, na.rm=T))	
+# Process the config file row by row.
+for(r in 1:nrow(ctg.tbl)) {
+    bam.file <- ctg.tbl$cov[r]
+    libsize <- v.lib.size[bam.file]
+    sn.inbam <- sn.list[[bam.file]]
+    chr.tag <- chrTag(sn.inbam)
+    if(class(chr.tag) == 'character') {
+        stop(sprintf("Read %s error: %s", bam.file, chr.tag))
+    }
+    reg <- ctg.tbl$glist[r]  # retrieve gene list names.
 
-		# Calculate SEM if needed. Shut off SEM in single gene case.
-		if(nrow(result.matrix) > 1 && se){
-			confiMat[, r] <- apply(result.matrix, 2, function(x) {
-									CalcSem(x, robust)
-								})
-		}
+    # Create coordinate chunk indices.
+    nchk <- ceiling(nrow(coord.list[[reg]]) / gcs)  # number of chunks.
+    chkidx.list <- vector('list', length=nchk)  # chunk indices list.
+    chk.start <- 1  # chunk start.
+    i.chk <- idiv(nrow(coord.list[[reg]]), chunkSize=gcs)
+    for(i in 1:nchk) {
+        chk.size <- nextElem(i.chk)
+        chkidx.list[[i]] <- c(chk.start, chk.start + chk.size - 1)
+        chk.start <- chk.start + chk.size
+    }
 
-		# Sample and book-keep this matrix for heatmap.
-		enrichList[[r]] <- result.matrix
-	}
-	# load a new coverage file.
-	i <- i + 1
-	if(i <= length(cov.u)){
-		cov2load <- cov.u[i]
-		load(cov2load)
-	}
+    # Extract coverage and combine into a matrix.
+    result.matrix <- foreach(chk=chkidx.list, .combine='rbind', 
+                             .multicombine=T) %dopar% {
+        cat(".")
+        i <- chk[1]:chk[2]  # chunk: start -> end
+        # If RNA-seq, retrieve exon ranges.
+        if(rnaseq.gb) {
+            exonranges.list <- unlist(exonmodel[coord.list[[reg]][i, ]$tid])
+        } else {
+            exonranges.list <- NULL
+        }
+        doCov(coord.list[[reg]][i, ], chr.tag, reg2plot, pint, bam.file, 
+              sn.inbam, flanksize, flankfactor, bufsize, fraglen, map.qual, 
+              m.pts, f.pts, v.map.bowtie[bam.file], exonranges.list)
+    }
+    result.matrix <- result.matrix / libsize * 1e6  # normalize to RPM.
+
+    # Calculate SEM if needed. Shut off SEM in single gene case.
+    if(nrow(result.matrix) > 1 && se){
+        confiMat[, r] <- apply(result.matrix, 2, function(x) CalcSem(x, robust))
+    }
+
+    # Book-keep this matrix for heatmap.
+    enrichList[[r]] <- result.matrix
+
+    # Return avg. profile.
+    regcovMat[, r] <- apply(result.matrix, 2, function(x) mean(x, trim=robust, 
+                                                               na.rm=T))
+}
+# browser()
+cat("Done\n")
+
+########################################
+# Save plotting data.
+cat("Saving results...")
+dir.create(oname, showWarnings=F)
+# Average profiles.
+out.prof <- file.path(oname, 'avgprof.txt')
+write.table(regcovMat, file=out.prof, row.names=F, sep="\t", quote=F)
+
+# Standard errors of mean.
+if(!is.null(confiMat)){
+    out.confi <- file.path(oname, 'sem.txt')
+    write.table(confiMat, file=out.confi, row.names=F, sep="\t", quote=F)
 }
 
-# Smooth plot if specified.
-if(smooth.radius > 0){
-	regcovMat <- smoothplot(regcovMat, smooth.radius, smooth.method)
+# Heatmap density values.
+for(i in 1:length(enrichList)) {
+    out.heat <- file.path(oname, paste('hm', i, '.txt', sep=''))
+    write.table(enrichList[[i]], file=out.heat, row.names=F, sep="\t", quote=F)
 }
+
+# Avg. profile R data.
+prof.dat <- file.path(oname, 'avgprof.RData')
+default.width <- 8  # in inches.
+default.height <- 7
+xticks <- genXticks(reg2plot, pint, lgint, pts, flanksize, flankfactor)
+save(default.width, default.height, regcovMat, ctg.tbl, xticks, pts, 
+     m.pts, f.pts, pint, shade.alp, confiMat, mw, se, file=prof.dat)
+
+# Heatmap R data.
+unit.width <- 4
+rr <- 30  # reduce ratio.
+heat.dat <- file.path(oname, 'heatmap.RData')
+ng.list <- sapply(enrichList, nrow)  # number of genes per heatmap.
+save(reg.list, uniq.reg, ng.list, pts, enrichList, go.algo, ctg.tbl, xticks, 
+     flood.frac, unit.width, rr, file=heat.dat)
+cat("Done\n")
+
+# Wrap results up.
+cat("Wrapping results up...")
+if(!zip(paste(oname, '.zip', sep=''), oname, extras='-q')) {
+    if(unlink(oname, recursive=T)) {
+        warning(sprintf("Unable to delete intermediate result folder: %s", 
+                         oname))
+    }
+}
+cat("Done\n")
 
 # Create image file and plot data into it.
 if(!fi_tag){
-	
-	# Average profile plot.
-	default.width <- 8	# in inches.
-	default.height <- 7
-	out.plot <- paste(basename, '.pdf', sep='')
-	pdf(out.plot, width=default.width, height=default.height)
-	xticks <- gen_xticks(reg2plot, pint, lgint, pts, flanksize, flankfactor)
+    cat("Plotting figures...")
+    #### Average profile plot. ####
+    out.plot <- paste(oname, '.avgprof.pdf', sep='')
+    pdf(out.plot, width=default.width, height=default.height)
+    plotmat(regcovMat, ctg.tbl$title, xticks, pts, m.pts, f.pts, pint,
+            shade.alp, confiMat, mw)
+    dev.off()
 
-	plotmat(regcovMat, ctg.tbl$title, xticks, pts, m.pts, f.pts, pint,
-			shade.alp, confiMat)
-	dev.off()
+    #### Heatmap. ####
+    # Setup output device.
+    hd <- SetupHeatmapDevice(reg.list, uniq.reg, ng.list, pts, unit.width, rr)
+    reg.hei <- hd$reg.hei  # list of image heights for unique regions.
+    hm.width <- hd$hm.width  # image width.
+    hm.height <- hd$hm.height # image height.
+    lay.mat <- hd$lay.mat  # matrix for heatmap layout.
+    heatmap.mar <- hd$heatmap.mar # heatmap margins.
 
-	# Heatmap.
-	# Identify unique regions.
-	# reg.list <- as.factor(ctg.tbl$glist)
-	# uniq.reg <- levels(reg.list)
-	# Number of plots per region.
-	reg.np <- sapply(uniq.reg, function(r) sum(reg.list==r))
-	# Number of genes per region.
-	reg.ng <- sapply(uniq.reg, function(r){
-					ri <- which(reg.list==r)[1]
-					nrow(enrichList[[ri]])
-				})
-	# Setup image size.
-	unit.width <- 4	# in inches.
-	reduce.ratio <- 10 	# col to row reduction because #gene is large.
-	hm.width <- unit.width * max(reg.np)
-	ipl <- .2 # inches per line. Obtained from par->'mai', 'mar'.
-	m.bot <- 2; m.lef <- 1; m.top <- 2; m.rig <- 1 # margin size in lines.
-	# Convert #gene to image height.
-	reg.hei <- sapply(reg.ng, function(r) {
-					r * unit.width / pts / reduce.ratio + 
-					m.bot * ipl + m.top * ipl  # margins are like intercepts.
-				})
-	hm.height <- sum(reg.hei)
+    out.hm <- paste(oname, '.heatmap.pdf', sep='')
+    pdf(out.hm, width=hm.width, height=hm.height)
+    par(mar=heatmap.mar)
+    layout(lay.mat, heights=reg.hei)
 
-	# Setup output device.
-	out.hm <- paste(basename, '.hm.pdf', sep='')
-	pdf(out.hm, width=hm.width, height=hm.height)
-	par(mar=c(m.bot, m.lef, m.top, m.rig))
-
-	# Setup layout of the heatmaps.
-	lay.mat <- matrix(0, ncol=max(reg.np), nrow=length(reg.np))
-	f.sta <- 1 # figure number start.
-	for(i in 1:length(reg.np)){
-		f.end <- f.sta + reg.np[i] - 1 # figure number end.
-		lay.mat[i, 1:reg.np[i]] <- f.sta : f.end
-		f.sta <- f.sta + reg.np[i]
-	}
-	layout(lay.mat, heights=reg.hei)
-
-	plotheat(reg.list, uniq.reg, enrichList, go.algo, ctg.tbl$title, xticks, 
-			flood.frac)
-	dev.off()
+    # Do heatmap plotting.
+    plotheat(reg.list, uniq.reg, enrichList, go.algo, ctg.tbl$title, xticks, 
+             flood.frac)
+    dev.off()
+    cat("Done\n")
 }
 
-# Save plotting data of reads density to a text file.
-out.txt <- paste(basename, '.txt', sep='')
-out.header <- c(
-	'#Do NOT change the following lines if you want to re-draw the image with \
-	 replot.r! If you change the matrix values, cut and paste the commented \
-	 lines into your new file and run replot.r.',
-	paste('#reg2plot:', reg2plot, sep=''),
-	paste('#flanksize:', flanksize, sep=''),
-	# paste('#intsize:', intsize, sep=''),
-	paste('#flankfactor:', flankfactor, sep=''),
-	paste('#shade.alp:', shade.alp, sep=''),
-	paste('#rnaseq.gb:', rnaseq.gb, sep=''),
-	paste('#width:', default.width, sep=''),
-	paste('#height:', default.height, sep=''))
-writeLines(out.header, out.txt)
-suppressWarnings(write.table(regcovMat, append=T, file=out.txt, 
-					row.names=F, sep="\t", quote=F))
+cat("All done. Cheers!\n")
 
-# Save plotting data of standard error to a text file.
-if(!is.null(confiMat)){
-	out.txt <- paste(basename, '_stderror.txt', sep='')
-	out.header <- '#Do NOT change the following lines if you want to re-draw \
-					the image with replot.r!'
-	writeLines(out.header, out.txt)
-	suppressWarnings(write.table(confiMat, append=T, file=out.txt, 
-						row.names=F, sep="\t", quote=F))
-}

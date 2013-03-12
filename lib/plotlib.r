@@ -7,6 +7,51 @@
 # Last updated: Feb 21, 2013
 #
 
+SetupHeatmapDevice <- function(reg.list, uniq.reg, ng.list, pts, 
+                               unit.width=4, reduce.ratio=30) {
+# Configure parameters for heatmap output device. The output is used by 
+# external procedures to setup pdf device ready for heatmap plotting.
+# Args:
+#   reg.list: region list as in config file.
+#   uniq.reg: unique region list.
+#   ng.list: number of genes per heatmap in the order as config file.
+#   pts: data points (number of columns of heatmaps).
+#   unit.width: image width per heatmap.
+#   reduce.ratio: how compressed are genes in comparison to data points? This 
+#                 controls image height.
+
+    # Number of plots per region.
+    reg.np <- sapply(uniq.reg, function(r) sum(reg.list==r))
+
+    # Number of genes per region.
+    reg.ng <- sapply(uniq.reg, function(r) {
+                    ri <- which(reg.list==r)[1]
+                    ng.list[ri]
+                })
+
+    # Setup image size.
+    hm.width <- unit.width * max(reg.np)
+    ipl <- .2 # inches per line. Obtained from par->'mai', 'mar'.
+    m.bot <- 2; m.lef <- 1; m.top <- 2; m.rig <- 1 # margin size in lines.
+    # Convert #gene to image height.
+    reg.hei <- sapply(reg.ng, function(r) {
+                    r * unit.width / pts / reduce.ratio + 
+                    m.bot * ipl + m.top * ipl  # margins are like intercepts.
+                })
+    hm.height <- sum(reg.hei)
+
+    # Setup layout of the heatmaps.
+    lay.mat <- matrix(0, ncol=max(reg.np), nrow=length(reg.np))
+    f.sta <- 1 # figure number start.
+    for(i in 1:length(reg.np)){
+        f.end <- f.sta + reg.np[i] - 1 # figure number end.
+        lay.mat[i, 1:reg.np[i]] <- f.sta : f.end
+        f.sta <- f.sta + reg.np[i]
+    }
+
+    list(reg.hei=reg.hei, hm.width=hm.width, hm.height=hm.height, 
+         lay.mat=lay.mat, heatmap.mar=c(m.bot, m.lef, m.top, m.rig))
+}
 
 SetPtsSpline <- function(pint) {
 # Set data points for spline function.
@@ -15,11 +60,11 @@ SetPtsSpline <- function(pint) {
 # Return: list of data points, middle data points, flanking data points.
 
     if(pint){  # point interval.
-        pts <- 401  # data points to plot and to calculate SEM.
+        pts <- 101  # data points to plot and to calculate SEM.
         m.pts <- 1  # middle part points.
-        f.pts <- 200 # flanking part points.
+        f.pts <- 50 # flanking part points.
     } else {
-        pts <- 400
+        pts <- 100
         if(lgint) {
             m.pts <- pts / 5 * 3
             f.pts <- pts / 5
@@ -119,7 +164,7 @@ smoothplot <- function(m, radius, method=c('mean', 'median')){
     m
 }
 
-gen_xticks <- function(reg2plot, pint, lgint, pts, flanksize, flankfactor){
+genXticks <- function(reg2plot, pint, lgint, pts, flanksize, flankfactor){
 # Generate X-ticks for plotting.
 # Args:
 #   reg2plot: string representation of region.
@@ -179,7 +224,7 @@ gen_xticks <- function(reg2plot, pint, lgint, pts, flanksize, flankfactor){
 }
 
 plotmat <- function(regcovMat, title2plot, xticks, pts, m.pts, f.pts, pint,
-    shade.alp=0, confiMat=NULL){
+                    shade.alp=0, confiMat=NULL, mw=1){
 # Plot avg. profiles and standard errors around them.
 # Args:
 #   regcovMat: matrix for avg. profiles.
@@ -191,6 +236,12 @@ plotmat <- function(regcovMat, title2plot, xticks, pts, m.pts, f.pts, pint,
 #   pint: tag for point interval
 #   shade.alp: shading area alpha
 #   confiMat: matrix for standard errors.
+
+    # Smooth avg. profiles if specified.
+    if(mw > 1){
+        regcovMat <- as.matrix(runmean(regcovMat, k=mw, alg='C', 
+                                       endrule='mean'))
+    }
 
     # Choose colors.
     ncurve <- ncol(regcovMat)
@@ -218,8 +269,8 @@ plotmat <- function(regcovMat, title2plot, xticks, pts, m.pts, f.pts, pint,
             v.y <- regcovMat[, i]
             v.y <- c(0, v.y, 0)
             col.rgb <- col2rgb(col2use[i])
-            p.col <- rgb(col.rgb[1,1], col.rgb[2,1], col.rgb[3,1], 
-                alpha=shade.alp*255, maxColorValue=255)
+            p.col <- rgb(col.rgb[1, 1], col.rgb[2, 1], col.rgb[3, 1], 
+                         alpha=shade.alp * 255, maxColorValue=255)
             polygon(v.x, v.y, density=-1, border=NA, col=p.col)
         }
     }
@@ -229,13 +280,15 @@ plotmat <- function(regcovMat, title2plot, xticks, pts, m.pts, f.pts, pint,
         v.x <- c(xrange, rev(xrange))
         for(i in 1:ncol(confiMat)){
             v.y <- c(regcovMat[, i] + confiMat[, i], 
-                rev(regcovMat[, i] - confiMat[, i]))
+                     rev(regcovMat[, i] - confiMat[, i]))
             col.rgb <- col2rgb(col2use[i])
-            p.col <- rgb(col.rgb[1,1], col.rgb[2,1], col.rgb[3,1], 
-                alpha=0.2*255, maxColorValue=255)
+            p.col <- rgb(col.rgb[1, 1], col.rgb[2, 1], col.rgb[3, 1], 
+                         alpha=0.2 * 255, maxColorValue=255)
             polygon(v.x, v.y, density=-1, border=NA, col=p.col)
         }
     }
+
+    # If not point interval, add an extra vertical line.
     if(!pint){
         abline(v=f.pts, col="gray", lwd=2)
     }
@@ -331,8 +384,8 @@ OrderGenesHeatmap <- function(n, enrichCombined,
 }
 
 
-plotheat <- function(reg.list, uniq.reg, enrichList, go.algo, title2plot, xticks,
-                        flood.q=.02){
+plotheat <- function(reg.list, uniq.reg, enrichList, go.algo, title2plot, 
+                     xticks, flood.q=.02) {
 # Plot heatmaps with genes ordered according to some algorithm.
 # Args:
 #   reg.list: factor vector of regions as in configuration.
@@ -352,29 +405,22 @@ plotheat <- function(reg.list, uniq.reg, enrichList, go.algo, title2plot, xticks
     # Go through each unique region. 
     # Do NOT use "dopar" in the "foreach" loops here because this will disturb
     # the image order.
-    foreach(ur=iter(uniq.reg)) %do% {
-
+    for(i in 1:length(uniq.reg)) {
+        ur <- uniq.reg[i]
         plist <- which(reg.list==ur)    # get indices in the config file.
 
         # Combine all profiles into one.
         enrichCombined <- do.call('cbind', enrichList[plist])
 
         # Order genes.
-        g.order <- OrderGenesHeatmap(length(plist), enrichCombined, go.algo)
-        enrichCombined <- enrichCombined[g.order[[1]], ]
+        if(go.algo != 'none') {
+            g.order <- OrderGenesHeatmap(length(plist), enrichCombined, go.algo)
+            enrichCombined <- enrichCombined[g.order[[1]], ]
+        }
         # for now, just use the 1st gene order.
-
-
-        # # Filter genes with zero sd.
-        # g.sd <- apply(enrichCombined, 1, sd)
-        # enrichCombined <- enrichCombined[g.sd > 0, ]
-        # # Clustering and order genes.
-        # hc <- hclust(as.dist(1-cor(t(enrichCombined))), method='complete')
-        # enrichCombined <- enrichCombined[hc$order, ]
-
-    
+  
         # Split combined profiles back into individual heatmaps.
-        foreach(j=1:length(plist)) %do% {
+        for(j in 1:length(plist)) {
             pj <- plist[j]  # index in the original config.
 
             enrichList[[pj]] <- enrichCombined[, ((j-1)*hm_cols+1) : 
@@ -417,7 +463,8 @@ CalcSem <- function(x, rb=.05){
     if(rb > 0){
         x <- trim(x, rb)
     }
-    sd(x) / sqrt(length(x))
+    sem <- sd(x) / sqrt(length(x))
+    ifelse(is.na(sem), 0, sem)
     # NOTE: this should be improved to handle exception that "sd" calculation 
     # emits errors.
 }

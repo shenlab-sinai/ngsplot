@@ -1,0 +1,5 @@
+# If you want to specify the gene list as "genome", use "-1".
+# Use TAB to separate the three columns: bam file<TAB>gene list<TAB>title
+# "title" will be shown in the figure's legend.
+hesc.H3k4me3.1M.bam	-1	"H3K4me3"
+hesc.H3k27me3.1M.bam	-1	"H3K27me3"

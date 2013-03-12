@@ -1,0 +1,6 @@
+hesc.H3k4me3.1M.bam	high.Ensembl.txt	"H3k4me3 high"
+hesc.H3k4me3.1M.bam	mid.Ensembl.txt	"H3k4me3 mid"
+hesc.H3k4me3.1M.bam	low.Ensembl.txt	"H3k4me3 low"
+hesc.H3k27me3.1M.bam	high.Ensembl.txt	"H3k27me3 high"
+hesc.H3k27me3.1M.bam	mid.Ensembl.txt	"H3k27me3 mid"
+hesc.H3k27me3.1M.bam	low.Ensembl.txt	"H3k27me3 low"

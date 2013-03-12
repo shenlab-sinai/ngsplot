@@ -1,24 +1,34 @@
 Revision history for ngs.plot.
 
-Recent:
-	- A lot of code cleanup, optimization and modularization.
-	- More usage of parallel processing
-	- Added new heatmap function
-	- Implemented 6 algorithms to order genes in heatmaps.
-	- A number of code restructure: new coverage.r; changed plotmat.r to plotlib.r; merged smoothplot.r with plotlib.r; new genedb.r;
-	- Added column subset function in replot.r.
-	- Used robust statistics as default for avg. profile plot.
-	- Reconstruction of the gene database and speedup coordinate loading by ~6 folds.
+1.64  Mar 7, 2013
+    - Significant improvement to coverage calculation. The program now calculate
+      coverage based on needs by extracting bam files on the go. This has 
+      significantly reduced memory requirement.
+    - cov.calc.r has been removed from the package. There is no need to pre-
+      calculate coverage any more.
+    - replot.r now supports heatmap and a few other options to tune figures.
+    - The result files are now wrapped as a zip file for cleaness.
 
-
+1.34  Feb 23, 2013
+    - A lot of code re-writing to optimize performance and to modularize the 
+      project.
+    - More usage of parallel processing.
+    - Added new heatmap function.
+    - Implemented 6 algorithms to order genes in heatmaps.
+    - Added column subset function in replot.r.
+    - Used robust statistics as default for avg. profile plot.
+    - Reconstruction of the gene database and speedup annotation loading by ~6 
+      folds.
 
 1.05  Dec 3, 2012
-	- Fix bugs in calculating physical coverage 
-	- Fix bugs in the scripts that are used to extract exons from Cufflinks.
+    - Fix bugs in calculating physical coverage 
+    - Fix bugs in the scripts that are used to extract exons from Cufflinks.
 
 1.04  Nov 12, 2012 
-	- Automatic turning off SEM when there is only single gene given in gene list.
-	- Misc. re-organization of ngs.plot.r code.
-	- Some re-organization of distribution folder.
-	- Added example gene list; example data for user to run through.
-	- Added script "alt_reg_cufflinks" which extracts all alternative regions in one command.
+    - Automatic turning off SEM when there is only single gene given in gene 
+      list.
+    - Misc. re-organization of ngs.plot.r code.
+    - Some re-organization of distribution folder.
+    - Added example gene list; example data for user to run through.
+    - Added script "alt_reg_cufflinks" which extracts all alternative regions in
+      one command.

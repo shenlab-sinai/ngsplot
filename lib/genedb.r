@@ -7,7 +7,7 @@ chromFormat <- function(crn, ...){
 }
 
 SetupPlotCoord <- function(args.tbl, ctg.tbl, progpath, genome, reg2plot, 
-                            samprate){
+                            samprate) {
 # Load genomic coordinates for plot based on the input arguments.
 # Args:
 #   args.tbl: input argument table
@@ -26,7 +26,8 @@ SetupPlotCoord <- function(args.tbl, ctg.tbl, progpath, genome, reg2plot,
         database <- 'refseq'
     }
 
-    prefix <- paste(progpath, 'database/', genome, '.', database, sep='')
+    prefix <- file.path(progpath, 'database', 
+                        paste(genome, '.', database, sep=''))
 
     # Further info to subset genomic regions.
     if('-F' %in% names(args.tbl)){
@@ -101,7 +102,7 @@ SetupPlotCoord <- function(args.tbl, ctg.tbl, progpath, genome, reg2plot,
     uniq.reg <- levels(reg.list)
 
     # Determine plot coordinates for each unique region.
-    coord.list <- as.list(rep(NA, length(uniq.reg)))
+    coord.list <- vector('list', length(uniq.reg))
     names(coord.list) <- uniq.reg
     for(i in 1:length(uniq.reg)) {
         ur <- uniq.reg[i]
@@ -123,7 +124,10 @@ SetupPlotCoord <- function(args.tbl, ctg.tbl, progpath, genome, reg2plot,
             if(!all(is.na(genome.coord$gid))) {
                 subset.idx <- c(subset.idx, 
                                 which(genome.coord$gid %in% gene.list & 
-                                    genome.coord$bygid.uniq))
+                                      genome.coord$bygid.uniq))
+            }
+            if(length(subset.idx) == 0) {
+                stop("Gene subset size becomes zero. Are you using the correct database?\n")
             }
             if(samprate < 1) {
                 samp.n <- round(samprate * length(subset.idx))

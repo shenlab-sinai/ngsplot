@@ -1,9 +1,12 @@
+- Mar 7, 2013
+* Add K-means for gene ranking.
+* Implement replot as a dynamic visulization program.
+
 - Nov 12, 2012
 * Turn off std error when there is one gene. (DONE)
 * Add example data, gene lists. (DONE)
 
 - May 8, 2012
-
 * Make sure read and process paired-end reads correctly.
 * Make sure read and process gapped alignment correctly.
 * When a mate pair overlaps, make sure the overlapped region is not double-counted.

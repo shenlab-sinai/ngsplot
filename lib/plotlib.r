@@ -53,7 +53,7 @@ SetupHeatmapDevice <- function(reg.list, uniq.reg, ng.list, pts,
          lay.mat=lay.mat, heatmap.mar=c(m.bot, m.lef, m.top, m.rig))
 }
 
-SetPtsSpline <- function(pint) {
+SetPtsSpline <- function(pint, lgint) {
 # Set data points for spline function.
 # Args:
 #   pint: tag for point interval.
@@ -323,7 +323,7 @@ OrderGenesHeatmap <- function(n, enrichCombined,
 #   than one vectors of gene orders. Otherwise, the list length is 1.
 
     npts <- ncol(enrichCombined) / n  # number of data points for each profile.
-
+    
     if(method == 'hc') {  # hierarchical clustering
         # Filter genes with zero sd.
         g.sd <- apply(enrichCombined, 1, sd)
@@ -413,7 +413,7 @@ plotheat <- function(reg.list, uniq.reg, enrichList, go.algo, title2plot,
         enrichCombined <- do.call('cbind', enrichList[plist])
 
         # Order genes.
-        if(go.algo != 'none') {
+        if(go.algo != 'none' && nrow(enrichCombined) > 1) {
             g.order <- OrderGenesHeatmap(length(plist), enrichCombined, go.algo)
             enrichCombined <- enrichCombined[g.order[[1]], ]
         }
@@ -434,7 +434,7 @@ plotheat <- function(reg.list, uniq.reg, enrichList, go.algo, title2plot,
 
             # Draw heatmap.
             image(z=t(enrichList[[pj]]), col=enrich.palette(ncolor), axes=F, 
-                useRaster=T, main=title2plot[pj])
+                  useRaster=T, main=title2plot[pj])
 
             axis(1, at=xticks$pos, labels=xticks$lab, lwd=1, lwd.ticks=1)
         }

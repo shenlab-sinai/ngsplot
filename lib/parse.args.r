@@ -59,6 +59,14 @@ setupVars <- function(args.tbl, ctg.tbl){
     vl$reg2plot <- args.tbl['-R']
     vl$oname <- args.tbl['-O']
 
+    prefix.regions <- c('tss','tes','genebody','exon','cgi')
+    if(!vl$reg2plot %in% prefix.regions) {
+        vl$bed.file <- vl$reg2plot  # save bed file name.
+        vl$reg2plot <- 'bed'  # assume BED input.
+    } else {
+        vl$bed.file <- NULL
+    }
+
     #### Image output forbidden tag. ####
     if('-FI' %in% names(args.tbl)){ 
         stopifnot(as.integer(args.tbl['-FI']) >= 0)

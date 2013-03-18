@@ -21,7 +21,10 @@ DISTFOLDER=ngsplot
 # example bam files.
 BAM=example.bam
 
-all: ngsplot-dist.tar.gz example.bam.tar.gz
+all: program bam
+
+program: ngsplot-dist.tar.gz
+bam: example.bam.tar.gz
 
 ngsplot-dist.tar.gz: $(BINCUFF) $(BINNGSP) $(LIB) $(OTHERS)
 	rm -rf ${DISTFOLDER}

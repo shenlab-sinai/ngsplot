@@ -7,7 +7,7 @@ chromFormat <- function(crn, ...){
 }
 
 SetupPlotCoord <- function(args.tbl, ctg.tbl, progpath, genome, reg2plot, 
-                            samprate) {
+                           bed.file, samprate) {
 # Load genomic coordinates for plot based on the input arguments.
 # Args:
 #   args.tbl: input argument table
@@ -69,15 +69,16 @@ SetupPlotCoord <- function(args.tbl, ctg.tbl, progpath, genome, reg2plot,
             finfo <- 'ProximalPromoter'
         }
         f.load <- paste(prefix, 'cgi', finfo, sep='.')
-    } else {  # assume reg2plot is a *.bed file.
-        bed.coord <- read.table(reg2plot, sep="\t")
+    } else if(reg2plot == 'bed') {
+        stopifnot(!is.null(bed.file))
+        bed.coord <- read.table(bed.file, sep="\t")
         if(ncol(bed.coord) <3){
             stop('Input file must contain at least 3 columns!')
         }
         genome.coord <- data.frame(chrom=chromFormat(bed.coord[, 1]), 
-                            start=bed.coord[, 2]+1, end=bed.coord[, 3], 
-                            gid=NA, gname='N', tid='N', strand='+', 
-                            byname.uniq=T, bygid.uniq=NA)
+                                   start=bed.coord[, 2]+1, end=bed.coord[, 3], 
+                                   gid=NA, gname='N', tid='N', strand='+', 
+                                   byname.uniq=T, bygid.uniq=NA)
         if(ncol(bed.coord) >=4){
             genome.coord$gname <- bed.coord[, 4]
         }
@@ -88,7 +89,9 @@ SetupPlotCoord <- function(args.tbl, ctg.tbl, progpath, genome, reg2plot,
             genome.coord$strand <- bed.coord[, 6]
         }
         f.load <- NULL
-        bed.tag <- T
+        # bed.tag <- T
+    } else {
+        # pass.
     }
 
     # Load genomic coordinates.
@@ -138,8 +141,8 @@ SetupPlotCoord <- function(args.tbl, ctg.tbl, progpath, genome, reg2plot,
     }
 
     # Set tag for point interval, i.e. interval=1bp.
-    if(reg2plot == 'tss' || reg2plot == 'tes' || bed.tag && 
-        all(genome.coord$end == genome.coord$start)) {
+    if(reg2plot == 'tss' || reg2plot == 'tes' || reg2plot == 'bed' && 
+       all(genome.coord$end == genome.coord$start)) {
         pint <- T
     } else{
         pint <- F
@@ -153,7 +156,7 @@ SetupPlotCoord <- function(args.tbl, ctg.tbl, progpath, genome, reg2plot,
     }
 
     res <- list(coord.list=coord.list, rnaseq.gb=rnaseq.gb, 
-        reg.list=reg.list, uniq.reg=uniq.reg, pint=pint)
+                reg.list=reg.list, uniq.reg=uniq.reg, pint=pint)
 
     # Add exon models to the result if RNA-seq.
     if(rnaseq.gb) {

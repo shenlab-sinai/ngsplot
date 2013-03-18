@@ -60,6 +60,7 @@ cmd.help <- function(){
 ###########################################################################
 #################### Deal with program input arguments ####################
 args <- commandArgs(T)
+# args <- unlist(strsplit('-G mm9 -R genebody -L 1000 -C config.k9.txt -O k9.Fosb', ' '))
 
 # Program environment variable.
 progpath <- Sys.getenv('NGSPLOT')
@@ -124,7 +125,8 @@ ctg.tbl <- ConfigTbl(args.tbl)
 # Setup variables from arguments.
 argvar.list <- setupVars(args.tbl, ctg.tbl)
 genome <- argvar.list$genome  # genome name, such as mm9, hg19, rn4.
-reg2plot <- argvar.list$reg2plot  # tss, tes, genebody, *.bed...
+reg2plot <- argvar.list$reg2plot  # tss, tes, genebody, bed...
+bed.file <- argvar.list$bed.file  # BED file name if reg2plot=bed.
 oname <- argvar.list$oname  # output file root name
 fi_tag <- argvar.list$fi_tag  # tag for forbidding image output
 lgint <- argvar.list$lgint  # lgint: tag for large interval
@@ -155,7 +157,7 @@ if(cores.number == 0){
 # Setup plot-related coordinates and variables.
 source(file.path(progpath, 'lib', 'genedb.r'))
 plotvar.list <- SetupPlotCoord(args.tbl, ctg.tbl, progpath, genome, reg2plot, 
-                               samprate)
+                               bed.file, samprate)
 coord.list <- plotvar.list$coord.list  # list of coordinates for unique regions.
 rnaseq.gb <- plotvar.list$rnaseq.gb  # tag for RNA-seq data.
 reg.list <- plotvar.list$reg.list  # region list as in config file.
@@ -165,7 +167,7 @@ exonmodel <- plotvar.list$exonmodel  # exon ranges if rnaseq.gb=True.
 
 # Setup data points for plot.
 source(file.path(progpath, 'lib', 'plotlib.r'))
-pts.list <- SetPtsSpline(pint)
+pts.list <- SetPtsSpline(pint, lgint)
 pts <- pts.list$pts  # data points for avg. profile and standard errors.
 m.pts <- pts.list$m.pts  # middle data points. For pint, m.pts=1.
 f.pts <- pts.list$f.pts  # flanking region data points.
@@ -238,7 +240,6 @@ for(r in 1:nrow(ctg.tbl)) {
     #           exonranges.list)
     # }
     ########### For debug #############
-
 
     # Extract coverage and combine into a matrix.
     result.matrix <- foreach(chk=chkidx.list, .combine='rbind', 

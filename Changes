@@ -1,5 +1,9 @@
 Revision history for ngs.plot.
 
+1.65.1 Mar 18, 2013
+    - Fixed a bug that emits errors when using a custom bed file (Thanks to 
+      Timothy E. Reddy from Duke to point out).
+
 1.65  Mar 12, 2013
     - This is an emergent bug fix version which addresses some problems when 
       reading bam header information.

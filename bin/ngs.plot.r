@@ -31,7 +31,7 @@ cmd.help <- function(){
     cat("         for cgi: ProximalPromoter(default), Promoter1k, Promoter3k,\n")
     cat("           Genebody, Genedesert, OtherIntergenic, Pericentromere.\n")
     cat("  -D   Gene database: refseq(default), ensembl\n")
-    cat("  -I   Shall interval be larger than flanking in plot?(0 or 1)\n")
+    cat("  -I   Shall interval be larger than flanking in plot?(0 or 1, default=automatic)\n")
     cat("  -L   Flanking region size\n")
     cat("  -N   Flanking region factor(will override flanking size)\n")
     cat("  -S   Randomly sample the regions for plot, must be:(0, 1]\n")
@@ -60,7 +60,7 @@ cmd.help <- function(){
 ###########################################################################
 #################### Deal with program input arguments ####################
 args <- commandArgs(T)
-# args <- unlist(strsplit('-G mm9 -R genebody -L 1000 -C config.k9.txt -O k9.Fosb', ' '))
+# args <- unlist(strsplit('-G mm9 -R genebody -C config.k56.exp.txt -O k56.inp.exp.gb', ' '))
 
 # Program environment variable.
 progpath <- Sys.getenv('NGSPLOT')
@@ -129,7 +129,7 @@ reg2plot <- argvar.list$reg2plot  # tss, tes, genebody, bed...
 bed.file <- argvar.list$bed.file  # BED file name if reg2plot=bed.
 oname <- argvar.list$oname  # output file root name
 fi_tag <- argvar.list$fi_tag  # tag for forbidding image output
-lgint <- argvar.list$lgint  # lgint: tag for large interval
+lgint <- argvar.list$lgint  # lgint: boolean tag for large interval
 flanksize <- argvar.list$flanksize  # flanking region size
 flankfactor <- argvar.list$flankfactor  # flanking region factor
 samprate <- argvar.list$samprate  # sampling rate
@@ -157,9 +157,10 @@ if(cores.number == 0){
 # Setup plot-related coordinates and variables.
 source(file.path(progpath, 'lib', 'genedb.r'))
 plotvar.list <- SetupPlotCoord(args.tbl, ctg.tbl, progpath, genome, reg2plot, 
-                               bed.file, samprate)
+                               lgint, flanksize, bed.file, samprate)
 coord.list <- plotvar.list$coord.list  # list of coordinates for unique regions.
 rnaseq.gb <- plotvar.list$rnaseq.gb  # tag for RNA-seq data.
+lgint <- plotvar.list$lgint  # lgint: automatically determined if not specified.
 reg.list <- plotvar.list$reg.list  # region list as in config file.
 uniq.reg <- plotvar.list$uniq.reg  # unique region list.
 pint <- plotvar.list$pint  # tag for point interval.
@@ -189,74 +190,61 @@ cat("Done\n")
 cat("Analyze bam files and calculate coverage")
 source(file.path(progpath, 'lib', 'coverage.r'))
 
+# Extract bam file names from configuration and determine if bam-pair is used.
+bfl.res <- bamFileList(ctg.tbl)
+bam.pair <- bfl.res$bbp  # boolean for bam-pair.
+bam.list <- bfl.res$bam.list  # bam file list.
+
 # Determine if bowtie is used to generate the bam files.
 # Index bam files if not done yet.
-v.map.bowtie <- headerIndexBam(ctg.tbl)
+v.map.bowtie <- headerIndexBam(bam.list)
 
 # Retrieve chromosome names for each bam file.
-sn.list <- seqnamesBam(ctg.tbl)
+sn.list <- seqnamesBam(bam.list)
 
 # Calculate library size from bam files for normalization.
-v.lib.size <- libSizeBam(ctg.tbl)
+v.lib.size <- libSizeBam(bam.list)
 
 # Process the config file row by row.
 for(r in 1:nrow(ctg.tbl)) {
-    bam.file <- ctg.tbl$cov[r]
-    libsize <- v.lib.size[bam.file]
-    sn.inbam <- sn.list[[bam.file]]
-    chr.tag <- chrTag(sn.inbam)
-    if(class(chr.tag) == 'character') {
-        stop(sprintf("Read %s error: %s", bam.file, chr.tag))
-    }
+
     reg <- ctg.tbl$glist[r]  # retrieve gene list names.
-
     # Create coordinate chunk indices.
-    nchk <- ceiling(nrow(coord.list[[reg]]) / gcs)  # number of chunks.
-    chkidx.list <- vector('list', length=nchk)  # chunk indices list.
-    chk.start <- 1  # chunk start.
-    i.chk <- idiv(nrow(coord.list[[reg]]), chunkSize=gcs)
-    for(i in 1:nchk) {
-        chk.size <- nextElem(i.chk)
-        chkidx.list[[i]] <- c(chk.start, chk.start + chk.size - 1)
-        chk.start <- chk.start + chk.size
+    chkidx.list <- chunkIndex(nrow(coord.list[[reg]]), gcs)
+
+    # Do coverage for each bam file.
+    bam.files <- unlist(strsplit(ctg.tbl$cov[r], ':'))
+    # Obtain bam file basic info.
+    libsize <- v.lib.size[bam.files[1]]
+    sn.inbam <- sn.list[[bam.files[1]]]
+    chr.tag <- chrTag(sn.inbam)
+    is.bowtie <- v.map.bowtie[bam.files[1]]
+    if(class(chr.tag) == 'character') {
+        stop(sprintf("Read %s error: %s", bam.files[1], chr.tag))
     }
-
-
-    ########### For debug #############
-    # result.matrix <- matrix(0, nrow=nrow(coord.list[[reg]]), ncol=pts)
-    # for(c in 1:length(chkidx.list)) {
-    #     chk <- chkidx.list[[c]]
-    #     i <- chk[1]:chk[2]  # chunk: start -> end
-    #     cat(".")
-    #     # If RNA-seq, retrieve exon ranges.
-    #     if(rnaseq.gb) {
-    #         exonranges.list <- unlist(exonmodel[coord.list[[reg]][i, ]$tid])
-    #     } else {
-    #         exonranges.list <- NULL
-    #     }
-    #     result.matrix[i, ] <- doCov(coord.list[[reg]][i, ], chr.tag, reg2plot, 
-    #           pint, bam.file, sn.inbam, flanksize, flankfactor, bufsize, 
-    #           fraglen, map.qual, m.pts, f.pts, v.map.bowtie[bam.file], 
-    #           exonranges.list)
-    # }
-    ########### For debug #############
-
-    # Extract coverage and combine into a matrix.
-    result.matrix <- foreach(chk=chkidx.list, .combine='rbind', 
-                             .multicombine=T) %dopar% {
-        cat(".")
-        i <- chk[1]:chk[2]  # chunk: start -> end
-        # If RNA-seq, retrieve exon ranges.
-        if(rnaseq.gb) {
-            exonranges.list <- unlist(exonmodel[coord.list[[reg]][i, ]$tid])
-        } else {
-            exonranges.list <- NULL
+    result.matrix <- covMatrix(bam.files[1], libsize, sn.inbam, chr.tag, 
+                               coord.list[[reg]], chkidx.list, rnaseq.gb, 
+                               exonmodel, reg2plot, pint, flanksize, 
+                               flankfactor, bufsize, fraglen, map.qual, m.pts, 
+                               f.pts, is.bowtie)
+    if(bam.pair) {  # calculate background.
+        pseudo.rpm <- 1e-9
+        libsize <- v.lib.size[bam.files[2]]
+        sn.inbam <- sn.list[[bam.files[2]]]
+        chr.tag <- chrTag(sn.inbam)
+        is.bowtie <- v.map.bowtie[bam.files[2]]
+        if(class(chr.tag) == 'character') {
+            stop(sprintf("Read %s error: %s", bam.files[2], chr.tag))
         }
-        doCov(coord.list[[reg]][i, ], chr.tag, reg2plot, pint, bam.file, 
-              sn.inbam, flanksize, flankfactor, bufsize, fraglen, map.qual, 
-              m.pts, f.pts, v.map.bowtie[bam.file], exonranges.list)
+        bkg.matrix <- covMatrix(bam.files[2], libsize, sn.inbam, chr.tag, 
+                                coord.list[[reg]], chkidx.list, rnaseq.gb, 
+                                exonmodel, reg2plot, pint, flanksize, 
+                                flankfactor, bufsize, fraglen, map.qual, m.pts, 
+                                f.pts, is.bowtie)
+        # browser()
+        result.matrix <- log2((result.matrix + pseudo.rpm) / 
+                              (bkg.matrix + pseudo.rpm))
     }
-    result.matrix <- result.matrix / libsize * 1e6  # normalize to RPM.
 
     # Calculate SEM if needed. Shut off SEM in single gene case.
     if(nrow(result.matrix) > 1 && se){
@@ -298,7 +286,7 @@ prof.dat <- file.path(oname, 'avgprof.RData')
 default.width <- 8  # in inches.
 default.height <- 7
 xticks <- genXticks(reg2plot, pint, lgint, pts, flanksize, flankfactor)
-save(default.width, default.height, regcovMat, ctg.tbl, xticks, pts, 
+save(default.width, default.height, regcovMat, ctg.tbl, bam.pair, xticks, pts, 
      m.pts, f.pts, pint, shade.alp, confiMat, mw, se, file=prof.dat)
 
 # Heatmap R data.
@@ -306,8 +294,8 @@ unit.width <- 4
 rr <- 30  # reduce ratio.
 heat.dat <- file.path(oname, 'heatmap.RData')
 ng.list <- sapply(enrichList, nrow)  # number of genes per heatmap.
-save(reg.list, uniq.reg, ng.list, pts, enrichList, go.algo, ctg.tbl, xticks, 
-     flood.frac, unit.width, rr, file=heat.dat)
+save(reg.list, uniq.reg, ng.list, pts, enrichList, go.algo, ctg.tbl, bam.pair, 
+     xticks, flood.frac, unit.width, rr, file=heat.dat)
 cat("Done\n")
 
 # Wrap results up.
@@ -326,7 +314,7 @@ if(!fi_tag){
     #### Average profile plot. ####
     out.plot <- paste(oname, '.avgprof.pdf', sep='')
     pdf(out.plot, width=default.width, height=default.height)
-    plotmat(regcovMat, ctg.tbl$title, xticks, pts, m.pts, f.pts, pint,
+    plotmat(regcovMat, ctg.tbl$title, bam.pair, xticks, pts, m.pts, f.pts, pint,
             shade.alp, confiMat, mw)
     dev.off()
 
@@ -345,8 +333,8 @@ if(!fi_tag){
     layout(lay.mat, heights=reg.hei)
 
     # Do heatmap plotting.
-    plotheat(reg.list, uniq.reg, enrichList, go.algo, ctg.tbl$title, xticks, 
-             flood.frac)
+    plotheat(reg.list, uniq.reg, enrichList, go.algo, ctg.tbl$title, bam.pair, 
+             xticks, flood.frac)
     dev.off()
     cat("Done\n")
 }

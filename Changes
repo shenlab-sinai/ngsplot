@@ -1,5 +1,13 @@
 Revision history for ngs.plot.
 
+
+    - Added a function to accept bam file pairs.
+    - Automatically determine interval vs. flanking size in plot.
+    - Minor bugs fixed.
+
+
+
+
 1.65.1 Mar 18, 2013
     - Fixed a bug that emits errors when using a custom bed file (Thanks to 
       Timothy E. Reddy from Duke to point out).
@@ -13,9 +21,9 @@ Revision history for ngs.plot.
     - Buffer size is automatically set based on fragment length.
 
 1.64  Mar 7, 2013
-    - Significant improvement to coverage calculation. The program now calculate
-      coverage based on needs by extracting bam files on the go. This has 
-      significantly reduced memory requirement.
+    - Significant improvement to coverage calculation. The program now 
+      calculate coverage based on needs by extracting bam files on the go. 
+      This has significantly reduced memory requirement.
     - cov.calc.r has been removed from the package. There is no need to pre-
       calculate coverage any more.
     - replot.r now supports heatmap and a few other options to tune figures.

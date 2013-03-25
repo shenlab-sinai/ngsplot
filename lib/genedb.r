@@ -7,7 +7,7 @@ chromFormat <- function(crn, ...){
 }
 
 SetupPlotCoord <- function(args.tbl, ctg.tbl, progpath, genome, reg2plot, 
-                           bed.file, samprate) {
+                           lgint, flanksize, bed.file, samprate) {
 # Load genomic coordinates for plot based on the input arguments.
 # Args:
 #   args.tbl: input argument table
@@ -15,6 +15,8 @@ SetupPlotCoord <- function(args.tbl, ctg.tbl, progpath, genome, reg2plot,
 #   progpath: program path derived from NGSPLOT
 #   genome: genome name, such as mm9, hg19.
 #   reg2plot: tss, tes, genebody, etc.
+#   lgint: boolean tag for large interval.
+#   flanksize: flanking region size.
 #   samprate: sampling rate
 
     # Database flavor.
@@ -100,6 +102,30 @@ SetupPlotCoord <- function(args.tbl, ctg.tbl, progpath, genome, reg2plot,
         load(f.load)  # load coordinates into variable: genome.coord
     }
 
+    # Set tag for point interval, i.e. interval=1bp.
+    if(reg2plot == 'tss' || reg2plot == 'tes' || reg2plot == 'bed' && 
+       all(genome.coord$end == genome.coord$start)) {
+        pint <- T
+    } else{
+        pint <- F
+    }
+
+    # RNA-seq tag.
+    if(reg2plot == 'genebody' && finfo == 'rnaseq'){
+        rnaseq.gb <- T
+    }else{
+        rnaseq.gb <- F
+    }
+
+    # Determine interval size automatically.
+    if(!pint && is.na(lgint)) {
+        if(median(genome.coord$end - genome.coord$start + 1) > flanksize) {
+            lgint <- 1
+        } else {
+            lgint <- 0
+        }
+    }
+
     # Identify unique regions.
     reg.list <- as.factor(ctg.tbl$glist)
     uniq.reg <- levels(reg.list)
@@ -121,7 +147,7 @@ SetupPlotCoord <- function(args.tbl, ctg.tbl, progpath, genome, reg2plot,
         } else {  # read gene list from text file.
             gene.list <- read.table(ur, as.is=T, comment.char='#')$V1
             subset.idx <- c(which(genome.coord$gname %in% gene.list & 
-                                    genome.coord$byname.uniq),
+                                  genome.coord$byname.uniq),
                             which(genome.coord$tid %in% gene.list))
             # Test if all gid are NA. If database=refseq, this is true.
             if(!all(is.na(genome.coord$gid))) {
@@ -140,22 +166,7 @@ SetupPlotCoord <- function(args.tbl, ctg.tbl, progpath, genome, reg2plot,
         }
     }
 
-    # Set tag for point interval, i.e. interval=1bp.
-    if(reg2plot == 'tss' || reg2plot == 'tes' || reg2plot == 'bed' && 
-       all(genome.coord$end == genome.coord$start)) {
-        pint <- T
-    } else{
-        pint <- F
-    }
-
-    # RNA-seq tag.
-    if(reg2plot == 'genebody' && finfo == 'rnaseq'){
-        rnaseq.gb <- T
-    }else{
-        rnaseq.gb <- F
-    }
-
-    res <- list(coord.list=coord.list, rnaseq.gb=rnaseq.gb, 
+    res <- list(coord.list=coord.list, rnaseq.gb=rnaseq.gb, lgint=lgint,
                 reg.list=reg.list, uniq.reg=uniq.reg, pint=pint)
 
     # Add exon models to the result if RNA-seq.

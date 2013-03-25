@@ -1,4 +1,4 @@
-This folder contains three toy samples for you to get a sense of the ngs.plot 
+This folder contains four toy samples for you to get a sense of the ngs.plot 
 workflow. User can also use these examples to check the completion of 
 installation.
 
@@ -6,8 +6,9 @@ installation.
 ========Example for ChIP-seq data:========
 
 hesc.H3k27me3.1M.bam and hesc.H3k4me3.1M.bam are alignment files for two 
-histone marks, H3k27me3 and H3k4me3, from the ENCODE project. For 
-demonstration purposes, I only kept 1M alignments for each file.
+histone marks, H3k27me3 and H3k4me3, from the ENCODE project. hesc.Input.1M.
+bam is an alignment file for DNA input. For demonstration purposes, I only 
+kept 1M alignments for each file.
 
 1. First, I show a simple example of doing plot for one histone mark around 
    TSS, this can be done easily using command:
@@ -82,6 +83,19 @@ demonstration purposes, I only kept 1M alignments for each file.
    Ensembl format. If ngs.plot cannot identify gene ids/symbols with the 
    database, it will emit an error and exit the program.
 
+5. New example: how to use bam pairs? A bam pair is a pair of bam files which 
+   are separated by colon. This can be used to represent antibody target vs. 
+   DNA or IgG control input. ngs.plot will calculate log2 ratios and plot them 
+   using appropriate colors. With the example files, issue a command like this:
+
+   ngs.plot.r -G hg19 -R tss -C hesc.H3k4me3.1M.bam:hesc.Input.1M.bam -O 
+   k4vsInp
+
+   Please note that in the heatmap, green colors represent negative values and 
+   red colors represent positive values. If you want to create a 
+   configuration, do NOT mix bam files with bam pairs because ngs.plot won't 
+   be able to plot the two types of curves together.
+
 
 ========Example for RNA-seq data:========
 
@@ -91,7 +105,8 @@ plots for RNA-seq, and we must tell ngs.plot that the input is RNA-seq. This
 will make ngs.plot remove intronic regions to make a correct representation 
 for transcripts. To demonstrate, let's issue a command like:
 
-   ngs.plot.r -G hg19 -R genebody -F rnaseq -C hesc.RNAseq.1M.bam -O encode1M.rnaseq
+   ngs.plot.r -G hg19 -R genebody -F rnaseq -C hesc.RNAseq.1M.bam -O encode1M.
+   rnaseq
 
 Note that an option "-F rnaseq" is used here to turn on the RNA-seq switch.
 

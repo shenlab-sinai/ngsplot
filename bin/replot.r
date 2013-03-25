@@ -106,7 +106,7 @@ if(command == 'prof') {
             stop('Loading package caTools failed!')
         }
     }
-    plotmat(regcovMat, ctg.tbl$title, xticks, pts, m.pts, f.pts, pint,
+    plotmat(regcovMat, ctg.tbl$title, bam.pair, xticks, pts, m.pts, f.pts, pint,
             shade.alp, confiMat, mw)
     dev.off()
 } else if(command == 'heatmap') {
@@ -148,8 +148,8 @@ if(command == 'prof') {
     par(mar=heatmap.mar)
     layout(lay.mat, heights=reg.hei)
     # Do heatmap plotting.
-    plotheat(reg.list, uniq.reg, enrichList, go.algo, ctg.tbl$title, xticks, 
-             flood.frac)
+    plotheat(reg.list, uniq.reg, enrichList, go.algo, ctg.tbl$title, bam.pair, 
+             xticks, flood.frac)
     dev.off()
 } else {
     # Pass.

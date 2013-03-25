@@ -223,8 +223,8 @@ genXticks <- function(reg2plot, pint, lgint, pts, flanksize, flankfactor){
     list(pos=tick.pos, lab=tick.lab)
 }
 
-plotmat <- function(regcovMat, title2plot, xticks, pts, m.pts, f.pts, pint,
-                    shade.alp=0, confiMat=NULL, mw=1){
+plotmat <- function(regcovMat, title2plot, bam.pair, xticks, pts, m.pts, f.pts, 
+                    pint, shade.alp=0, confiMat=NULL, mw=1){
 # Plot avg. profiles and standard errors around them.
 # Args:
 #   regcovMat: matrix for avg. profiles.
@@ -255,7 +255,8 @@ plotmat <- function(regcovMat, title2plot, xticks, pts, m.pts, f.pts, pint,
     col2use <- col2alpha(col2use, 0.8)
 
     # Plot profiles.
-    ytext <- "Normalized Coverage (RPM)"
+    ytext <- ifelse(bam.pair, "log2(Fold change vs. control)", 
+                              "Read count Per Million mapped reads")
     xrange <- 1:pts
     matplot(xrange, regcovMat, xaxt='n', type="l", col=col2use, 
             lty="solid", lwd=3,
@@ -385,7 +386,7 @@ OrderGenesHeatmap <- function(n, enrichCombined,
 
 
 plotheat <- function(reg.list, uniq.reg, enrichList, go.algo, title2plot, 
-                     xticks, flood.q=.02) {
+                     bam.pair, xticks, flood.q=.02) {
 # Plot heatmaps with genes ordered according to some algorithm.
 # Args:
 #   reg.list: factor vector of regions as in configuration.
@@ -394,13 +395,19 @@ plotheat <- function(reg.list, uniq.reg, enrichList, go.algo, title2plot,
 
     # Setup basic parameters.
     ncolor <- 256
-    enrich.palette <- colorRampPalette(c('snow', 'red2'))
+    if(bam.pair) {
+        enrich.palette <- colorRampPalette(c('green', 'black', 'red'), 
+                                           bias=.6, interpolate='spline')
+    } else {
+        enrich.palette <- colorRampPalette(c('snow', 'red2'))
+    }
     hm_cols <- ncol(enrichList[[1]])
 
     # Adjust X-axis tick position. In a heatmap, X-axis is [0, 1].
     mat.xsz <- tail(xticks$pos, n=1) - xticks$pos[1] + 1
     xticks$pos <- xticks$pos - xticks$pos[1] + 1  # shift left-most to 1.
     xticks$pos <- xticks$pos / mat.xsz  # scale to the same size.
+
 
     # Go through each unique region. 
     # Do NOT use "dopar" in the "foreach" loops here because this will disturb
@@ -424,17 +431,31 @@ plotheat <- function(reg.list, uniq.reg, enrichList, go.algo, title2plot,
             pj <- plist[j]  # index in the original config.
 
             enrichList[[pj]] <- enrichCombined[, ((j-1)*hm_cols+1) : 
-                                                (j*hm_cols)]
+                                                 (j*hm_cols)]
 
             # Flooding extreme values which are identified by quantiles.
             flood.pts <- quantile(c(enrichList[[pj]], recursive=T), 
-                                c(flood.q, 1-flood.q))
+                                  c(flood.q, 1-flood.q))
             enrichList[[pj]][ enrichList[[pj]] < flood.pts[1] ] <- flood.pts[1]
             enrichList[[pj]][ enrichList[[pj]] > flood.pts[2] ] <- flood.pts[2]
 
+            # Determine breaks of color mapping. Create breaks for positives
+            # and negatives separately. If log2 ratios are all positive or 
+            # negative, use only half of the color space.
+            max.e <- max(enrichList[[pj]])
+            min.e <- min(enrichList[[pj]])
+            if(bam.pair) {
+                max.e <- ifelse(max.e > 0, max.e, 1)
+                min.e <- ifelse(min.e < 0, min.e, -1)
+                brk.use <- c(seq(min.e, 0, length.out=ncolor / 2 + 1),
+                             seq(0, max.e, length.out=ncolor / 2 + 1)[-1])
+            } else {
+                brk.use <- seq(min.e, max.e, length.out=ncolor + 1)
+            }
+
             # Draw heatmap.
-            image(z=t(enrichList[[pj]]), col=enrich.palette(ncolor), axes=F, 
-                  useRaster=T, main=title2plot[pj])
+            image(z=t(enrichList[[pj]]), col=enrich.palette(ncolor), 
+                  breaks=brk.use, axes=F, useRaster=T, main=title2plot[pj])
 
             axis(1, at=xticks$pos, labels=xticks$lab, lwd=1, lwd.ticks=1)
         }

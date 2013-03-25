@@ -88,9 +88,10 @@ setupVars <- function(args.tbl, ctg.tbl){
         stopifnot(as.integer(args.tbl['-I']) >= 0)
         vl$lgint <- as.integer(args.tbl['-I'])
     }else{
-        int.tbl <- c(1, 0, 0, 1)
-        names(int.tbl) <- c('genebody', 'exon', 'cgi', 'bed')
-        vl$lgint <- int.tbl[vl$reg2plot]
+        # int.tbl <- c(1, 0, 0, 1)
+        # names(int.tbl) <- c('genebody', 'exon', 'cgi', 'bed')
+        # vl$lgint <- int.tbl[vl$reg2plot]
+        vl$lgint <- NA
     }
 
     #### Flanking region size. ####

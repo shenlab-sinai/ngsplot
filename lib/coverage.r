@@ -437,16 +437,37 @@ covBamExons <- function(bam.file, sn.inbam, granges.list, fraglen,
     covg.allgenes
 }
 
-headerIndexBam <- function(ctg.tbl) {
+bamFileList <- function(ctg.tbl) {
+# Determine the bam files involved in the configuration and whether it is a 
+# bam file pair setup.
+# Args:
+#   ctg.tbl: coverage-genelist-title table.
+
+    cov.uniq <- unique(ctg.tbl$cov)
+    cov.list <- strsplit(cov.uniq, ':')
+    v.nbam <- sapply(cov.list, length)
+    v.bbp <- v.nbam == 2
+    if(all(v.bbp)) {
+        bbp <- T
+    } else if(all(!v.bbp)) {
+        bbp <- F
+    } else {
+        stop("No mix of bam and bam-pair allowed in configuration.\n")
+    }
+
+    list(bbp=bbp, bam.list=unlist(cov.list))
+}
+
+
+headerIndexBam <- function(bam.list) {
 # Read bam header to determine mapping method.
 # Index bam files if not done yet.
 # Args:
 #   ctg.tbl: coverage-genelist-title table.
 
-    cov.uniq <- unique(ctg.tbl$cov)
-    v.map.bowtie <- vector('logical', length=length(cov.uniq))
-    for(i in 1:length(cov.uniq)) {
-        bam.file <- cov.uniq[i]
+    v.map.bowtie <- vector('logical', length=length(bam.list))
+    for(i in 1:length(bam.list)) {
+        bam.file <- bam.list[i]
 
         # Index bam file.
         if(!file.exists(paste(bam.file, ".bai", sep=""))) {
@@ -460,28 +481,28 @@ headerIndexBam <- function(ctg.tbl) {
         if(class(map.prog) != "try-error") {
             v.map.bowtie[i] <- ifelse(map.prog %in% c('Bowtie', 'TopHat'), T, F)
         } else {
-            warning(sprintf("Alignment algorithm for: %s cannot be determined. Will automatically convert mapping scores 255.", bam.file))
+            cat("\n")
+            warning(sprintf("Alignment algorithm for: %s cannot be determined. Will automatically convert mapping scores of 255.", bam.file))
             v.map.bowtie[i] <- NA
         }
     }
-    names(v.map.bowtie) <- cov.uniq
+    names(v.map.bowtie) <- bam.list
 
     v.map.bowtie
 }
 
-libSizeBam <- function(ctg.tbl) {
+libSizeBam <- function(bam.list) {
 # Obtain library sizes by counting qualified bam records.
 # Args:
 #   ctg.tbl: coverage-genelist-title table.
 
-    cov.uniq <- unique(ctg.tbl$cov)
     # Count only reads that are mapped, primary, passed quality control and 
     # un-duplicated.
     sbp <- ScanBamParam(flag=scanBamFlag(isUnmappedQuery=F, isNotPrimaryRead=F, 
                         isNotPassingQualityControls=F, isDuplicate=F))
-    v.lib.size <- vector('integer', length=length(cov.uniq))
-    for(i in 1:length(cov.uniq)) {
-        bfn <- cov.uniq[i]  # bam file name.
+    v.lib.size <- vector('integer', length=length(bam.list))
+    for(i in 1:length(bam.list)) {
+        bfn <- bam.list[i]  # bam file name.
         cfn <- paste(bfn, '.cnt', sep='')  # count file name.
         if(file.exists(cfn)) {
             v.lib.size[i] <- as.integer(readLines(cfn, n=1))
@@ -496,20 +517,16 @@ libSizeBam <- function(ctg.tbl) {
     v.lib.size
 }
 
-seqnamesBam <- function(ctg.tbl) {
+seqnamesBam <- function(bam.list) {
 # Obtain chromosome names for each bam file. This list must be used to filter
 # genomic regions before scanBam or it terminates immaturely.
 #   ctg.tbl: coverage-genelist-title table.
 
     # browser()
-    cov.uniq <- unique(ctg.tbl$cov)
-    sn.list <- lapply(scanBamHeader(cov.uniq), function(h) {
+    sn.list <- lapply(scanBamHeader(bam.list), function(h) {
             names(h$targets)
-            # bh.txt <- unlist(h$text)
-            # sn.txt <- bh.txt[grep('SN', bh.txt)]
-            # sub('SN:', '', sn.txt)
         })
-    names(sn.list) <- basename(names(sn.list))
+    names(sn.list) <- bam.list
 
     sn.list
 }
@@ -530,6 +547,72 @@ chrTag <- function(sn.inbam) {
 
     chr.tag
 }
+
+chunkIndex <- function(tot.gene, gcs) {
+# Create chunk indices according to total number of genes and chunk size.
+# Args:
+#   tot.gene: total number of genes.
+#   gcs: gene chunk size.
+
+    nchk <- ceiling(tot.gene / gcs)  # number of chunks.
+    chkidx.list <- vector('list', length=nchk)  # chunk indices list.
+    chk.start <- 1  # chunk start.
+    i.chk <- idiv(tot.gene, chunkSize=gcs)
+    for(i in 1:nchk) {
+        chk.size <- nextElem(i.chk)
+        chkidx.list[[i]] <- c(chk.start, chk.start + chk.size - 1)
+        chk.start <- chk.start + chk.size
+    }
+
+    chkidx.list
+}
+
+covMatrix <- function(bam.file, libsize, sn.inbam, chr.tag, coord, 
+                      chkidx.list, rnaseq.gb, exonmodel, reg2plot, pint, 
+                      flanksize, flankfactor, bufsize, fraglen, map.qual, 
+                      m.pts, f.pts, is.bowtie) {
+    
+    # Extract coverage and combine into a matrix.
+    result.matrix <- foreach(chk=chkidx.list, .combine='rbind', 
+                             .multicombine=T) %dopar% {
+        cat(".")
+        i <- chk[1]:chk[2]  # chunk: start -> end
+        # If RNA-seq, retrieve exon ranges.
+        if(rnaseq.gb) {
+            exonranges.list <- unlist(exonmodel[coord[i, ]$tid])
+        } else {
+            exonranges.list <- NULL
+        }
+        doCov(coord[i, ], chr.tag, reg2plot, pint, bam.file, sn.inbam, 
+              flanksize, flankfactor, bufsize, fraglen, map.qual, 
+              m.pts, f.pts, is.bowtie, exonranges.list)
+    }
+
+    # Floor negative values which are caused by spline.
+    result.matrix[result.matrix < 0] <- 0
+
+    result.matrix / libsize * 1e6  # normalize to RPM.
+
+    ########### For debug #############
+    # result.matrix <- matrix(0, nrow=nrow(coord.list[[reg]]), ncol=pts)
+    # for(c in 1:length(chkidx.list)) {
+    #     chk <- chkidx.list[[c]]
+    #     i <- chk[1]:chk[2]  # chunk: start -> end
+    #     cat(".")
+    #     # If RNA-seq, retrieve exon ranges.
+    #     if(rnaseq.gb) {
+    #         exonranges.list <- unlist(exonmodel[coord.list[[reg]][i, ]$tid])
+    #     } else {
+    #         exonranges.list <- NULL
+    #     }
+    #     result.matrix[i, ] <- doCov(coord.list[[reg]][i, ], chr.tag, reg2plot, 
+    #           pint, bam.file, sn.inbam, flanksize, flankfactor, bufsize, 
+    #           fraglen, map.qual, m.pts, f.pts, v.map.bowtie[bam.file], 
+    #           exonranges.list)
+    # }
+    ########### For debug #############
+}
+
 
 doCov <- function(coord.mat, chr.tag, reg2plot, pint, bam.file, sn.inbam, 
                   flanksize, flankfactor, bufsize, fraglen, map.qual, m.pts, 

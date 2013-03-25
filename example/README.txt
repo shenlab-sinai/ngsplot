@@ -2,13 +2,17 @@ This folder contains four toy samples for you to get a sense of the ngs.plot
 workflow. User can also use these examples to check the completion of 
 installation.
 
+Due to Google code's 200M limitation, we have to separate the main program and 
+the bam example files. If you want to run through the following examples, un-
+archive and merge the "example" and "example.bam" folders.
+
 
 ========Example for ChIP-seq data:========
 
 hesc.H3k27me3.1M.bam and hesc.H3k4me3.1M.bam are alignment files for two 
-histone marks, H3k27me3 and H3k4me3, from the ENCODE project. hesc.Input.1M.
+histone marks, H3k27me3 and H3k4me3, from the ENCODE project. hesc.Input.500K.
 bam is an alignment file for DNA input. For demonstration purposes, I only 
-kept 1M alignments for each file.
+kept 1M or 500K alignments for each file.
 
 1. First, I show a simple example of doing plot for one histone mark around 
    TSS, this can be done easily using command:
@@ -88,7 +92,7 @@ kept 1M alignments for each file.
    DNA or IgG control input. ngs.plot will calculate log2 ratios and plot them 
    using appropriate colors. With the example files, issue a command like this:
 
-   ngs.plot.r -G hg19 -R tss -C hesc.H3k4me3.1M.bam:hesc.Input.1M.bam -O 
+   ngs.plot.r -G hg19 -R tss -C hesc.H3k4me3.1M.bam:hesc.Input.500K.bam -O 
    k4vsInp
 
    Please note that in the heatmap, green colors represent negative values and 

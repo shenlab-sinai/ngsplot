@@ -401,13 +401,14 @@ covBamExons <- function(bam.file, sn.inbam, granges.list, fraglen,
                                                    v.brk.right[scan.counter]])
 
         # Special handling for bowtie mapping.
+        srg.mapq <- sr.pooled$mapq
         if(is.na(bowtie) && length(srg.mapq) > 0 && 
            mean(is.na(srg.mapq)) > .8 || !is.na(bowtie) && bowtie) {
             srg.mapq[is.na(srg.mapq)] <- 254
         }
 
         # Filter short reads by mapping quality.
-        sr.pooled <- sr.pooled[sr.pooled$mapq >= map.qual, ]
+        sr.pooled <- sr.pooled[srg.mapq >= map.qual, ]
 
         # Calculate coverage.
         if(nrow(sr.pooled) > 0) {

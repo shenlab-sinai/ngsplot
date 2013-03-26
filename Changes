@@ -4,7 +4,7 @@ Revision history for ngs.plot.
     - Added a function to accept bam file pairs.
     - Automatically determine interval vs. flanking size in plot.
     - Minor bugs fixed.
-
+	- Fixed a bug in RNA-seq coverage calculation.
 
 
 

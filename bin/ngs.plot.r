@@ -60,7 +60,7 @@ cmd.help <- function(){
 ###########################################################################
 #################### Deal with program input arguments ####################
 args <- commandArgs(T)
-# args <- unlist(strsplit('-G mm9 -R genebody -C config.k56.exp.txt -O k56.inp.exp.gb', ' '))
+# args <- unlist(strsplit('-G rn4 -R genebody -F rnaseq -C accepted_hits.bam -O test_full', ' '))
 
 # Program environment variable.
 progpath <- Sys.getenv('NGSPLOT')
@@ -127,7 +127,7 @@ argvar.list <- setupVars(args.tbl, ctg.tbl)
 genome <- argvar.list$genome  # genome name, such as mm9, hg19, rn4.
 reg2plot <- argvar.list$reg2plot  # tss, tes, genebody, bed...
 bed.file <- argvar.list$bed.file  # BED file name if reg2plot=bed.
-oname <- argvar.list$oname  # output file root name
+oname <- argvar.list$oname  # output file root name.
 fi_tag <- argvar.list$fi_tag  # tag for forbidding image output
 lgint <- argvar.list$lgint  # lgint: boolean tag for large interval
 flanksize <- argvar.list$flanksize  # flanking region size
@@ -300,12 +300,17 @@ cat("Done\n")
 
 # Wrap results up.
 cat("Wrapping results up...")
-if(!zip(paste(oname, '.zip', sep=''), oname, extras='-q')) {
+cur.dir <- getwd()
+out.dir <- dirname(oname)
+out.zip <- basename(oname)
+setwd(out.dir)
+if(!zip(paste(out.zip, '.zip', sep=''), out.zip, extras='-q')) {
     if(unlink(oname, recursive=T)) {
         warning(sprintf("Unable to delete intermediate result folder: %s", 
-                         oname))
+                        oname))
     }
 }
+setwd(cur.dir)
 cat("Done\n")
 
 # Create image file and plot data into it.

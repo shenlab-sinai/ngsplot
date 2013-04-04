@@ -44,4 +44,4 @@ example.bam.tar.gz: $(BAM)
 	tar czvf $@ $(BAM)
 
 clean:
-	rm -rf ngsplot-dist.tar.gz
+	rm -rf ngsplot-dist.tar.gz example.bam.tar.gz

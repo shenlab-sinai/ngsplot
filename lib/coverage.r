@@ -137,6 +137,11 @@ extrCovExons <- function(bam.file, sn.inbam, v.chrom, ranges.list, v.fls,
         n <- length(r.mod)
         # Add flanking regions.
         start(r.mod)[1] <- start(r.mod)[1] - v.fls[i] - bufsize
+        # Avoid non-positive start which can cause problems later when doing
+        # position shift.
+        if(start(r.mod)[1] < 1) {
+            start(r.mod)[1] <- 1
+        }
         end(r.mod)[n] <- end(r.mod)[n] + v.fls[i] + bufsize
         exonflank.list[[i]] <- GRanges(seqnames=v.chrom[i], ranges=r.mod)
     }
@@ -594,23 +599,28 @@ covMatrix <- function(bam.file, libsize, sn.inbam, chr.tag, coord,
 
     result.matrix / libsize * 1e6  # normalize to RPM.
 
+
     ########### For debug #############
-    # result.matrix <- matrix(0, nrow=nrow(coord.list[[reg]]), ncol=pts)
+    # pts <- m.pts + 2 * f.pts
+    # result.matrix <- matrix(0, nrow=nrow(coord), ncol=pts)
     # for(c in 1:length(chkidx.list)) {
     #     chk <- chkidx.list[[c]]
     #     i <- chk[1]:chk[2]  # chunk: start -> end
     #     cat(".")
     #     # If RNA-seq, retrieve exon ranges.
     #     if(rnaseq.gb) {
-    #         exonranges.list <- unlist(exonmodel[coord.list[[reg]][i, ]$tid])
+    #         exonranges.list <- unlist(exonmodel[coord[i, ]$tid])
     #     } else {
     #         exonranges.list <- NULL
     #     }
-    #     result.matrix[i, ] <- doCov(coord.list[[reg]][i, ], chr.tag, reg2plot, 
+    #     result.matrix[i, ] <- doCov(coord[i, ], chr.tag, reg2plot, 
     #           pint, bam.file, sn.inbam, flanksize, flankfactor, bufsize, 
     #           fraglen, map.qual, m.pts, f.pts, v.map.bowtie[bam.file], 
     #           exonranges.list)
     # }
+    # # Floor negative values which are caused by spline.
+    # result.matrix[result.matrix < 0] <- 0
+    # result.matrix / libsize * 1e6  # normalize to RPM.
     ########### For debug #############
 }
 

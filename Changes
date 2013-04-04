@@ -1,12 +1,21 @@
 Revision history for ngs.plot.
+==============================
 
 
+1.66.2 Apr 4, 2013
+    - Fixed a bug that can cause RNA-seq plotting to exit with an error 
+      message stating widths(x) cannot be negative.
+
+1.66.1 Apr 3, 2013
+    - Fixed a bug that prevents replot from reading files correctly if the 
+      original output name contains directory name.
+
+1.66  Mar 26, 2013
     - Added a function to accept bam file pairs.
     - Automatically determine interval vs. flanking size in plot.
+    - Fixed a bug in RNA-seq coverage calculation (Thanks to Alphonse Chu from 
+      Ottawa to point out).
     - Minor bugs fixed.
-	- Fixed a bug in RNA-seq coverage calculation.
-
-
 
 1.65.1 Mar 18, 2013
     - Fixed a bug that emits errors when using a custom bed file (Thanks to 
@@ -50,5 +59,5 @@ Revision history for ngs.plot.
     - Misc. re-organization of ngs.plot.r code.
     - Some re-organization of distribution folder.
     - Added example gene list; example data for user to run through.
-    - Added script "alt_reg_cufflinks" which extracts all alternative regions in
-      one command.
+    - Added script "alt_reg_cufflinks" which extracts all alternative regions 
+      in one command.

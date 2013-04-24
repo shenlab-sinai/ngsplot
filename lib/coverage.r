@@ -135,13 +135,8 @@ extrCovExons <- function(bam.file, sn.inbam, v.chrom, ranges.list, v.fls,
     for(i in 1:length(ranges.list)) {
         r.mod <- ranges.list[[i]]  # IRanges object to be modified.
         n <- length(r.mod)
-        # Add flanking regions.
+        # Add flanking and buffer regions.
         start(r.mod)[1] <- start(r.mod)[1] - v.fls[i] - bufsize
-        # Avoid non-positive start which can cause problems later when doing
-        # position shift.
-        if(start(r.mod)[1] < 1) {
-            start(r.mod)[1] <- 1
-        }
         end(r.mod)[n] <- end(r.mod)[n] + v.fls[i] + bufsize
         exonflank.list[[i]] <- GRanges(seqnames=v.chrom[i], ranges=r.mod)
     }
@@ -162,8 +157,8 @@ extrCovExons <- function(bam.file, sn.inbam, v.chrom, ranges.list, v.fls,
 }
 
 
-extrCovMidp <- function(bam.file, sn.inbam, v.chrom, v.midp, flanksize, bufsize, 
-                        pts, v.strand, fraglen, map.qual, bowtie) {
+extrCovMidp <- function(bam.file, sn.inbam, v.chrom, v.midp, flanksize, 
+                        bufsize, pts, v.strand, fraglen, map.qual, bowtie) {
 # Extract coverage vectors with a middle point and symmetric flanking regions.
 # Args:
 #   bam.file: character string refers to the path of a bam file.
@@ -232,7 +227,8 @@ genZeroList <- function(llen, v.vlen) {
     res
 }
 
-covBam <- function(bam.file, sn.inbam, granges, fraglen, map.qual=20, bowtie=F) {
+covBam <- function(bam.file, sn.inbam, granges, fraglen, 
+                   map.qual=20, bowtie=F) {
 # Extract coverage vectors from bam file for a list of genes.
 # Args:
 #   bam.file: character string refers to the path of a bam file.
@@ -263,7 +259,7 @@ covBam <- function(bam.file, sn.inbam, granges, fraglen, map.qual=20, bowtie=F) 
     sr.in.ranges <- tryCatch(scanBam(bam.file, param=sbp), error=function(e) e)
     if(class(sr.in.ranges)[1] == 'simpleError') {
         # This is not supposed to happen after those unmatched seqnames are
-        # removed. I keep it for safty.
+        # removed. I keep it for safety.
         return(genZeroList(length(granges), gb.len))
     }
 
@@ -294,7 +290,8 @@ covBam <- function(bam.file, sn.inbam, granges, fraglen, map.qual=20, bowtie=F) 
         }
 
         # Subset by mapping quality.
-        q.mask <- srg.mapq >= map.qual
+        q.mask <- which(!is.na(srg.mapq) & srg.mapq >= map.qual)
+        # q.mask <- which(srg.mapq >= map.qual)
         srg.pos <- srg.pos[q.mask]
         srg.strand <- srg.strand[q.mask]
         srg.qwidth <- srg.qwidth[q.mask]
@@ -302,13 +299,15 @@ covBam <- function(bam.file, sn.inbam, granges, fraglen, map.qual=20, bowtie=F) 
         if(length(srg.pos) > 0) {
             # Adjust negative read positions for physical coverage.
             neg.idx <- srg.strand == '-'
-            srg.pos[neg.idx] <- srg.pos[neg.idx] - fraglen + srg.qwidth[neg.idx]
+            srg.pos[neg.idx] <- srg.pos[neg.idx] - fraglen + 
+                                srg.qwidth[neg.idx]
             
             # Shift reads by subtracting start positions.
             srg.pos <- srg.pos - g.start[i] + 1
             
             # Calculate physical coverage on the whole genebody.
-            covg.allgenes[[i]] <- coverage(IRanges(start=srg.pos, width=fraglen), 
+            covg.allgenes[[i]] <- coverage(IRanges(start=srg.pos, 
+                                                   width=fraglen), 
                                            width=gb.len[i], method='sort')
         } else {
             covg.allgenes[[i]] <- Rle(0, gb.len[i])
@@ -316,6 +315,7 @@ covBam <- function(bam.file, sn.inbam, granges, fraglen, map.qual=20, bowtie=F) 
     }
     covg.allgenes
 }
+
 
 covBamExons <- function(bam.file, sn.inbam, granges.list, fraglen, 
                         map.qual=20, bowtie=F) {
@@ -413,7 +413,7 @@ covBamExons <- function(bam.file, sn.inbam, granges.list, fraglen,
         }
 
         # Filter short reads by mapping quality.
-        sr.pooled <- sr.pooled[srg.mapq >= map.qual, ]
+        sr.pooled <- sr.pooled[!is.na(srg.mapq) & srg.mapq >= map.qual, ]
 
         # Calculate coverage.
         if(nrow(sr.pooled) > 0) {
@@ -426,9 +426,19 @@ covBamExons <- function(bam.file, sn.inbam, granges.list, fraglen,
             sr.pooled$pos <- sr.pooled$pos - v.start[i] + 1
             
             # Shift ranges by subtracting start positions.
+            # BE careful with negative start positions! Need to adjust end
+            # positions first(or the GRanges lib will emit errors if 
+            # start > end). 
+            # Negative start positions happen when flanking region exceeds 
+            # the chromosomal start.
             gr <- ranges(granges.list[[i]])
-            start(gr) <- start(gr) - v.start[i] + 1
-            end(gr) <- end(gr) - v.start[i] + 1
+            if(v.start[i] > 0) {
+                start(gr) <- start(gr) - v.start[i] + 1
+                end(gr) <- end(gr) - v.start[i] + 1
+            } else {
+                end(gr) <- end(gr) - v.start[i] + 1
+                start(gr) <- start(gr) - v.start[i] + 1
+            }
             
             # Calculate physical coverage on the whole genebody.
             covg <- coverage(IRanges(start=sr.pooled$pos, width=fraglen), 
@@ -485,10 +495,12 @@ headerIndexBam <- function(bam.list) {
         map.prog <- try(strsplit(header[[1]]$text$'@PG'[[1]], ':')[[1]][2], 
                         silent=T)
         if(class(map.prog) != "try-error") {
-            v.map.bowtie[i] <- ifelse(map.prog %in% c('Bowtie', 'TopHat'), T, F)
+            v.map.bowtie[i] <- ifelse(map.prog %in% c('Bowtie', 'TopHat', 
+                                                      'BEDTools_bedToBam'), 
+                                      T, F)
         } else {
             cat("\n")
-            warning(sprintf("Alignment algorithm for: %s cannot be determined. Will automatically convert mapping scores of 255.", bam.file))
+            warning(sprintf("Aligner for: %s cannot be determined. Will automatically convert mapping scores of 255.", bam.file))
             v.map.bowtie[i] <- NA
         }
     }
@@ -576,12 +588,14 @@ chunkIndex <- function(tot.gene, gcs) {
 covMatrix <- function(bam.file, libsize, sn.inbam, chr.tag, coord, 
                       chkidx.list, rnaseq.gb, exonmodel, reg2plot, pint, 
                       flanksize, flankfactor, bufsize, fraglen, map.qual, 
-                      m.pts, f.pts, is.bowtie) {
+                      m.pts, f.pts, is.bowtie, spit.dot=T) {
     
     # Extract coverage and combine into a matrix.
     result.matrix <- foreach(chk=chkidx.list, .combine='rbind', 
                              .multicombine=T) %dopar% {
-        cat(".")
+        if(spit.dot) {
+            cat(".")
+        }
         i <- chk[1]:chk[2]  # chunk: start -> end
         # If RNA-seq, retrieve exon ranges.
         if(rnaseq.gb) {
@@ -615,7 +629,7 @@ covMatrix <- function(bam.file, libsize, sn.inbam, chr.tag, coord,
     #     }
     #     result.matrix[i, ] <- doCov(coord[i, ], chr.tag, reg2plot, 
     #           pint, bam.file, sn.inbam, flanksize, flankfactor, bufsize, 
-    #           fraglen, map.qual, m.pts, f.pts, v.map.bowtie[bam.file], 
+    #           fraglen, map.qual, m.pts, f.pts, is.bowtie, 
     #           exonranges.list)
     # }
     # # Floor negative values which are caused by spline.

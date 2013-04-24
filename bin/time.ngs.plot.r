@@ -13,8 +13,8 @@
 # Deal with command line arguments.
 cmd.help <- function(){
     cat("\nVisit http://code.google.com/p/ngsplot/wiki/ProgramArguments101 for details\n")
-    cat("\nUsage: ngs.plot.r -G genome -R region -C [cov|config]file\n")
-    cat("                  -O name [Options]\n")
+    cat("\nUsage: time.ngs.plot.r -G genome -R region -C [cov|config]file\n")
+    cat("                  [Options]\n")
     cat("\n## Mandatory parameters:\n")
     cat("  -G   Genome name, currently supported: mm9, hg19, rn4, sacCer3(ensembl only)\n")
     cat("  -R   Genomic regions to plot: tss, tes, genebody, exon, cgi or *.bed\n")
@@ -60,7 +60,7 @@ cmd.help <- function(){
 ###########################################################################
 #################### Deal with program input arguments ####################
 args <- commandArgs(T)
-# args <- unlist(strsplit('-G rn4 -R genebody -C accepted_hits.bam -O test -F rnaseq -N 0.33', ' '))
+# args <- unlist(strsplit('-G mm9 -R tss -C H2bub_MB.sorted.bam -O test_full', ' '))
 
 # Program environment variable.
 progpath <- Sys.getenv('NGSPLOT')
@@ -71,14 +71,13 @@ if(progpath == "") {
 
 # Input argument parser.
 source(file.path(progpath, 'lib', 'parse.args.r'))
-args.tbl <- parseArgs(args, c('-G', '-C', '-R', '-O'))
+args.tbl <- parseArgs(args, c('-G', '-C', '-R'))
 if(is.null(args.tbl)){
     cmd.help()
     stop('Error in parsing command line arguments. Stop.\n')
 }
 
 # Load required libraries.
-cat("Loading R libraries")
 if(!suppressMessages(require(ShortRead, warn.conflicts=F))) {
     source("http://bioconductor.org/biocLite.R")
     biocLite(ShortRead)
@@ -86,7 +85,6 @@ if(!suppressMessages(require(ShortRead, warn.conflicts=F))) {
         stop('Loading package ShortRead failed!')
     }
 }
-cat('.')
 if(!suppressMessages(require(BSgenome, warn.conflicts=F))) {
     source("http://bioconductor.org/biocLite.R")
     biocLite(BSgenome)
@@ -94,32 +92,26 @@ if(!suppressMessages(require(BSgenome, warn.conflicts=F))) {
         stop('Loading package BSgenome failed!')
     }
 }
-cat('.')
 if(!suppressMessages(require(doMC, warn.conflicts=F))) {
     install.packages('doMC')
     if(!suppressMessages(require(doMC, warn.conflicts=F))) {
         stop('Loading package doMC failed!')
     }
 }
-cat('.')
 if(!suppressMessages(require(caTools, warn.conflicts=F))) {
     install.packages('caTools')
     if(!suppressMessages(require(caTools, warn.conflicts=F))) {
         stop('Loading package caTools failed!')
     }
 }
-cat('.')
 if(!suppressMessages(require(utils, warn.conflicts=F))) {
     install.packages('utils')
     if(!suppressMessages(require(utils, warn.conflicts=F))) {
         stop('Loading package utils failed!')
     }
 }
-cat('.')
-cat("Done\n")
 
 # Configuration: coverage-genelist-title relationships.
-cat("Configuring variables...")
 ctg.tbl <- ConfigTbl(args.tbl)
 
 # Setup variables from arguments.
@@ -180,14 +172,12 @@ confiMat <- CreateConfiMat(se, pts, ctg.tbl)
 
 # Genomic enrichment for all profiles in the config. Use this for heatmaps.
 enrichList <- vector('list', nrow(ctg.tbl))
-cat("Done\n")
 
 #######################################################################
 # Here start to extract coverages for all genomic regions and calculate 
 # data for plotting.
 
 # Load coverage extraction lib.
-cat("Analyze bam files and calculate coverage")
 source(file.path(progpath, 'lib', 'coverage.r'))
 
 # Extract bam file names from configuration and determine if bam-pair is used.
@@ -205,8 +195,10 @@ sn.list <- seqnamesBam(bam.list)
 # Calculate library size from bam files for normalization.
 v.lib.size <- libSizeBam(bam.list)
 
+
+# ptm <- proc.time()
 # Process the config file row by row.
-for(r in 1:nrow(ctg.tbl)) {
+res.time <- system.time(for(r in 1:nrow(ctg.tbl)) {
 
     reg <- ctg.tbl$glist[r]  # retrieve gene list names.
     # Create coordinate chunk indices.
@@ -226,7 +218,7 @@ for(r in 1:nrow(ctg.tbl)) {
                                coord.list[[reg]], chkidx.list, rnaseq.gb, 
                                exonmodel, reg2plot, pint, flanksize, 
                                flankfactor, bufsize, fraglen, map.qual, m.pts, 
-                               f.pts, is.bowtie)
+                               f.pts, is.bowtie, spit.dot=F)
     if(bam.pair) {  # calculate background.
         pseudo.rpm <- 1e-9
         libsize <- v.lib.size[bam.files[2]]
@@ -240,7 +232,7 @@ for(r in 1:nrow(ctg.tbl)) {
                                 coord.list[[reg]], chkidx.list, rnaseq.gb, 
                                 exonmodel, reg2plot, pint, flanksize, 
                                 flankfactor, bufsize, fraglen, map.qual, m.pts, 
-                                f.pts, is.bowtie)
+                                f.pts, is.bowtie, spit.dot=F)
         # browser()
         result.matrix <- log2((result.matrix + pseudo.rpm) / 
                               (bkg.matrix + pseudo.rpm))
@@ -257,92 +249,10 @@ for(r in 1:nrow(ctg.tbl)) {
     # Return avg. profile.
     regcovMat[, r] <- apply(result.matrix, 2, function(x) mean(x, trim=robust, 
                                                                na.rm=T))
-}
-# browser()
-cat("Done\n")
+})
 
-########################################
-# Save plotting data.
-cat("Saving results...")
-dir.create(oname, showWarnings=F)
-# Average profiles.
-out.prof <- file.path(oname, 'avgprof.txt')
-write.table(regcovMat, file=out.prof, row.names=F, sep="\t", quote=F)
+print(res.time)
 
-# Standard errors of mean.
-if(!is.null(confiMat)){
-    out.confi <- file.path(oname, 'sem.txt')
-    write.table(confiMat, file=out.confi, row.names=F, sep="\t", quote=F)
-}
 
-# Heatmap density values.
-for(i in 1:length(enrichList)) {
-    out.heat <- file.path(oname, paste('hm', i, '.txt', sep=''))
-    write.table(enrichList[[i]], file=out.heat, row.names=F, sep="\t", quote=F)
-}
 
-# Avg. profile R data.
-prof.dat <- file.path(oname, 'avgprof.RData')
-default.width <- 8  # in inches.
-default.height <- 7
-xticks <- genXticks(reg2plot, pint, lgint, pts, flanksize, flankfactor)
-save(default.width, default.height, regcovMat, ctg.tbl, bam.pair, xticks, pts, 
-     m.pts, f.pts, pint, shade.alp, confiMat, mw, se, file=prof.dat)
-
-# Heatmap R data.
-unit.width <- 4
-rr <- 30  # reduce ratio.
-heat.dat <- file.path(oname, 'heatmap.RData')
-ng.list <- sapply(enrichList, nrow)  # number of genes per heatmap.
-save(reg.list, uniq.reg, ng.list, pts, enrichList, go.algo, ctg.tbl, bam.pair, 
-     xticks, flood.frac, unit.width, rr, file=heat.dat)
-cat("Done\n")
-
-# Wrap results up.
-cat("Wrapping results up...")
-cur.dir <- getwd()
-out.dir <- dirname(oname)
-out.zip <- basename(oname)
-setwd(out.dir)
-if(!zip(paste(out.zip, '.zip', sep=''), out.zip, extras='-q')) {
-    if(unlink(oname, recursive=T)) {
-        warning(sprintf("Unable to delete intermediate result folder: %s", 
-                        oname))
-    }
-}
-setwd(cur.dir)
-cat("Done\n")
-
-# Create image file and plot data into it.
-if(!fi_tag){
-    cat("Plotting figures...")
-    #### Average profile plot. ####
-    out.plot <- paste(oname, '.avgprof.pdf', sep='')
-    pdf(out.plot, width=default.width, height=default.height)
-    plotmat(regcovMat, ctg.tbl$title, bam.pair, xticks, pts, m.pts, f.pts, pint,
-            shade.alp, confiMat, mw)
-    dev.off()
-
-    #### Heatmap. ####
-    # Setup output device.
-    hd <- SetupHeatmapDevice(reg.list, uniq.reg, ng.list, pts, unit.width, rr)
-    reg.hei <- hd$reg.hei  # list of image heights for unique regions.
-    hm.width <- hd$hm.width  # image width.
-    hm.height <- hd$hm.height # image height.
-    lay.mat <- hd$lay.mat  # matrix for heatmap layout.
-    heatmap.mar <- hd$heatmap.mar # heatmap margins.
-
-    out.hm <- paste(oname, '.heatmap.pdf', sep='')
-    pdf(out.hm, width=hm.width, height=hm.height)
-    par(mar=heatmap.mar)
-    layout(lay.mat, heights=reg.hei)
-
-    # Do heatmap plotting.
-    plotheat(reg.list, uniq.reg, enrichList, go.algo, ctg.tbl$title, bam.pair, 
-             xticks, flood.frac)
-    dev.off()
-    cat("Done\n")
-}
-
-cat("All done. Cheers!\n")
 

@@ -26,6 +26,7 @@ cmd.help <- function(){
     cat("           prod, diff, pca and none(according to gene list supplied)\n")
     cat("    -RR  Reduce ratio(default=30). The parameter controls the heatmap height\n")
     cat("           The smaller the value, the taller the heatmap\n")
+    cat("    -RZ  Remove all zero profiles in heatmaps(default=1). Set 0 to keep them.\n")
     cat("    -FC  Flooding fraction:[0, 1), default=0.02\n")
     cat("    -P   #CPUs to use. Set 0(default) for auto detection\n")
 
@@ -129,6 +130,11 @@ if(command == 'prof') {
     if('flood.frac' %in% names(repvar.list)) {
         flood.frac <- repvar.list$flood.frac
     }
+    if('rm.zero' %in% names(repvar.list)) {
+        rm.zero <- repvar.list$rm.zero
+    } else if(!'rm.zero' %in% ls()) {  # backward compatibility.
+        rm.zero <- 1
+    }
     if('go.algo' %in% names(repvar.list)) {
         go.algo <- repvar.list$go.algo
     }
@@ -149,7 +155,7 @@ if(command == 'prof') {
     layout(lay.mat, heights=reg.hei)
     # Do heatmap plotting.
     plotheat(reg.list, uniq.reg, enrichList, go.algo, ctg.tbl$title, bam.pair, 
-             xticks, flood.frac)
+             xticks, rm.zero, flood.frac)
     dev.off()
 } else {
     # Pass.

@@ -46,6 +46,7 @@ cmd.help <- function(){
     cat("  -SE  Shall standard errors be plotted?(0 or 1)\n")
     cat("  -RB  The fraction of extreme values to be trimmed on both ends\n")
     cat("         default=0, 0.05 means 5% of extreme values will be trimmed\n")
+    cat("  -RZ  Remove all zero profiles in heatmaps(default=1). Set 0 to keep them.\n")
     cat("  -FC  Flooding fraction:[0, 1), default=0.02\n")
     cat("  -FI  Forbid image output if set to 1(default=0)\n")
     cat("  -MW  Moving window width to smooth avg. profiles, must be integer\n")
@@ -139,6 +140,7 @@ cores.number <- argvar.list$cores.number  # #CPUs
 se <- argvar.list$se  # se: tag for plotting stand errors
 robust <- argvar.list$robust  # robust stat fraction
 flood.frac <- argvar.list$flood.frac  # flooding fraction.
+rm.zero <- argvar.list$rm.zero  # remove all zero tag.
 go.algo <- argvar.list$go.algo  # gene order algorithm used in heatmaps.
 gcs <- argvar.list$gcs  # gcs: chunk size for grouping genes.
 fraglen <- argvar.list$fraglen  # fragment length for physical coverage.
@@ -277,8 +279,11 @@ if(!is.null(confiMat)){
 
 # Heatmap density values.
 for(i in 1:length(enrichList)) {
+    reg <- ctg.tbl$glist[i]  # gene list name.
     out.heat <- file.path(oname, paste('hm', i, '.txt', sep=''))
-    write.table(enrichList[[i]], file=out.heat, row.names=F, sep="\t", quote=F)
+    write.table(cbind(coord.list[[reg]][, c('gid', 'gname', 'tid', 'strand')], 
+                      enrichList[[i]]), 
+                file=out.heat, row.names=F, sep="\t", quote=F)
 }
 
 # Avg. profile R data.
@@ -295,7 +300,7 @@ rr <- 30  # reduce ratio.
 heat.dat <- file.path(oname, 'heatmap.RData')
 ng.list <- sapply(enrichList, nrow)  # number of genes per heatmap.
 save(reg.list, uniq.reg, ng.list, pts, enrichList, go.algo, ctg.tbl, bam.pair, 
-     xticks, flood.frac, unit.width, rr, file=heat.dat)
+     xticks, rm.zero, flood.frac, unit.width, rr, file=heat.dat)
 cat("Done\n")
 
 # Wrap results up.
@@ -339,7 +344,7 @@ if(!fi_tag){
 
     # Do heatmap plotting.
     plotheat(reg.list, uniq.reg, enrichList, go.algo, ctg.tbl$title, bam.pair, 
-             xticks, flood.frac)
+             xticks, rm.zero, flood.frac)
     dev.off()
     cat("Done\n")
 }

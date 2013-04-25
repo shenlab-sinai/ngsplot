@@ -386,7 +386,7 @@ OrderGenesHeatmap <- function(n, enrichCombined,
 
 
 plotheat <- function(reg.list, uniq.reg, enrichList, go.algo, title2plot, 
-                     bam.pair, xticks, flood.q=.02) {
+                     bam.pair, xticks, rm.zero=1, flood.q=.02) {
 # Plot heatmaps with genes ordered according to some algorithm.
 # Args:
 #   reg.list: factor vector of regions as in configuration.
@@ -419,12 +419,19 @@ plotheat <- function(reg.list, uniq.reg, enrichList, go.algo, title2plot,
         # Combine all profiles into one.
         enrichCombined <- do.call('cbind', enrichList[plist])
 
+        # Remove profiles that are all zero. They may correspond to unmappable
+        # genes.
+        if(rm.zero) {
+            enrichCombined <- enrichCombined[rowSums(enrichCombined) != 0, ]
+        }
+
         # Order genes.
         if(go.algo != 'none' && nrow(enrichCombined) > 1) {
             g.order <- OrderGenesHeatmap(length(plist), enrichCombined, go.algo)
             enrichCombined <- enrichCombined[g.order[[1]], ]
         }
-        # for now, just use the 1st gene order.
+        # for now, just use the 1st gene order. p.s.: pca will provide more than
+        # one orders.
   
         # Split combined profiles back into individual heatmaps.
         for(j in 1:length(plist)) {

@@ -2,17 +2,15 @@ Revision history for ngs.plot.
 ==============================
 
 
-
-Recent changes
+1.67 Apr 25, 2013
     - Fixed a bug that may cause the program to exit when all mapping quality 
-      values are NA.
+      values are NAs.
     - Automatically convert mapping scores of 255 if bam files are converted 
       from BedTools.
     - Fixed a bug that causes the program to exit when the flanking region 
-      exceeds chromosomal start position.
+      exceeds chromosomal start position in RNA-seq plotting.
+    - Added gene information to hmX.txt files.
     - Misc. tiny bugs fixed.
-
-
 
 1.66.2 Apr 4, 2013
     - Fixed a bug that can cause RNA-seq plotting to exit with an error 

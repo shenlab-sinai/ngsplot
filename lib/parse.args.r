@@ -181,6 +181,14 @@ setupVars <- function(args.tbl, ctg.tbl){
         vl$flood.frac <- .02  # <2% and >98% data will be illuminated equally.
     }
 
+    #### Remove zero tag. ####
+    if('-RZ' %in% names(args.tbl)){ 
+        vl$rm.zero <- as.integer(args.tbl['-RZ'])
+        stopifnot(vl$rm.zero == 0 || vl$rm.zero == 1)
+    } else {
+        vl$rm.zero <- 1  # remove all zero profiles in heatmaps.
+    }
+
     #### Gene order algorithm ####
     if('-GO' %in% names(args.tbl)){ 
         vl$go.algo <- args.tbl['-GO']
@@ -248,6 +256,12 @@ replotVars <- function(args.tbl){
         vl$flood.frac <- as.numeric(args.tbl['-FC'])
         stopifnot(vl$flood.frac >= 0 && vl$flood.frac < 1)
     } 
+
+    #### Remove zero tag. ####
+    if('-RZ' %in% names(args.tbl)){ 
+        vl$rm.zero <- as.integer(args.tbl['-RZ'])
+        stopifnot(vl$rm.zero == 0 || vl$rm.zero == 1)
+    }
 
     #### Gene order algorithm ####
     if('-GO' %in% names(args.tbl)){ 

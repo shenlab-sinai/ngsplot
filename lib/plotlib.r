@@ -314,7 +314,8 @@ spline_mat <- function(mat, n=100){
 }
 
 OrderGenesHeatmap <- function(n, enrichCombined, 
-                    method=c('total', 'max', 'prod', 'diff', 'hc', 'pca')) {
+                              method=c('total', 'max', 'prod', 'diff', 'hc', 
+                                       'pca', 'none')) {
 # Order genes in combined heatmap data.
 # Args: 
 #   n: number of plots(such as histone marks) in the combined data.
@@ -336,7 +337,8 @@ OrderGenesHeatmap <- function(n, enrichCombined,
         # Notes: do NOT forget hc is applied to non-zero sd genes only.
         # The original gene indices must be recovered before return values.
         list(hc=c(g.nz[hc$order], g.ze))
-    } else if(method == 'total') {  # overall enrichment of the 1st profile.
+    } else if(method == 'total' || method == 'diff' && n == 1) {  
+        # overall enrichment of the 1st profile.
         list(total=order(rowSums(enrichCombined[, 1:npts])))
     } else if(method == 'max') {  # peak enrichment value of the 1st profile.
         list(max=order(apply(enrichCombined[, 1:npts], 1, max)))
@@ -351,13 +353,9 @@ OrderGenesHeatmap <- function(n, enrichCombined,
             }
         }
         list(prod=order(g.prod))
-    } else if(method == 'diff') {  # difference between 1st and 2nd profiles.
-        if(n < 2) {  # if only one profile available, return org. order.
-            list(none=1:nrow(enrichCombined))
-        } else {
-            list(diff=order(rowSums(enrichCombined[, 1:npts]) - 
-                rowSums(enrichCombined[, (npts + 1):(npts * 2)])))
-        }
+    } else if(method == 'diff' && n > 1) {  # difference between 2 profiles.
+        list(diff=order(rowSums(enrichCombined[, 1:npts]) - 
+                        rowSums(enrichCombined[, (npts + 1):(npts * 2)])))
     } else if(method == 'pca') {  # principal component analysis.
         # Reduce the data to a small number of bins per profile.
         nbin <- 10
@@ -381,6 +379,12 @@ OrderGenesHeatmap <- function(n, enrichCombined,
         }
         names(pc.order) <- paste('pc', 1:ncol(enrich.pca$x), sep='')
         pc.order
+    } else if(method == 'none') {  # according to the order of input gene list.
+        # Because the image function draws from bottom to top, the rows are 
+        # reversed to give a more natural look.
+        list(none=rev(1:nrow(enrichCombined)))
+    } else {
+        # pass.
     }
 }
 
@@ -426,7 +430,7 @@ plotheat <- function(reg.list, uniq.reg, enrichList, go.algo, title2plot,
         }
 
         # Order genes.
-        if(go.algo != 'none' && nrow(enrichCombined) > 1) {
+        if(nrow(enrichCombined) > 1) {
             g.order <- OrderGenesHeatmap(length(plist), enrichCombined, go.algo)
             enrichCombined <- enrichCombined[g.order[[1]], ]
         }

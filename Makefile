@@ -32,6 +32,7 @@ ngsplot-dist.tar.gz: $(BINCUFF) $(BINNGSP) $(LIB) $(OTHERS)
 	cp -rL $(BINCUFF) $(BINNGSP) ${DISTFOLDER}/bin
 	cp -rL $(LIB) ${DISTFOLDER}/lib
 	cp -rL $(OTHERS) ${DISTFOLDER}
+	find ${DISTFOLDER}/ -name '.svn'|xargs -I% rm -r %
 	# Remove comments and blank lines from *.r files.
 	# for r in ${ALLR}; do \
 	# 	sed '2,+10000 s/^\s*#.*//' ${DISTFOLDER}/$$r|sed '/^$$/ c\' > tmp; \

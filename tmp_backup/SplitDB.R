@@ -8,7 +8,7 @@ SplitDB <- function(d, s, g){
     
 	# genebody
     d$genebody -> genome.coord
-    genome.coord[order(genome.coord$chrom, genome.coord$start), ] -> genome.coord
+    genome.coord[order(!genome.coord$byname.uniq, !genome.coord$bygid.uniq, genome.coord$gname), ] -> genome.coord
     out.f <- sprintf("%s.%s.genebody.RData", s, g)
     save(genome.coord, file=out.f)
    
@@ -17,7 +17,7 @@ SplitDB <- function(d, s, g){
 	# exon
     foreach(n=names(d$exon)) %do% {
         d$exon[[n]] -> genome.coord
-        genome.coord[order(genome.coord$chrom, genome.coord$start), ] -> genome.coord
+        genome.coord[order(!genome.coord$byname.uniq, !genome.coord$bygid.uniq, genome.coord$gname), ] -> genome.coord
         out.f <- sprintf("%s.%s.exon.%s.RData", s, g, n)
         save(genome.coord, file=out.f)
     }
@@ -25,7 +25,7 @@ SplitDB <- function(d, s, g){
 	# cgi
     foreach(n=names(d$cgi)) %do% {
         d$cgi[[n]] -> genome.coord
-        genome.coord[order(genome.coord$chrom, genome.coord$start), ] -> genome.coord
+        genome.coord[order(!genome.coord$byname.uniq, !genome.coord$bygid.uniq, genome.coord$gname), ] -> genome.coord
         out.f <- sprintf("%s.%s.cgi.%s.RData", s, g, n)
         save(genome.coord, file=out.f)
     }

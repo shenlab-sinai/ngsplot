@@ -133,35 +133,49 @@ SetupPlotCoord <- function(args.tbl, ctg.tbl, progpath, genome, reg2plot,
     # Determine plot coordinates for each unique region.
     coord.list <- vector('list', length(uniq.reg))
     names(coord.list) <- uniq.reg
+    # Sample a vector but preserve its original sequential order.
+    sampleInSequence <- function(x, samprate) {
+        x[ifelse(runif(length(x)) <= samprate, T, F)]
+    }
     for(i in 1:length(uniq.reg)) {
         ur <- uniq.reg[i]
  
         if(ur == '-1') {  # use whole genome.
             g.uniq <- which(genome.coord$byname.uniq)
             if(samprate < 1){
-                samp.n <- round(samprate * length(g.uniq))
-                coord.list[[i]] <- genome.coord[sample(g.uniq, samp.n), ]
-            }else{
+                coord.list[[i]] <- genome.coord[sampleInSequence(g.uniq, 
+                                                                 samprate), ]
+            } else {
                 coord.list[[i]] <- genome.coord[g.uniq, ]
             }
         } else {  # read gene list from text file.
             gene.list <- read.table(ur, as.is=T, comment.char='#')$V1
-            subset.idx <- c(which(genome.coord$gname %in% gene.list & 
-                                  genome.coord$byname.uniq),
-                            which(genome.coord$tid %in% gene.list))
-            # Test if all gid are NA. If database=refseq, this is true.
-            if(!all(is.na(genome.coord$gid))) {
-                subset.idx <- c(subset.idx, 
-                                which(genome.coord$gid %in% gene.list & 
-                                      genome.coord$bygid.uniq))
-            }
+            gid.match <- match(gene.list, genome.coord$gid, nomatch=0)
+            gname.match <- match(gene.list, genome.coord$gname, nomatch=0)
+            tid.match <- match(gene.list, genome.coord$tid, nomatch=0)
+            subset.idx <- gid.match + tid.match + gname.match
+            subset.idx <- subset.idx[subset.idx != 0]
             if(length(subset.idx) == 0) {
-                stop("Gene subset size becomes zero. Are you using the correct database?\n")
+                stop("\nGene subset size becomes zero. Are you using the correct database?\n")
             }
+            
+            # subset.idx <- c(which(genome.coord$gname %in% gene.list & 
+            #                       genome.coord$byname.uniq),
+            #                 which(genome.coord$tid %in% gene.list))
+            # # Test if all gid are NA. If database=refseq, this is true.
+            # if(!all(is.na(genome.coord$gid))) {
+            #     subset.idx <- c(subset.idx, 
+            #                     which(genome.coord$gid %in% gene.list & 
+            #                           genome.coord$bygid.uniq))
+            # }
+            # if(length(subset.idx) == 0) {
+            #     stop("Gene subset size becomes zero. Are you using the correct database?\n")
+            # }
+
             if(samprate < 1) {
-                samp.n <- round(samprate * length(subset.idx))
-                subset.idx <- sample(subset.idx, samp.n)
+                subset.idx <- sampleInSequence(subset.idx, samprate)
             }
+
             coord.list[[i]] <- genome.coord[subset.idx, ]
         }
     }

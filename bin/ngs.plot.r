@@ -264,6 +264,55 @@ for(r in 1:nrow(ctg.tbl)) {
 cat("Done\n")
 
 ########################################
+# Add row names to heatmap data.
+for(i in 1:length(enrichList)) {
+    reg <- ctg.tbl$glist[i]  # gene list name.
+    rownames(enrichList[[i]]) <- paste(coord.list[[reg]]$gname, 
+                                       coord.list[[reg]]$tid, sep=':')
+}
+# Some basic parameters.
+default.width <- 8  # in inches.
+default.height <- 7
+xticks <- genXticks(reg2plot, pint, lgint, pts, flanksize, flankfactor)
+unit.width <- 4
+rr <- 30  # reduce ratio.
+ng.list <- sapply(enrichList, nrow)  # number of genes per heatmap.
+
+# Create image file and plot data into it.
+if(!fi_tag){
+    cat("Plotting figures...")
+    #### Average profile plot. ####
+    out.plot <- paste(oname, '.avgprof.pdf', sep='')
+    pdf(out.plot, width=default.width, height=default.height)
+    plotmat(regcovMat, ctg.tbl$title, bam.pair, xticks, pts, m.pts, f.pts, pint,
+            shade.alp, confiMat, mw)
+    out.dev <- dev.off()
+
+    #### Heatmap. ####
+    # Setup output device.
+    hd <- SetupHeatmapDevice(reg.list, uniq.reg, ng.list, pts, unit.width, rr)
+    reg.hei <- hd$reg.hei  # list of image heights for unique regions.
+    hm.width <- hd$hm.width  # image width.
+    hm.height <- hd$hm.height # image height.
+    lay.mat <- hd$lay.mat  # matrix for heatmap layout.
+    heatmap.mar <- hd$heatmap.mar # heatmap margins.
+
+    out.hm <- paste(oname, '.heatmap.pdf', sep='')
+    pdf(out.hm, width=hm.width, height=hm.height)
+    par(mar=heatmap.mar)
+    layout(lay.mat, heights=reg.hei)
+
+    # Do heatmap plotting.
+    go.list <- plotheat(reg.list, uniq.reg, enrichList, go.algo, ctg.tbl$title, 
+                        bam.pair, xticks, rm.zero, flood.frac)
+    out.dev <- dev.off()
+
+    cat("Done\n")
+} else {
+    go.list <- plotheat(reg.list, uniq.reg, enrichList, go.algo, ctg.tbl$title, 
+                        bam.pair, xticks, rm.zero, flood.frac, do.plot=F)
+}
+
 # Save plotting data.
 cat("Saving results...")
 dir.create(oname, showWarnings=F)
@@ -288,19 +337,13 @@ for(i in 1:length(enrichList)) {
 
 # Avg. profile R data.
 prof.dat <- file.path(oname, 'avgprof.RData')
-default.width <- 8  # in inches.
-default.height <- 7
-xticks <- genXticks(reg2plot, pint, lgint, pts, flanksize, flankfactor)
 save(default.width, default.height, regcovMat, ctg.tbl, bam.pair, xticks, pts, 
      m.pts, f.pts, pint, shade.alp, confiMat, mw, se, file=prof.dat)
 
 # Heatmap R data.
-unit.width <- 4
-rr <- 30  # reduce ratio.
 heat.dat <- file.path(oname, 'heatmap.RData')
-ng.list <- sapply(enrichList, nrow)  # number of genes per heatmap.
 save(reg.list, uniq.reg, ng.list, pts, enrichList, go.algo, ctg.tbl, bam.pair, 
-     xticks, rm.zero, flood.frac, unit.width, rr, file=heat.dat)
+     xticks, rm.zero, flood.frac, unit.width, rr, go.list, file=heat.dat)
 cat("Done\n")
 
 # Wrap results up.
@@ -317,37 +360,5 @@ if(!zip(paste(out.zip, '.zip', sep=''), out.zip, extras='-q')) {
 }
 setwd(cur.dir)
 cat("Done\n")
-
-# Create image file and plot data into it.
-if(!fi_tag){
-    cat("Plotting figures...")
-    #### Average profile plot. ####
-    out.plot <- paste(oname, '.avgprof.pdf', sep='')
-    pdf(out.plot, width=default.width, height=default.height)
-    plotmat(regcovMat, ctg.tbl$title, bam.pair, xticks, pts, m.pts, f.pts, pint,
-            shade.alp, confiMat, mw)
-    dev.off()
-
-    #### Heatmap. ####
-    # Setup output device.
-    hd <- SetupHeatmapDevice(reg.list, uniq.reg, ng.list, pts, unit.width, rr)
-    reg.hei <- hd$reg.hei  # list of image heights for unique regions.
-    hm.width <- hd$hm.width  # image width.
-    hm.height <- hd$hm.height # image height.
-    lay.mat <- hd$lay.mat  # matrix for heatmap layout.
-    heatmap.mar <- hd$heatmap.mar # heatmap margins.
-
-    out.hm <- paste(oname, '.heatmap.pdf', sep='')
-    pdf(out.hm, width=hm.width, height=hm.height)
-    par(mar=heatmap.mar)
-    layout(lay.mat, heights=reg.hei)
-
-    # Do heatmap plotting.
-    plotheat(reg.list, uniq.reg, enrichList, go.algo, ctg.tbl$title, bam.pair, 
-             xticks, rm.zero, flood.frac)
-    dev.off()
-    cat("Done\n")
-}
-
 cat("All done. Cheers!\n")
 

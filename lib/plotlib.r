@@ -390,21 +390,58 @@ OrderGenesHeatmap <- function(n, enrichCombined,
 
 
 plotheat <- function(reg.list, uniq.reg, enrichList, go.algo, title2plot, 
-                     bam.pair, xticks, rm.zero=1, flood.q=.02) {
+                     bam.pair, xticks, rm.zero=1, flood.q=.02, do.plot=T,
+                     hm.color=NULL) {
 # Plot heatmaps with genes ordered according to some algorithm.
 # Args:
 #   reg.list: factor vector of regions as in configuration.
 #   uniq.reg: character vector of unique regions.
 #   enrichList: list of heatmap data.
+#   go.algo: gene order algorithm.
+#   title2plot: title for each heatmap. Same as the legends in avgprof.
+#   bam.pair: boolean tag for bam-pair.
+#   xticks: info for X-axis ticks.
+#   rm.zero: tag for removing all zero profiles.
+#   flood.q: flooding percentage.
+#   do.plot: boolean tag for plotting heatmaps.
+#   hm.color: character for heatmap colors.
+# Returns: ordered gene names for each unique region as a list.
 
     # Setup basic parameters.
     ncolor <- 256
     if(bam.pair) {
-        enrich.palette <- colorRampPalette(c('green', 'black', 'red'), 
-                                           bias=.6, interpolate='spline')
+        if(!is.null(hm.color)) {
+            two.colors <- unlist(strsplit(hm.color, ':'))
+            if(length(two.colors) != 2 || !two.colors[1] %in% colors() ||
+               !two.colors[2] %in% colors()) {
+                warning(sprintf("Color specification:%s is incorrect or they are not R colors. Use default.", hm.color))
+                enrich.palette <- colorRampPalette(c('green', 'black', 'red'), 
+                                                   bias=.6, 
+                                                   interpolate='spline')
+            } else {
+                enrich.palette <- colorRampPalette(c(two.colors[1], 'black', 
+                                                     two.colors[2]), 
+                                                   bias=.6, 
+                                                   interpolate='spline')
+            }
+        } else {
+            enrich.palette <- colorRampPalette(c('green', 'black', 'red'), 
+                                               bias=.6, interpolate='spline')
+        }
     } else {
-        enrich.palette <- colorRampPalette(c('snow', 'red2'))
+        if(!is.null(hm.color)) {
+            if(hm.color %in% colors()) {
+                enrich.palette <- colorRampPalette(c('snow', hm.color))
+            } else {
+                warning(sprintf("Color:%s is not R color. Use default.", 
+                                hm.color))
+                enrich.palette <- colorRampPalette(c('snow', 'red2'))
+            }
+        } else {
+            enrich.palette <- colorRampPalette(c('snow', 'red2'))    
+        }
     }
+
     hm_cols <- ncol(enrichList[[1]])
 
     # Adjust X-axis tick position. In a heatmap, X-axis is [0, 1].
@@ -416,6 +453,8 @@ plotheat <- function(reg.list, uniq.reg, enrichList, go.algo, title2plot,
     # Go through each unique region. 
     # Do NOT use "dopar" in the "foreach" loops here because this will disturb
     # the image order.
+    go.list <- vector('list', length=length(uniq.reg))
+    names(go.list) <- uniq.reg
     for(i in 1:length(uniq.reg)) {
         ur <- uniq.reg[i]
         plist <- which(reg.list==ur)    # get indices in the config file.
@@ -436,6 +475,11 @@ plotheat <- function(reg.list, uniq.reg, enrichList, go.algo, title2plot,
         }
         # for now, just use the 1st gene order. p.s.: pca will provide more than
         # one orders.
+        go.list[[i]] <- rev(rownames(enrichCombined))
+
+        if(!do.plot) {
+            next
+        }
   
         # Split combined profiles back into individual heatmaps.
         for(j in 1:length(plist)) {
@@ -471,6 +515,7 @@ plotheat <- function(reg.list, uniq.reg, enrichList, go.algo, title2plot,
             axis(1, at=xticks$pos, labels=xticks$lab, lwd=1, lwd.ticks=1)
         }
     }
+    go.list
 }
 
 trim <- function(x, p){

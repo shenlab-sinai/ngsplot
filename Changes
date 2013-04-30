@@ -1,7 +1,13 @@
 Revision history for ngs.plot.
 ==============================
 
-1.67.1 Apr 25, 2013
+Recent changes
+
+    - Output gene order as shown in heatmap. Each replot will also generate a 
+      new gene order.
+    - Allow users to change colors of heatmaps.
+
+1.67.1 Apr 26, 2013
     - Important bug fix: the heatmap does not follow the order of given gene 
       list even if "-GO none" is used. This has been fixed.
     - New option "-RZ" to remove profiles that contain zero signal across all 

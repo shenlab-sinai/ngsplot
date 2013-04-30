@@ -257,6 +257,13 @@ replotVars <- function(args.tbl){
         stopifnot(vl$flood.frac >= 0 && vl$flood.frac < 1)
     } 
 
+    #### Heatmap color. ####
+    if('-CO' %in% names(args.tbl)) {
+        vl$hm.color <- as.character(args.tbl['-CO'])
+    } else {
+        vl$hm.color <- NULL
+    }
+
     #### Remove zero tag. ####
     if('-RZ' %in% names(args.tbl)){ 
         vl$rm.zero <- as.integer(args.tbl['-RZ'])

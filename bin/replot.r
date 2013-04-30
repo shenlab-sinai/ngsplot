@@ -28,6 +28,8 @@ cmd.help <- function(){
     cat("           The smaller the value, the taller the heatmap\n")
     cat("    -RZ  Remove all zero profiles in heatmaps(default=1). Set 0 to keep them.\n")
     cat("    -FC  Flooding fraction:[0, 1), default=0.02\n")
+    cat("    -CO  Color for heatmap. For bam-pair, use color-pair(neg_color:pos_color).\n")
+    cat("           Hint: must use R colors, such as darkgreen, yellow and blue2.\n")
     cat("    -P   #CPUs to use. Set 0(default) for auto detection\n")
 
     # cat("-C     Subset columns to plot using a string such as 1,2,4-6,9.")
@@ -64,6 +66,7 @@ repvar.list <- replotVars(args.tbl)
 oname <- repvar.list$oname
 iname <- repvar.list$iname
 cores.number <- repvar.list$cores.number
+hm.color <- repvar.list$hm.color
 # oname: output file root name
 # iname: input zip file name
 # shade.alp: shade area alpha
@@ -109,7 +112,11 @@ if(command == 'prof') {
     }
     plotmat(regcovMat, ctg.tbl$title, bam.pair, xticks, pts, m.pts, f.pts, pint,
             shade.alp, confiMat, mw)
-    dev.off()
+    out.dev <- dev.off()
+    # Save replot data.
+    out.dat <- paste(oname, '.RData', sep='')
+    save(shade.alp, mw, se, file=out.dat)
+
 } else if(command == 'heatmap') {
     load(unz(iname, file.path(ifolder, 'heatmap.RData')))
     # Setup multi-core doMC.
@@ -154,9 +161,14 @@ if(command == 'prof') {
     par(mar=heatmap.mar)
     layout(lay.mat, heights=reg.hei)
     # Do heatmap plotting.
-    plotheat(reg.list, uniq.reg, enrichList, go.algo, ctg.tbl$title, bam.pair, 
-             xticks, rm.zero, flood.frac)
-    dev.off()
+    go.list <- plotheat(reg.list, uniq.reg, enrichList, go.algo, ctg.tbl$title, 
+                        bam.pair, xticks, rm.zero, flood.frac, 
+                        hm.color=hm.color)
+    out.dev <- dev.off()
+    # Save replot data.
+    out.dat <- paste(oname, '.RData', sep='')
+    save(flood.frac, rm.zero, go.algo, rr, go.list, file=out.dat)
+
 } else {
     # Pass.
 }

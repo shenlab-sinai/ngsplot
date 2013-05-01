@@ -18,7 +18,7 @@ sort  $2/merged.bed.tmp|uniq >  $2/merged.bed
 ###2. Alternative exons
 
 #get the significant up-/down-regulated isoforms and Foldchange must be more than 4
-get_difflist.pl  isoform_exp.diff  Control:Treat   4   $2/up.isoform_exp.diff   $2/down.isoform_exp.diff
+get_difflist.pl  isoform_exp.diff  Control:Treat   1   $2/up.isoform_exp.diff   $2/down.isoform_exp.diff
 
 #the Treatment FPKM must be more than 1
 #awk '{if($9 > 1)print $0}'  $2/up.isoform_exp.diff  >  $2/up.isoform_exp.diff.tmp
@@ -52,7 +52,7 @@ rm  $2/up.isoform_exp.diff   $2/down.isoform_exp.diff   $2/splicing.significant.
 ###3. Alternative promoters
 
 #get the significant up-/down-regulated tss_groups and Foldchange must be more than 4
-get_difflist.pl  tss_group_exp.diff   Control:Treat  4  $2/up.tss_group_exp.diff   $2/down.tss_group_exp.diff
+get_difflist.pl  tss_group_exp.diff   Control:Treat  1  $2/up.tss_group_exp.diff   $2/down.tss_group_exp.diff
 
 
 #the Treatment FPKM must be more than 1

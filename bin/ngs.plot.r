@@ -129,6 +129,11 @@ genome <- argvar.list$genome  # genome name, such as mm9, hg19, rn4.
 reg2plot <- argvar.list$reg2plot  # tss, tes, genebody, bed...
 bed.file <- argvar.list$bed.file  # BED file name if reg2plot=bed.
 oname <- argvar.list$oname  # output file root name.
+galaxy <- argvar.list$galaxy 
+if(galaxy==1){
+avgname <- argvar.list$avgname
+heatmapname <- argvar.list$heatmapname
+}
 fi_tag <- argvar.list$fi_tag  # tag for forbidding image output
 lgint <- argvar.list$lgint  # lgint: boolean tag for large interval
 flanksize <- argvar.list$flanksize  # flanking region size
@@ -283,6 +288,9 @@ if(!fi_tag){
     cat("Plotting figures...")
     #### Average profile plot. ####
     out.plot <- paste(oname, '.avgprof.pdf', sep='')
+    if(galaxy==1){
+    out.plot <- paste(avgname, '', sep='')
+    }
     pdf(out.plot, width=default.width, height=default.height)
     plotmat(regcovMat, ctg.tbl$title, bam.pair, xticks, pts, m.pts, f.pts, pint,
             shade.alp, confiMat, mw)
@@ -298,6 +306,9 @@ if(!fi_tag){
     heatmap.mar <- hd$heatmap.mar # heatmap margins.
 
     out.hm <- paste(oname, '.heatmap.pdf', sep='')
+    if(galaxy==1){
+    out.hm <- paste(heatmapname, '', sep='')
+    }  
     pdf(out.hm, width=hm.width, height=hm.height)
     par(mar=heatmap.mar)
     layout(lay.mat, heights=reg.hei)
@@ -314,34 +325,59 @@ if(!fi_tag){
 }
 
 # Save plotting data.
+if(galaxy==1){oname1="data"}
 cat("Saving results...")
-dir.create(oname, showWarnings=F)
+if(galaxy==1){
+   dir.create(oname1, showWarnings=F)
+}else{
+   dir.create(oname, showWarnings=F)
+}
 # Average profiles.
-out.prof <- file.path(oname, 'avgprof.txt')
+if(galaxy==1){
+   out.prof <- file.path(oname1, 'avgprof.txt')
+}else{
+   out.prof <- file.path(oname, 'avgprof.txt')
+}
 write.table(regcovMat, file=out.prof, row.names=F, sep="\t", quote=F)
 
 # Standard errors of mean.
 if(!is.null(confiMat)){
-    out.confi <- file.path(oname, 'sem.txt')
+    if(galaxy==1){
+       out.confi <- file.path(oname1, 'sem.txt')
+    }else{
+       out.confi <- file.path(oname, 'sem.txt')
+    }
     write.table(confiMat, file=out.confi, row.names=F, sep="\t", quote=F)
 }
 
 # Heatmap density values.
 for(i in 1:length(enrichList)) {
     reg <- ctg.tbl$glist[i]  # gene list name.
-    out.heat <- file.path(oname, paste('hm', i, '.txt', sep=''))
+    if(galaxy==1){
+       out.heat <- file.path(oname1, paste('hm', i, '.txt', sep=''))
+    }else{
+       out.heat <- file.path(oname, paste('hm', i, '.txt', sep=''))
+    }
     write.table(cbind(coord.list[[reg]][, c('gid', 'gname', 'tid', 'strand')], 
                       enrichList[[i]]), 
                 file=out.heat, row.names=F, sep="\t", quote=F)
 }
 
 # Avg. profile R data.
-prof.dat <- file.path(oname, 'avgprof.RData')
+if(galaxy==1){
+   prof.dat <- file.path(oname1, 'avgprof.RData')
+}else{
+   prof.dat <- file.path(oname, 'avgprof.RData')
+}
 save(default.width, default.height, regcovMat, ctg.tbl, bam.pair, xticks, pts, 
      m.pts, f.pts, pint, shade.alp, confiMat, mw, se, file=prof.dat)
 
 # Heatmap R data.
-heat.dat <- file.path(oname, 'heatmap.RData')
+if(galaxy==1){
+     heat.dat <- file.path(oname1, 'heatmap.RData')
+}else{
+     heat.dat <- file.path(oname, 'heatmap.RData')
+}
 save(reg.list, uniq.reg, ng.list, pts, enrichList, go.algo, ctg.tbl, bam.pair, 
      xticks, rm.zero, flood.frac, unit.width, rr, go.list, file=heat.dat)
 cat("Done\n")
@@ -349,8 +385,13 @@ cat("Done\n")
 # Wrap results up.
 cat("Wrapping results up...")
 cur.dir <- getwd()
-out.dir <- dirname(oname)
-out.zip <- basename(oname)
+if(galaxy==1){
+    out.dir <- dirname(oname1)
+    out.zip <- basename(oname1)
+}else{
+    out.dir <- dirname(oname)
+    out.zip <- basename(oname)
+}
 setwd(out.dir)
 if(!zip(paste(out.zip, '.zip', sep=''), out.zip, extras='-q')) {
     if(unlink(oname, recursive=T)) {

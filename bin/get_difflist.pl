@@ -74,8 +74,8 @@ for(my $i=1; $i<scalar(@array); $i++ )  #first line is the header
   my $log_value = $string[9];
   my $p_value = $string[12];
   my $significant = $string[13];
-#  if($p_value < 0.05){
-  if($significant eq "yes"){
+  if($p_value < 0.05){
+#  if($significant eq "yes"){
      if($condition eq "Control:Treat"){
         if($log_value > $log_FC ){ 
            print $up_file  $array[$i];

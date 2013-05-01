@@ -58,7 +58,15 @@ setupVars <- function(args.tbl, ctg.tbl){
     vl$genome <- args.tbl['-G']
     vl$reg2plot <- args.tbl['-R']
     vl$oname <- args.tbl['-O']
-
+    if('-Galaxy' %in% names(args.tbl)){
+       stopifnot(as.integer(args.tbl['-Galaxy']) >= 0)
+       vl$galaxy <- as.integer(args.tbl['-Galaxy'])
+       vl$avgname <- args.tbl['-O2']
+       vl$heatmapname <- args.tbl['-O3']
+    }else{
+       vl$galaxy <- as.integer(0)
+    }
+    
     prefix.regions <- c('tss','tes','genebody','exon','cgi')
     if(!vl$reg2plot %in% prefix.regions) {
         vl$bed.file <- vl$reg2plot  # save bed file name.

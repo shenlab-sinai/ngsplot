@@ -119,12 +119,15 @@ if(!suppressMessages(require(utils, warn.conflicts=F))) {
 cat('.')
 cat("Done\n")
 
+# Load table of database: anno.tbl, anno.db.tbl
+load(file.path(progpath, 'database/database.RData'))
 # Configuration: coverage-genelist-title relationships.
 cat("Configuring variables...")
+# Load table of database: anno.tbl
 ctg.tbl <- ConfigTbl(args.tbl)
 
 # Setup variables from arguments.
-argvar.list <- setupVars(args.tbl, ctg.tbl)
+argvar.list <- setupVars(args.tbl, ctg.tbl, anno.tbl)
 genome <- argvar.list$genome  # genome name, such as mm9, hg19, rn4.
 reg2plot <- argvar.list$reg2plot  # tss, tes, genebody, bed...
 bed.file <- argvar.list$bed.file  # BED file name if reg2plot=bed.
@@ -163,7 +166,7 @@ if(cores.number == 0){
 
 # Setup plot-related coordinates and variables.
 source(file.path(progpath, 'lib', 'genedb.r'))
-plotvar.list <- SetupPlotCoord(args.tbl, ctg.tbl, progpath, genome, reg2plot, 
+plotvar.list <- SetupPlotCoord(args.tbl, ctg.tbl, anno.tbl, anno.db.tbl, progpath, genome, reg2plot, 
                                lgint, flanksize, bed.file, samprate)
 coord.list <- plotvar.list$coord.list  # list of coordinates for unique regions.
 rnaseq.gb <- plotvar.list$rnaseq.gb  # tag for RNA-seq data.
@@ -172,6 +175,7 @@ reg.list <- plotvar.list$reg.list  # region list as in config file.
 uniq.reg <- plotvar.list$uniq.reg  # unique region list.
 pint <- plotvar.list$pint  # tag for point interval.
 exonmodel <- plotvar.list$exonmodel  # exon ranges if rnaseq.gb=True.
+Labs <- plotvar.list$Labs # labels for the plot.
 
 # Setup data points for plot.
 source(file.path(progpath, 'lib', 'plotlib.r'))
@@ -278,7 +282,7 @@ for(i in 1:length(enrichList)) {
 # Some basic parameters.
 default.width <- 8  # in inches.
 default.height <- 7
-xticks <- genXticks(reg2plot, pint, lgint, pts, flanksize, flankfactor)
+xticks <- genXticks(reg2plot, pint, lgint, pts, flanksize, flankfactor, Labs)
 unit.width <- 4
 rr <- 30  # reduce ratio.
 ng.list <- sapply(enrichList, nrow)  # number of genes per heatmap.

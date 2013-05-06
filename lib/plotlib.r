@@ -164,7 +164,7 @@ smoothplot <- function(m, radius, method=c('mean', 'median')){
     m
 }
 
-genXticks <- function(reg2plot, pint, lgint, pts, flanksize, flankfactor){
+genXticks <- function(reg2plot, pint, lgint, pts, flanksize, flankfactor, Labs){
 # Generate X-ticks for plotting.
 # Args:
 #   reg2plot: string representation of region.
@@ -174,25 +174,27 @@ genXticks <- function(reg2plot, pint, lgint, pts, flanksize, flankfactor){
 #   flanksize: flanking region size in bps.
 #   flankfactor: flanking region factor.
 # Return: list of x-tick position and label.
-
     if(pint){   # point interval.
-        lab.tbl <- c('TSS', 'TES', 'Center')
-        names(lab.tbl) <- c('tss', 'tes', 'bed')
-        mid.lab <- lab.tbl[reg2plot]
+        # lab.tbl <- c('TSS', 'TES', 'Center')
+        # names(lab.tbl) <- c('tss', 'tes', 'bed')
+        # mid.lab <- lab.tbl[reg2plot]
+        mid.lab <- Labs[1]
         tick.pos <- c(1, (pts - 1)/4, (pts - 1)/2 + 1, (pts - 1)/4*3, pts)
         tick.lab <- as.character(c(-flanksize, -flanksize/2, mid.lab, 
             flanksize/2, flanksize))
     }else{
-        if(reg2plot == 'genebody'){
-            left.lab <- 'TSS'
-            right.lab <- 'TES'
-        }else if(reg2plot == 'exon'){
-            left.lab <- 'Acceptor'
-            right.lab <- 'Donor'
-        }else if(reg2plot == 'cgi' || reg2plot == 'bed'){
-            left.lab <- 'Left'
-            right.lab <- 'Right'
-        }
+        # if(reg2plot == 'genebody'){
+        #     left.lab <- 'TSS'
+        #     right.lab <- 'TES'
+        # }else if(reg2plot == 'exon'){
+        #     left.lab <- 'Acceptor'
+        #     right.lab <- 'Donor'
+        # }else if(reg2plot == 'cgi' || reg2plot == 'bed'){
+        #     left.lab <- 'Left'
+        #     right.lab <- 'Right'
+        # }
+        left.lab <- Labs[1]
+        right.lab <- Labs[2]
         tick.pos <- c(0, pts/5, pts/5*2, pts/5*3, pts/5*4, pts)
         if(lgint){  # large interval: fla int int int fla
             if(flankfactor > 0){  # show percentage at x-tick.

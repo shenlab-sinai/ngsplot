@@ -52,12 +52,13 @@ ConfigTbl <- function(args.tbl, ctg.tbl){
 }
 
 # Setup misc. variables from program arguments for later use.
-setupVars <- function(args.tbl, ctg.tbl){
+setupVars <- function(args.tbl, ctg.tbl, anno.tbl){
 
     vl <- list()  # variable list to be exported.
     vl$genome <- args.tbl['-G']
     vl$reg2plot <- args.tbl['-R']
     vl$oname <- args.tbl['-O']
+
     if('-Galaxy' %in% names(args.tbl)){
        stopifnot(as.integer(args.tbl['-Galaxy']) >= 0)
        vl$galaxy <- as.integer(args.tbl['-Galaxy'])
@@ -67,7 +68,8 @@ setupVars <- function(args.tbl, ctg.tbl){
        vl$galaxy <- as.integer(0)
     }
     
-    prefix.regions <- c('tss','tes','genebody','exon','cgi')
+    prefix.regions <- unique(anno.tbl$Region)
+    # prefix.regions <- c('tss','tes','genebody','exon','cgi')
     if(!vl$reg2plot %in% prefix.regions) {
         vl$bed.file <- vl$reg2plot  # save bed file name.
         vl$reg2plot <- 'bed'  # assume BED input.
@@ -107,8 +109,8 @@ setupVars <- function(args.tbl, ctg.tbl){
         stopifnot(as.integer(args.tbl['-L']) >= 0)
         vl$flanksize <- args.tbl['-L']
     }else{
-        flank.tbl <- c(2000, 2000, 2000, 500, 500, 1000)
-        names(flank.tbl) <- c('tss','tes','genebody','exon','cgi','bed')
+        flank.tbl <- c(2000, 2000, 2000, 500, 500, 1500, 1000, 1000)
+        names(flank.tbl) <- c('tss','tes','genebody','exon','cgi', 'enhancer', 'dhs','bed')
         vl$flanksize <- flank.tbl[vl$reg2plot]
     }
     vl$flanksize <- as.integer(vl$flanksize)

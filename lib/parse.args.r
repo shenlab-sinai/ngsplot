@@ -59,6 +59,7 @@ setupVars <- function(args.tbl, ctg.tbl, anno.tbl){
     vl$reg2plot <- args.tbl['-R']
     vl$oname <- args.tbl['-O']
 
+    #### Switch for Galaxy usage ####
     if('-Galaxy' %in% names(args.tbl)){
        stopifnot(as.integer(args.tbl['-Galaxy']) >= 0)
        vl$galaxy <- as.integer(args.tbl['-Galaxy'])
@@ -68,8 +69,8 @@ setupVars <- function(args.tbl, ctg.tbl, anno.tbl){
        vl$galaxy <- as.integer(0)
     }
     
+    #### Tag for use of bed file ####
     prefix.regions <- unique(anno.tbl$Region)
-    # prefix.regions <- c('tss','tes','genebody','exon','cgi')
     if(!vl$reg2plot %in% prefix.regions) {
         vl$bed.file <- vl$reg2plot  # save bed file name.
         vl$reg2plot <- 'bed'  # assume BED input.
@@ -110,7 +111,8 @@ setupVars <- function(args.tbl, ctg.tbl, anno.tbl){
         vl$flanksize <- args.tbl['-L']
     }else{
         flank.tbl <- c(2000, 2000, 2000, 500, 500, 1500, 1000, 1000)
-        names(flank.tbl) <- c('tss','tes','genebody','exon','cgi', 'enhancer', 'dhs','bed')
+        names(flank.tbl) <- c('tss','tes','genebody','exon','cgi', 'enhancer', 
+                              'dhs','bed')
         vl$flanksize <- flank.tbl[vl$reg2plot]
     }
     vl$flanksize <- as.integer(vl$flanksize)
@@ -191,6 +193,14 @@ setupVars <- function(args.tbl, ctg.tbl, anno.tbl){
         vl$flood.frac <- .02  # <2% and >98% data will be illuminated equally.
     }
 
+    #### Color scale string. ####
+    if('-SC' %in% names(args.tbl)){ 
+        vl$color.scale <- args.tbl['-SC']
+        stopifnot(vl$color.scale %in% c('local', 'region', 'global'))
+    } else {
+        vl$color.scale <- 'local'
+    }
+
     #### Remove zero tag. ####
     if('-RZ' %in% names(args.tbl)){ 
         vl$rm.zero <- as.integer(args.tbl['-RZ'])
@@ -266,6 +276,12 @@ replotVars <- function(args.tbl){
         vl$flood.frac <- as.numeric(args.tbl['-FC'])
         stopifnot(vl$flood.frac >= 0 && vl$flood.frac < 1)
     } 
+
+    #### Color scale string. ####
+    if('-SC' %in% names(args.tbl)){ 
+        vl$color.scale <- args.tbl['-SC']
+        stopifnot(vl$color.scale %in% c('local', 'region', 'global'))
+    }
 
     #### Heatmap color. ####
     if('-CO' %in% names(args.tbl)) {

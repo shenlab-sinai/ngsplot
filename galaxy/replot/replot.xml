@@ -1,0 +1,84 @@
+<tool id="replot_1" name="replot">
+	<command interpreter="bash">
+#if  $choose_command.command == "prof":
+	     replot_prof.sh  $choose_command.command   $zip_file  $replot_file  $choose_command.standard_error  $choose_command.smooth_method    $choose_command.shaded_area  
+#else if  $choose_command.command == "heatmap":
+             replot_heatmap.sh  $choose_command.command   $zip_file  $replot_file  $choose_command.gene_order  $choose_command.reduce_ratio    $choose_command.flooding_fraction
+#end if
+
+	</command>
+	<inputs>
+                <param type="data"  name="zip_file" label="ngsplot zip File"/>
+            <conditional name="choose_command">
+		<param type="select" name="command" label="Choose type for reploting">
+			<option value="prof">prof</option>
+                        <option value="heatmap">heatmap</option>
+		</param>
+                <when value="prof">
+                      <param type="select" name="standard_error" label="Boolean tag for plotting standard errors">
+                        <option value="1">On</option>
+                        <option value="0">Off</option>
+                      </param>
+                      <param type="select" name="smooth_method" label="Moving window width to smooth avg. profiles">
+                        <option value="1">no</option>
+                        <option value="3">slightly</option>
+                        <option value="5">somewhat</option>
+                        <option value="9">quite</option>
+                        <option value="13">super</option>
+                      </param>
+                      <param name="shaded_area" size="10" type="text" value="0" label="Opacity of shaded area, suggested value:[0, 0.5]"/>
+                </when>
+                <when value="heatmap">
+                      <param type="select" name="gene_order" label="Gene order algorithm">
+                        <option value="total">total</option>
+                        <option value="hc">hc</option>
+                        <option value="max">max</option>
+                        <option value="prod">prod</option>
+                        <option value="diff">diff</option>
+                        <option value="pca">pca</option>
+                        <option value="none">none</option>
+                      </param>
+                      <param name="reduce_ratio" size="10" type="text" value="30" label="The parameter controls the heatmap height"/>
+                      <param name="flooding_fraction" size="10" type="text" value="0.02" label="Flooding fraction"/>
+                </when>
+           </conditional>
+	</inputs>
+	<outputs>
+                 <data  format="pdf"  name="replot_file" />	
+	</outputs>
+
+<help>
+**replot Overview**
+
+replot_ can be used to re-create plots with generated data. There are a couple of options for you to tune the figures.
+
+.. _replot: http://code.google.com/p/ngsplot/
+
+------
+
+**Input formats**
+
+replot accepts zip file created by ngs.plot.
+
+------
+
+**Outputs**
+
+replot will re-create plots with generated data according to your options to tune the figure.
+
+------
+
+**replot.r parameter list**
+
+This is a list of implemented replot.r options::
+
+-I             Result zip file created by ngs.plot 
+-SE            Shall standard errors be plotted?(0 or 1)     
+-MW            Moving window width to smooth avg. profiles, must be integer: 1=no(default); 3=slightly; 5=somewhat; 9=quite; 13=super.     
+-H             Opacity of shaded area, suggested value:[0, 0.5]   default=0, i.e. no shading, just curves 
+-GO            Gene order algorithm used in heatmaps: total(default), hc, max, prod, diff, pca and none(according to gene list supplied)     
+-RR            Reduce ratio(default=30). The parameter controls the heatmap height      The smaller the value, the taller the heatmap     
+-FC            Flooding fraction:[0, 1), default=0.02 
+</help>
+</tool>
+

@@ -4,7 +4,7 @@
 # Authors: Li Shen, Ningyi Shao
 # 
 # Created: Feb 19, 2013
-# Last updated: Feb 21, 2013
+# Last updated: May 21, 2013
 #
 
 SetupHeatmapDevice <- function(reg.list, uniq.reg, ng.list, pts, 
@@ -32,25 +32,33 @@ SetupHeatmapDevice <- function(reg.list, uniq.reg, ng.list, pts,
     # Setup image size.
     hm.width <- unit.width * max(reg.np)
     ipl <- .2 # inches per line. Obtained from par->'mai', 'mar'.
-    m.bot <- 2; m.lef <- 1; m.top <- 2; m.rig <- 1 # margin size in lines.
+    m.bot <- 2; m.lef <- 1.5; m.top <- 2; m.rig <- 1.5 # margin size in lines.
+    key.in <- 1.0  # colorkey in inches.
     # Convert #gene to image height.
     reg.hei <- sapply(reg.ng, function(r) {
-                    r * unit.width / pts / reduce.ratio + 
-                    m.bot * ipl + m.top * ipl  # margins are like intercepts.
+                    c(key.in,  # colorkey + margin.
+                      r * unit.width / pts / reduce.ratio + 
+                      m.bot * ipl + m.top * ipl)  # heatmap + margin.
                 })
+    reg.hei <- c(reg.hei)
     hm.height <- sum(reg.hei)
 
     # Setup layout of the heatmaps.
-    lay.mat <- matrix(0, ncol=max(reg.np), nrow=length(reg.np))
-    f.sta <- 1 # figure number start.
-    for(i in 1:length(reg.np)){
-        f.end <- f.sta + reg.np[i] - 1 # figure number end.
-        lay.mat[i, 1:reg.np[i]] <- f.sta : f.end
-        f.sta <- f.sta + reg.np[i]
+    lay.mat <- matrix(0, ncol=max(reg.np), nrow=length(reg.np) * 2)
+    fig.n <- 1  # figure plotting number.
+    for(i in 1:length(reg.np)) {
+        row.upper <- i * 2 - 1
+        row.lower <- i * 2
+        for(j in 1:reg.np[i]) {
+            lay.mat[row.upper, j] <- fig.n;
+            fig.n <- fig.n + 1
+            lay.mat[row.lower, j] <- fig.n;
+            fig.n <- fig.n + 1
+        }
     }
 
     list(reg.hei=reg.hei, hm.width=hm.width, hm.height=hm.height, 
-         lay.mat=lay.mat, heatmap.mar=c(m.bot, m.lef, m.top, m.rig))
+         lay.mat=lay.mat, heatmap.mar=c(m.bot, m.lef, m.top, m.rig) * ipl)
 }
 
 SetPtsSpline <- function(pint, lgint) {
@@ -59,17 +67,16 @@ SetPtsSpline <- function(pint, lgint) {
 #   pint: tag for point interval.
 # Return: list of data points, middle data points, flanking data points.
 
+    pts <- 100  # data points to plot: 0...pts
     if(pint){  # point interval.
-        pts <- 101  # data points to plot and to calculate SEM.
         m.pts <- 1  # middle part points.
         f.pts <- 50 # flanking part points.
     } else {
-        pts <- 100
         if(lgint) {
-            m.pts <- pts / 5 * 3
+            m.pts <- pts / 5 * 3 + 1
             f.pts <- pts / 5
         } else {
-            m.pts <- pts / 5
+            m.pts <- pts / 5 + 1
             f.pts <- pts / 5 * 2
         }
     }
@@ -83,7 +90,7 @@ CreatePlotMat <- function(pts, ctg.tbl) {
 #   ctg.tbl: configuration table.
 # Return: avg. profile matrix initialized to zero.
 
-    regcovMat <- matrix(0, nrow=pts, ncol=nrow(ctg.tbl))
+    regcovMat <- matrix(0, nrow=pts + 1, ncol=nrow(ctg.tbl))
     colnames(regcovMat) <- ctg.tbl$title
     regcovMat
 }
@@ -97,7 +104,7 @@ CreateConfiMat <- function(se, pts, ctg.tbl){
 # Return: standard error matrix initialized to zero or null.
 
     if(se){
-        confiMat <- matrix(0, nrow=pts, ncol=nrow(ctg.tbl))
+        confiMat <- matrix(0, nrow=pts + 1, ncol=nrow(ctg.tbl))
         colnames(confiMat) <- ctg.tbl$title
     } else {
         confiMat <- NULL
@@ -164,7 +171,8 @@ smoothplot <- function(m, radius, method=c('mean', 'median')){
     m
 }
 
-genXticks <- function(reg2plot, pint, lgint, pts, flanksize, flankfactor, Labs){
+genXticks <- function(reg2plot, pint, lgint, pts, flanksize, flankfactor, 
+                      Labs){
 # Generate X-ticks for plotting.
 # Args:
 #   reg2plot: string representation of region.
@@ -173,29 +181,18 @@ genXticks <- function(reg2plot, pint, lgint, pts, flanksize, flankfactor, Labs){
 #   pts: data points.
 #   flanksize: flanking region size in bps.
 #   flankfactor: flanking region factor.
+#   Labs: character vector of labels of the genomic region.
 # Return: list of x-tick position and label.
+
     if(pint){   # point interval.
-        # lab.tbl <- c('TSS', 'TES', 'Center')
-        # names(lab.tbl) <- c('tss', 'tes', 'bed')
-        # mid.lab <- lab.tbl[reg2plot]
         mid.lab <- Labs[1]
-        tick.pos <- c(1, (pts - 1)/4, (pts - 1)/2 + 1, (pts - 1)/4*3, pts)
+        tick.pos <- c(0, pts / 4, pts / 2, pts / 4 * 3, pts)
         tick.lab <- as.character(c(-flanksize, -flanksize/2, mid.lab, 
             flanksize/2, flanksize))
     }else{
-        # if(reg2plot == 'genebody'){
-        #     left.lab <- 'TSS'
-        #     right.lab <- 'TES'
-        # }else if(reg2plot == 'exon'){
-        #     left.lab <- 'Acceptor'
-        #     right.lab <- 'Donor'
-        # }else if(reg2plot == 'cgi' || reg2plot == 'bed'){
-        #     left.lab <- 'Left'
-        #     right.lab <- 'Right'
-        # }
         left.lab <- Labs[1]
         right.lab <- Labs[2]
-        tick.pos <- c(0, pts/5, pts/5*2, pts/5*3, pts/5*4, pts)
+        tick.pos <- c(0, pts / 5, pts / 5 * 2, pts / 5 * 3, pts / 5 * 4, pts)
         if(lgint){  # large interval: fla int int int fla
             if(flankfactor > 0){  # show percentage at x-tick.
                 tick.lab <- c(sprintf("%d%%", -flankfactor*100), 
@@ -259,7 +256,7 @@ plotmat <- function(regcovMat, title2plot, bam.pair, xticks, pts, m.pts, f.pts,
     # Plot profiles.
     ytext <- ifelse(bam.pair, "log2(Fold change vs. control)", 
                               "Read count Per Million mapped reads")
-    xrange <- 1:pts
+    xrange <- 0:pts
     matplot(xrange, regcovMat, xaxt='n', type="l", col=col2use, 
             lty="solid", lwd=3,
             xlab="Genomic Region (5' -> 3')", ylab=ytext)
@@ -291,13 +288,13 @@ plotmat <- function(regcovMat, title2plot, bam.pair, xticks, pts, m.pts, f.pts,
         }
     }
 
+    # Add gray lines indicating feature boundaries.
+    abline(v=f.pts, col="gray", lwd=2)
+
     # If not point interval, add an extra vertical line.
     if(!pint){
-        abline(v=f.pts, col="gray", lwd=2)
+        abline(v=f.pts + m.pts, col="gray", lwd=2)
     }
-
-    # Add gray lines indicating feature boundaries.
-    abline(v=f.pts + m.pts, col="gray", lwd=2)
 
     # Legend.
     legend("topright", title2plot, text.col=col2use)
@@ -393,7 +390,7 @@ OrderGenesHeatmap <- function(n, enrichCombined,
 
 plotheat <- function(reg.list, uniq.reg, enrichList, go.algo, title2plot, 
                      bam.pair, xticks, rm.zero=1, flood.q=.02, do.plot=T,
-                     hm.color=NULL) {
+                     hm.color=NULL, color.scale='local') {
 # Plot heatmaps with genes ordered according to some algorithm.
 # Args:
 #   reg.list: factor vector of regions as in configuration.
@@ -406,8 +403,11 @@ plotheat <- function(reg.list, uniq.reg, enrichList, go.algo, title2plot,
 #   rm.zero: tag for removing all zero profiles.
 #   flood.q: flooding percentage.
 #   do.plot: boolean tag for plotting heatmaps.
-#   hm.color: character for heatmap colors.
+#   hm.color: string for heatmap colors.
+#   scale: string for the method to adjust color scale.
 # Returns: ordered gene names for each unique region as a list.
+
+    # browser()
 
     # Setup basic parameters.
     ncolor <- 256
@@ -447,10 +447,36 @@ plotheat <- function(reg.list, uniq.reg, enrichList, go.algo, title2plot,
     hm_cols <- ncol(enrichList[[1]])
 
     # Adjust X-axis tick position. In a heatmap, X-axis is [0, 1].
-    mat.xsz <- tail(xticks$pos, n=1) - xticks$pos[1] + 1
-    xticks$pos <- xticks$pos - xticks$pos[1] + 1  # shift left-most to 1.
-    xticks$pos <- xticks$pos / mat.xsz  # scale to the same size.
+    # Assume xticks$pos is from 0 to N(>0).
+    xticks$pos <- xticks$pos / tail(xticks$pos, n=1)  # scale to the same size.
 
+    # Define a function to calculate color breaks.
+    ColorBreaks <- function(max.e, min.e, bam.pair, ncolor) {
+    # Args:
+    #   max.e: maximum enrichment value to be mapped to color.
+    #   min.e: minimum enrichment value to be mapped to color.
+    #   bam.pair: boolean tag for bam-pair.
+    #   ncolor: number of colors to use.
+    # Returns: vector of color breaks.
+
+        # If bam-pair is used, create breaks for positives and negatives 
+        # separately. If log2 ratios are all positive or negative, use only 
+        # half of the color space.
+        if(bam.pair) {
+            max.e <- ifelse(max.e > 0, max.e, 1)
+            min.e <- ifelse(min.e < 0, min.e, -1)
+            c(seq(min.e, 0, length.out=ncolor / 2 + 1),
+              seq(0, max.e, length.out=ncolor / 2 + 1)[-1])
+        } else {
+            seq(min.e, max.e, length.out=ncolor + 1)
+        }
+    }
+
+    # If color scale is global, calculate breaks and quantile here.
+    if(color.scale == 'global') {
+        flood.pts <- quantile(c(enrichList, recursive=T), c(flood.q, 1-flood.q))
+        brk.use <- ColorBreaks(flood.pts[2], flood.pts[1], bam.pair, ncolor)
+    }
 
     # Go through each unique region. 
     # Do NOT use "dopar" in the "foreach" loops here because this will disturb
@@ -459,7 +485,7 @@ plotheat <- function(reg.list, uniq.reg, enrichList, go.algo, title2plot,
     names(go.list) <- uniq.reg
     for(i in 1:length(uniq.reg)) {
         ur <- uniq.reg[i]
-        plist <- which(reg.list==ur)    # get indices in the config file.
+        plist <- which(reg.list==ur)  # get indices in the config file.
 
         # Combine all profiles into one.
         enrichCombined <- do.call('cbind', enrichList[plist])
@@ -468,6 +494,13 @@ plotheat <- function(reg.list, uniq.reg, enrichList, go.algo, title2plot,
         # genes.
         if(rm.zero) {
             enrichCombined <- enrichCombined[rowSums(enrichCombined) != 0, ]
+        }
+
+        # If color scale is region, calculate breaks and quantile here.
+        if(color.scale == 'region') {
+            flood.pts <- quantile(c(enrichCombined, recursive=T), 
+                                  c(flood.q, 1-flood.q))
+            brk.use <- ColorBreaks(flood.pts[2], flood.pts[1], bam.pair, ncolor)
         }
 
         # Order genes.
@@ -483,32 +516,33 @@ plotheat <- function(reg.list, uniq.reg, enrichList, go.algo, title2plot,
             next
         }
   
-        # Split combined profiles back into individual heatmaps.
+        # Go through each sample and do plot.
         for(j in 1:length(plist)) {
             pj <- plist[j]  # index in the original config.
 
+            # Split combined profiles back into individual heatmaps.
             enrichList[[pj]] <- enrichCombined[, ((j-1)*hm_cols+1) : 
                                                  (j*hm_cols)]
 
-            # Flooding extreme values which are identified by quantiles.
-            flood.pts <- quantile(c(enrichList[[pj]], recursive=T), 
-                                  c(flood.q, 1-flood.q))
+            # If color scale is local, calculate breaks and quantiles here.
+            if(color.scale == 'local') {
+                flood.pts <- quantile(c(enrichList[[pj]], recursive=T), 
+                                      c(flood.q, 1-flood.q))
+                brk.use <- ColorBreaks(flood.pts[2], flood.pts[1], bam.pair, 
+                                       ncolor)
+            }
+
+            # Flooding extreme values.
             enrichList[[pj]][ enrichList[[pj]] < flood.pts[1] ] <- flood.pts[1]
             enrichList[[pj]][ enrichList[[pj]] > flood.pts[2] ] <- flood.pts[2]
 
-            # Determine breaks of color mapping. Create breaks for positives
-            # and negatives separately. If log2 ratios are all positive or 
-            # negative, use only half of the color space.
-            max.e <- max(enrichList[[pj]])
-            min.e <- min(enrichList[[pj]])
-            if(bam.pair) {
-                max.e <- ifelse(max.e > 0, max.e, 1)
-                min.e <- ifelse(min.e < 0, min.e, -1)
-                brk.use <- c(seq(min.e, 0, length.out=ncolor / 2 + 1),
-                             seq(0, max.e, length.out=ncolor / 2 + 1)[-1])
-            } else {
-                brk.use <- seq(min.e, max.e, length.out=ncolor + 1)
-            }
+            # Draw colorkey.
+            image(z=matrix(brk.use, ncol=1), col=enrich.palette(ncolor), 
+                  breaks=brk.use, axes=F, useRaster=T, main='Colorkey')
+            axis(1, at=seq(0, 1, length.out=5), 
+                 labels=format(brk.use[seq(1, ncolor + 1, length.out=5)], 
+                               digits=1), 
+                 lwd=1, lwd.ticks=1)
 
             # Draw heatmap.
             image(z=t(enrichList[[pj]]), col=enrich.palette(ncolor), 

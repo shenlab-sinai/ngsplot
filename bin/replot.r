@@ -27,6 +27,10 @@ cmd.help <- function(){
     cat("    -RR  Reduce ratio(default=30). The parameter controls the heatmap height\n")
     cat("           The smaller the value, the taller the heatmap\n")
     cat("    -RZ  Remove all zero profiles in heatmaps(default=1). Set 0 to keep them.\n")
+    cat("    -SC  Color scale used to map values to colors in a heatmap.\n")
+    cat("           local(default): base on each individual heatmap\n")
+    cat("           region: base on all heatmaps belong to the same region\n")
+    cat("           global: base on all heatmaps together\n")
     cat("    -FC  Flooding fraction:[0, 1), default=0.02\n")
     cat("    -CO  Color for heatmap. For bam-pair, use color-pair(neg_color:pos_color).\n")
     cat("           Hint: must use R colors, such as darkgreen, yellow and blue2.\n")
@@ -38,6 +42,7 @@ cmd.help <- function(){
 
 # Read command.
 args <- commandArgs(T)
+# args <- unlist(strsplit('heatmap -I h123vsTot.cgi.ProximalPromoter.zip -O test.scale -SC local', ' '))
 if(length(args) < 1) {
     cmd.help()
     stop("No arguments provided.\n")
@@ -137,6 +142,11 @@ if(command == 'prof') {
     if('flood.frac' %in% names(repvar.list)) {
         flood.frac <- repvar.list$flood.frac
     }
+    if('color.scale' %in% names(repvar.list)) {
+        color.scale <- repvar.list$color.scale
+    } else if(!'color.scale' %in% ls()) {  # backward compatibility.
+        color.scale <- 'local'
+    }
     if('rm.zero' %in% names(repvar.list)) {
         rm.zero <- repvar.list$rm.zero
     } else if(!'rm.zero' %in% ls()) {  # backward compatibility.
@@ -158,12 +168,12 @@ if(command == 'prof') {
     # Do plot.
     out.hm <- paste(oname, '.pdf', sep='')
     pdf(out.hm, width=hm.width, height=hm.height)
-    par(mar=heatmap.mar)
+    par(mai=heatmap.mar)
     layout(lay.mat, heights=reg.hei)
     # Do heatmap plotting.
     go.list <- plotheat(reg.list, uniq.reg, enrichList, go.algo, ctg.tbl$title, 
                         bam.pair, xticks, rm.zero, flood.frac, 
-                        hm.color=hm.color)
+                        hm.color=hm.color, color.scale=color.scale)
     out.dev <- dev.off()
     # Save replot data.
     out.dat <- paste(oname, '.RData', sep='')

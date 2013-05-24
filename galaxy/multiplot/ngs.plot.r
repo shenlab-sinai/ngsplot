@@ -19,16 +19,20 @@ cmd.help <- function(){
     cat("  -G   Genome name, currently supported: mm9, hg19, rn4, sacCer3(ensembl only)\n")
     cat("  -R   Genomic regions to plot: tss, tes, genebody, exon, cgi or *.bed\n")
     cat("  -C   Indexed bam file or a configuration file for multiplot\n")
-    cat("  -O   Name for output: multiple files will be generated\n")
+    cat("  -O   Name for zip output: multiple files will be generated\n")
+    cat("  -O2  Name for avg output: avg pdf file will be generated\n")
+    cat("  -O3  Name for heatmap output: heat map pdf file will be generated\n")
     cat("## Optional parameters related to configuration file:\n")
     cat("  -E   Gene list to subset regions\n")
     cat("  -T   Image title\n")
     cat("## Important optional parameters:\n")
-    cat("  -F   Further information provided to select database table or plottype:\n")
-    cat("         This is a string of description separated by comma.\n")
-    cat("         E.g. protein_coding,K562,rnaseq(order of descriptors does not matter)\n")
-    cat("              means coding genes in K562 cell line drawn in rnaseq mode.\n")
-    cat("  -D   Gene database: ensembl(default), refseq\n")
+    cat("  -F   Further information can be provided to subset regions:\n")
+    cat("         for genebody: chipseq(default), rnaseq.\n")
+    cat("         for exon: canonical(default), variant, promoter, polyA,\n")
+    cat("           altAcceptor, altDonor, altBoth.\n")
+    cat("         for cgi: ProximalPromoter(default), Promoter1k, Promoter3k,\n")
+    cat("           Genebody, Genedesert, OtherIntergenic, Pericentromere.\n")
+    cat("  -D   Gene database: refseq(default), ensembl\n")
     cat("  -I   Shall interval be larger than flanking in plot?(0 or 1, default=automatic)\n")
     cat("  -L   Flanking region size\n")
     cat("  -N   Flanking region factor(will override flanking size)\n")
@@ -44,11 +48,6 @@ cmd.help <- function(){
     cat("  -SE  Shall standard errors be plotted?(0 or 1)\n")
     cat("  -RB  The fraction of extreme values to be trimmed on both ends\n")
     cat("         default=0, 0.05 means 5% of extreme values will be trimmed\n")
-    cat("  -RZ  Remove all zero profiles in heatmaps(default=1). Set 0 to keep them.\n")
-    cat("  -SC  Color scale used to map values to colors in a heatmap.\n")
-    cat("         local(default): base on each individual heatmap\n")
-    cat("         region: base on all heatmaps belong to the same region\n")
-    cat("         global: base on all heatmaps together\n")
     cat("  -FC  Flooding fraction:[0, 1), default=0.02\n")
     cat("  -FI  Forbid image output if set to 1(default=0)\n")
     cat("  -MW  Moving window width to smooth avg. profiles, must be integer\n")
@@ -74,7 +73,8 @@ if(progpath == "") {
 
 # Input argument parser.
 source(file.path(progpath, 'lib', 'parse.args.r'))
-args.tbl <- parseArgs(args, c('-G', '-C', '-R', '-O'))
+#args.tbl <- parseArgs(args, c('-G', '-C', '-R', '-O'))
+args.tbl <- parseArgs(args, c('-G', '-C', '-R', '-O', '-O2', '-O3'))
 if(is.null(args.tbl)){
     cmd.help()
     stop('Error in parsing command line arguments. Stop.\n')
@@ -121,23 +121,18 @@ if(!suppressMessages(require(utils, warn.conflicts=F))) {
 cat('.')
 cat("Done\n")
 
-# Load table of database: anno.tbl, anno.db.tbl
-load(file.path(progpath, 'database/database.RData'))
 # Configuration: coverage-genelist-title relationships.
 cat("Configuring variables...")
 ctg.tbl <- ConfigTbl(args.tbl)
 
 # Setup variables from arguments.
-argvar.list <- setupVars(args.tbl, ctg.tbl, anno.tbl)
+argvar.list <- setupVars(args.tbl, ctg.tbl)
 genome <- argvar.list$genome  # genome name, such as mm9, hg19, rn4.
 reg2plot <- argvar.list$reg2plot  # tss, tes, genebody, bed...
 bed.file <- argvar.list$bed.file  # BED file name if reg2plot=bed.
 oname <- argvar.list$oname  # output file root name.
-galaxy <- argvar.list$galaxy  # tag for Galaxy use.
-if(galaxy) {
-    avgname <- argvar.list$avgname
-    heatmapname <- argvar.list$heatmapname
-}
+avgname <- argvar.list$avgname
+heatmapname <- argvar.list$heatmapname
 fi_tag <- argvar.list$fi_tag  # tag for forbidding image output
 lgint <- argvar.list$lgint  # lgint: boolean tag for large interval
 flanksize <- argvar.list$flanksize  # flanking region size
@@ -148,9 +143,7 @@ mw <- argvar.list$mw  # moving window width for smooth function.
 cores.number <- argvar.list$cores.number  # #CPUs
 se <- argvar.list$se  # se: tag for plotting stand errors
 robust <- argvar.list$robust  # robust stat fraction
-color.scale <- argvar.list$color.scale  # string for color scale.
 flood.frac <- argvar.list$flood.frac  # flooding fraction.
-rm.zero <- argvar.list$rm.zero  # remove all zero tag.
 go.algo <- argvar.list$go.algo  # gene order algorithm used in heatmaps.
 gcs <- argvar.list$gcs  # gcs: chunk size for grouping genes.
 fraglen <- argvar.list$fraglen  # fragment length for physical coverage.
@@ -168,9 +161,8 @@ if(cores.number == 0){
 
 # Setup plot-related coordinates and variables.
 source(file.path(progpath, 'lib', 'genedb.r'))
-plotvar.list <- SetupPlotCoord(args.tbl, ctg.tbl, anno.tbl, anno.db.tbl, 
-                               progpath, genome, reg2plot, lgint, flanksize, 
-                               bed.file, samprate)
+plotvar.list <- SetupPlotCoord(args.tbl, ctg.tbl, progpath, genome, reg2plot, 
+                               lgint, flanksize, bed.file, samprate)
 coord.list <- plotvar.list$coord.list  # list of coordinates for unique regions.
 rnaseq.gb <- plotvar.list$rnaseq.gb  # tag for RNA-seq data.
 lgint <- plotvar.list$lgint  # lgint: automatically determined if not specified.
@@ -178,7 +170,6 @@ reg.list <- plotvar.list$reg.list  # region list as in config file.
 uniq.reg <- plotvar.list$uniq.reg  # unique region list.
 pint <- plotvar.list$pint  # tag for point interval.
 exonmodel <- plotvar.list$exonmodel  # exon ranges if rnaseq.gb=True.
-Labs <- plotvar.list$Labs # labels for the plot.
 
 # Setup data points for plot.
 source(file.path(progpath, 'lib', 'plotlib.r'))
@@ -276,134 +267,56 @@ for(r in 1:nrow(ctg.tbl)) {
 cat("Done\n")
 
 ########################################
-# Add row names to heatmap data.
-for(i in 1:length(enrichList)) {
-    reg <- ctg.tbl$glist[i]  # gene list name.
-    rownames(enrichList[[i]]) <- paste(coord.list[[reg]]$gname, 
-                                       coord.list[[reg]]$tid, sep=':')
-}
-# Some basic parameters.
-default.width <- 8  # in inches.
-default.height <- 7
-xticks <- genXticks(reg2plot, pint, lgint, pts, flanksize, flankfactor, Labs)
-unit.width <- 4
-rr <- 30  # reduce ratio.
-ng.list <- sapply(enrichList, nrow)  # number of genes per heatmap.
-
-# Create image file and plot data into it.
-if(!fi_tag){
-    cat("Plotting figures...")
-    #### Average profile plot. ####
-    if(galaxy) {
-        out.plot <- avgname
-    } else {
-        out.plot <- paste(oname, '.avgprof.pdf', sep='')
-    }
-    pdf(out.plot, width=default.width, height=default.height)
-    plotmat(regcovMat, ctg.tbl$title, bam.pair, xticks, pts, m.pts, f.pts, pint,
-            shade.alp, confiMat, mw)
-    out.dev <- dev.off()
-
-    #### Heatmap. ####
-    # Setup output device.
-    hd <- SetupHeatmapDevice(reg.list, uniq.reg, ng.list, pts, unit.width, rr)
-    reg.hei <- hd$reg.hei  # list of image heights for unique regions.
-    hm.width <- hd$hm.width  # image width.
-    hm.height <- hd$hm.height # image height.
-    lay.mat <- hd$lay.mat  # matrix for heatmap layout.
-    heatmap.mar <- hd$heatmap.mar # heatmap margins in inches.
-
-    if(galaxy) {
-        out.hm <- heatmapname
-    } else {
-        out.hm <- paste(oname, '.heatmap.pdf', sep='')
-    }
-    pdf(out.hm, width=hm.width, height=hm.height)
-    par(mai=heatmap.mar)
-    layout(lay.mat, heights=reg.hei)
-
-    # Do heatmap plotting.
-    go.list <- plotheat(reg.list, uniq.reg, enrichList, go.algo, ctg.tbl$title, 
-                        bam.pair, xticks, rm.zero, flood.frac, 
-                        color.scale=color.scale)
-    out.dev <- dev.off()
-
-    cat("Done\n")
-} else {
-    go.list <- plotheat(reg.list, uniq.reg, enrichList, go.algo, ctg.tbl$title, 
-                        bam.pair, xticks, rm.zero, flood.frac, do.plot=F,
-                        color.scale=color.scale)
-}
-
 # Save plotting data.
-if(galaxy==1){oname1="data"}
+oname1="data"
 cat("Saving results...")
-if(galaxy==1){
-   dir.create(oname1, showWarnings=F)
-}else{
-   dir.create(oname, showWarnings=F)
-}
+#dir.create(oname, showWarnings=F)
+dir.create(oname1, showWarnings=F)
 # Average profiles.
-if(galaxy==1){
-   out.prof <- file.path(oname1, 'avgprof.txt')
-}else{
-   out.prof <- file.path(oname, 'avgprof.txt')
-}
+#out.prof <- file.path(oname, 'avgprof.txt')
+out.prof <- file.path(oname1, 'avgprof.txt')
 write.table(regcovMat, file=out.prof, row.names=F, sep="\t", quote=F)
 
 # Standard errors of mean.
 if(!is.null(confiMat)){
-    if(galaxy==1){
-       out.confi <- file.path(oname1, 'sem.txt')
-    }else{
-       out.confi <- file.path(oname, 'sem.txt')
-    }
+#    out.confi <- file.path(oname, 'sem.txt')
+    out.confi <- file.path(oname1, 'sem.txt')
     write.table(confiMat, file=out.confi, row.names=F, sep="\t", quote=F)
 }
 
 # Heatmap density values.
 for(i in 1:length(enrichList)) {
-    reg <- ctg.tbl$glist[i]  # gene list name.
-    if(galaxy==1){
-       out.heat <- file.path(oname1, paste('hm', i, '.txt', sep=''))
-    }else{
-       out.heat <- file.path(oname, paste('hm', i, '.txt', sep=''))
-    }
-    write.table(cbind(coord.list[[reg]][, c('gid', 'gname', 'tid', 'strand')], 
-                      enrichList[[i]]), 
-                file=out.heat, row.names=F, sep="\t", quote=F)
+#    out.heat <- file.path(oname, paste('hm', i, '.txt', sep=''))
+    out.heat <- file.path(oname1, paste('hm', i, '.txt', sep=''))
+    write.table(enrichList[[i]], file=out.heat, row.names=F, sep="\t", quote=F)
 }
 
 # Avg. profile R data.
-if(galaxy==1){
-   prof.dat <- file.path(oname1, 'avgprof.RData')
-}else{
-   prof.dat <- file.path(oname, 'avgprof.RData')
-}
+#prof.dat <- file.path(oname, 'avgprof.RData')
+prof.dat <- file.path(oname1, 'avgprof.RData')
+default.width <- 8  # in inches.
+default.height <- 7
+xticks <- genXticks(reg2plot, pint, lgint, pts, flanksize, flankfactor)
 save(default.width, default.height, regcovMat, ctg.tbl, bam.pair, xticks, pts, 
      m.pts, f.pts, pint, shade.alp, confiMat, mw, se, file=prof.dat)
 
 # Heatmap R data.
-if(galaxy==1){
-     heat.dat <- file.path(oname1, 'heatmap.RData')
-}else{
-     heat.dat <- file.path(oname, 'heatmap.RData')
-}
+unit.width <- 4
+rr <- 30  # reduce ratio.
+#heat.dat <- file.path(oname, 'heatmap.RData')
+heat.dat <- file.path(oname1, 'heatmap.RData')
+ng.list <- sapply(enrichList, nrow)  # number of genes per heatmap.
 save(reg.list, uniq.reg, ng.list, pts, enrichList, go.algo, ctg.tbl, bam.pair, 
-     xticks, rm.zero, flood.frac, unit.width, rr, go.list, color.scale, 
-     file=heat.dat)
+     xticks, flood.frac, unit.width, rr, file=heat.dat)
 cat("Done\n")
 
 # Wrap results up.
 cat("Wrapping results up...")
 cur.dir <- getwd()
-if(galaxy==1){
-    out.dir <- dirname(oname1)
-    out.zip <- basename(oname1)
-}else{
-    out.dir <- dirname(oname)
-    out.zip <- basename(oname)
-}
+#out.dir <- dirname(oname)
+out.dir <- dirname(oname1)
+#out.zip <- basename(oname)
+out.zip <- basename(oname1)
 setwd(out.dir)
 if(!zip(paste(out.zip, '.zip', sep=''), out.zip, extras='-q')) {
     if(unlink(oname, recursive=T)) {
@@ -413,5 +326,39 @@ if(!zip(paste(out.zip, '.zip', sep=''), out.zip, extras='-q')) {
 }
 setwd(cur.dir)
 cat("Done\n")
+
+# Create image file and plot data into it.
+if(!fi_tag){
+    cat("Plotting figures...")
+    #### Average profile plot. ####
+#    out.plot <- paste(oname, '.avgprof.pdf', sep='')
+    out.plot <- paste(avgname, '', sep='')
+    pdf(out.plot, width=default.width, height=default.height)
+    plotmat(regcovMat, ctg.tbl$title, bam.pair, xticks, pts, m.pts, f.pts, pint,
+            shade.alp, confiMat, mw)
+    dev.off()
+
+    #### Heatmap. ####
+    # Setup output device.
+    hd <- SetupHeatmapDevice(reg.list, uniq.reg, ng.list, pts, unit.width, rr)
+    reg.hei <- hd$reg.hei  # list of image heights for unique regions.
+    hm.width <- hd$hm.width  # image width.
+    hm.height <- hd$hm.height # image height.
+    lay.mat <- hd$lay.mat  # matrix for heatmap layout.
+    heatmap.mar <- hd$heatmap.mar # heatmap margins.
+
+#    out.hm <- paste(oname, '.heatmap.pdf', sep='')
+    out.hm <- paste(heatmapname, '', sep='')
+    pdf(out.hm, width=hm.width, height=hm.height)
+    par(mar=heatmap.mar)
+    layout(lay.mat, heights=reg.hei)
+
+    # Do heatmap plotting.
+    plotheat(reg.list, uniq.reg, enrichList, go.algo, ctg.tbl$title, bam.pair, 
+             xticks, flood.frac)
+    dev.off()
+    cat("Done\n")
+}
+
 cat("All done. Cheers!\n")
 

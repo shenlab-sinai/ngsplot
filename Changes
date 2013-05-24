@@ -2,10 +2,20 @@ Revision history for ngs.plot.
 ==============================
 
 Recent changes
+    - Fixed a bug in plotting X-axis in avg. profiles introduced in v1.68.
 
+    
+
+1.68 May 8, 2013
     - Output gene order as shown in heatmap. Each replot will also generate a 
       new gene order.
-    - Allow users to change colors of heatmaps.
+    - Allow users to change colors of heatmaps (replot).
+    - Added colorkey to heatmaps. You do not have to re-generate your plots, 
+      use replot.r. Also allow a user to adjust scale at global, region and 
+      local levels.
+    - Better sizing of figures and margins in heatmaps.
+    - Fixed a bug in X-axis plotting in heatmaps.
+    - Added a switch to integrate with Galaxy installation.
 
 1.67.1 Apr 26, 2013
     - Important bug fix: the heatmap does not follow the order of given gene 

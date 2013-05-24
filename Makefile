@@ -13,7 +13,7 @@ LIB=lib/parse.args.r lib/plotlib.r lib/coverage.r lib/genedb.r
 ALLR=${BINNGSP} ${LIB}
 
 # ngs.plot database, example, readme, etc.
-OTHERS=database example README Changes
+OTHERS=database example README Changes galaxy
 
 # ngs.plot distribution folder
 DISTFOLDER=ngsplot

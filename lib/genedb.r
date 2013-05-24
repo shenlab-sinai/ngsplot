@@ -1,18 +1,29 @@
-# Function to remove ".fa" if needed, or to add "chr" if absent.
 chromFormat <- function(crn, ...){
+# Format chromosome names to our standard.
+# Args:
+#   crn: character vector of chromosome names.
+# Returns: character vector of formatted chromosome names.
+
     crn <- sub('.fa$', '', crn)
     nochr.i <- grep('^chr', crn, invert=T)
     crn[nochr.i] <- paste('chr', crn[nochr.i], sep='')
     crn
 }
 
-filterFIScore <- function(db.info, finfos){
-    score <- 3 - length(intersect(as.matrix(db.info[c("FI.1", "FI.2", "FI.3")]), as.matrix(finfos)))
-    return(score)
+FIScoreIntersect <- function(db.info, v.finfo){
+# Further info score based on intersection with database FI columns.
+# Used to select database files.
+# Args: 
+#   db.info: one record of annotation database table.
+#   v.finfo: further info that is split into vector.
+# Returns: a score for the intersection between database and further info.
+
+    length(intersect(as.vector(db.info[c("FI.1", "FI.2", "FI.3")]), v.finfo))
 }
 
-SetupPlotCoord <- function(args.tbl, ctg.tbl, anno.tbl, anno.db.tbl, progpath, genome, reg2plot, 
-                           lgint, flanksize, bed.file, samprate) {
+SetupPlotCoord <- function(args.tbl, ctg.tbl, anno.tbl, anno.db.tbl, progpath, 
+                           genome, reg2plot, lgint, flanksize, bed.file, 
+                           samprate) {
 # Load genomic coordinates for plot based on the input arguments.
 # Args:
 #   args.tbl: input argument table
@@ -26,14 +37,20 @@ SetupPlotCoord <- function(args.tbl, ctg.tbl, anno.tbl, anno.db.tbl, progpath, g
 #   flanksize: flanking region size.
 #   samprate: sampling rate
 
+    # Subset using genome-region combination.
     key <- paste(genome, reg2plot, sep='.')
+    if(!key %in% rownames(anno.tbl)) {
+        stop("The combination of genome and region does not exist.\nYou may need to install the genome or the region does not exist yet.\n")
+    }
     anno.parameters <- anno.tbl[key, ]
-    # fi.allowed <- strsplit(as.character(anno.parameters$FurtherInfo), ',')[[1]]
-
+    db.match.mask <- anno.db.tbl$Genome==genome & 
+                     anno.db.tbl$Region==reg2plot
+    anno.db.candidates <- anno.db.tbl[db.match.mask, ]
+    
     # Database flavor.
     if('-D' %in% names(args.tbl)){  
         database <- as.character(args.tbl['-D'])
-        database.allowed <- as.character(unique(anno.db.tbl[which(anno.db.tbl$Genome==genome & anno.db.tbl$Region==reg2plot), "DB"]))
+        database.allowed <- unique(anno.db.candidates$DB)
         stopifnot(database %in% database.allowed)
     }else{
         database <- anno.parameters$DefaultDB
@@ -48,94 +65,41 @@ SetupPlotCoord <- function(args.tbl, ctg.tbl, anno.tbl, anno.db.tbl, progpath, g
         finfo <- NULL
     }
 
-    # Load coordinate dataset for the specified region. 
-    # Use further info to subset regions.
-    bed.tag <- F  # is the region a BED file?
-
-    # if(reg2plot == 'tss' || reg2plot == 'tes') {
-    #     f.load <- paste(prefix, 'genebody', sep='.')
-    # } else if(reg2plot == 'genebody') {
-    #     if(!is.null(finfo)){
-    #         gb.allowed <- c('chipseq', 'rnaseq')
-    #         stopifnot(finfo %in% gb.allowed)
-    #     } else {
-    #         finfo <- 'chipseq'            
-    #     }
-    #     f.load <- paste(prefix, 'genebody', sep='.')
-    # } else if(reg2plot == 'exon') {
-    #     if(!is.null(finfo)){
-    #         exon.allowed <- c('canonical', 'variant', 'promoter', 'polyA', 
-    #                           'altAcceptor', 'altDonor', 'altBoth')
-    #         stopifnot(finfo %in% exon.allowed)
-    #     } else {
-    #         finfo <- 'canonical'            
-    #     }
-    #     f.load <- paste(prefix, 'exon', finfo, sep='.')
-    # } else if(reg2plot == 'cgi') {
-    #     if(!is.null(finfo)){
-    #         cgi.allowed <- c("Genebody", "Genedesert", "OtherIntergenic", 
-    #                          "Pericentromere", "Promoter1k", "Promoter3k", 
-    #                          "ProximalPromoter")
-    #         stopifnot(finfo %in% cgi.allowed)
-    #     } else {
-    #         finfo <- 'ProximalPromoter'
-    #     }
-    #     f.load <- paste(prefix, 'cgi', finfo, sep='.')
-    # } else if(reg2plot == 'bed') {
-    #     stopifnot(!is.null(bed.file))
-    #     bed.coord <- read.table(bed.file, sep="\t")
-    #     if(ncol(bed.coord) <3){
-    #         stop('Input file must contain at least 3 columns!')
-    #     }
-    #     genome.coord <- data.frame(chrom=chromFormat(bed.coord[, 1]), 
-    #                                start=bed.coord[, 2]+1, end=bed.coord[, 3], 
-    #                                gid=NA, gname='N', tid='N', strand='+', 
-    #                                byname.uniq=T, bygid.uniq=NA)
-    #     if(ncol(bed.coord) >=4){
-    #         genome.coord$gname <- bed.coord[, 4]
-    #     }
-    #     if(ncol(bed.coord) >=5){
-    #         genome.coord$tid <- bed.coord[, 5]
-    #     }
-    #     if(ncol(bed.coord) >=6){
-    #         genome.coord$strand <- bed.coord[, 6]
-    #     }
-    #     f.load <- NULL
-    #     # bed.tag <- T
-    # } else {
-    #     # pass.
-    # }
-
     if(reg2plot!='bed'){
-        Labs <- strsplit(as.character(anno.parameters$PointLab), ",")[[1]]
+        Labs <- unlist(strsplit(anno.parameters$PointLab, ","))
         if(length(Labs)==1){
             pint <- TRUE
         }else{
             pint <- FALSE
         }
-        anno.db.candidates <- anno.db.tbl[which(anno.db.tbl$Genome==genome & anno.db.tbl$Region==reg2plot), ]
-        if(!is.null(finfo)){
-            finfos <- strsplit(finfo, ',')[[1]]
-            # get the intersect of the finfos and features of databases, and choose the best fit one
-            anno.db.candidates$FIScore <- apply(anno.db.candidates, 1, filterFIScore, finfos=finfos)
-            anno.db.candidates <- anno.db.candidates[which(anno.db.candidates$FIScore==anno.db.candidates[order(anno.db.candidates$FIScore), "FIScore"][1]), ]
-            f.load <- file.path(prefix, anno.db.candidates[order(anno.db.candidates$dbScore), "db.file"][1])
+
+        if(!is.null(finfo)){  # use finfo to subset DB tables.
+            v.finfo <- unlist(strsplit(finfo, ','))
+            # Get the intersect of the v.finfo and FI columns of databases, 
+            # and choose the best fit.
+            fi.score <- apply(anno.db.candidates, 1, FIScoreIntersect, 
+                              v.finfo=v.finfo)
+            anno.db.candidates <- anno.db.candidates[fi.score == max(fi.score), ]
             # RNA-seq tag.
-            if(reg2plot == 'genebody' && ('rnaseq' %in% finfos)){
+            if(reg2plot == 'genebody' && 'rnaseq' %in% v.finfo) {
                 rnaseq.gb <- TRUE
             }else{
                 rnaseq.gb <- FALSE
             }
-        }else{
-            f.load <- file.path(prefix, anno.db.candidates[order(anno.db.candidates$dbScore), "db.file"][1])
+        } else {
             rnaseq.gb <- FALSE
         }
+        anno.db.candidates <- anno.db.candidates[order(anno.db.candidates$dbScore), ]
+        f.load <- file.path(prefix, anno.db.candidates$"db.file"[1])
+
         if (!file.exists(f.load)){
-            cat("\nDownloading database:\n")
-            download.file(anno.db.candidates[order(anno.db.candidates$dbScore), "URL"][1], destfile=f.load, method="curl")
-            stopifnot(file.exists(f.load))
+            stop("The requested database file does not exist. You may have a corrupted database.\nConsider reinstalling the genome.\n")
+            # cat("\nDownloading database:\n")
+            # download.file(anno.db.candidates$"URL"[1], destfile=f.load, 
+            #               method="curl")
+            # stopifnot(file.exists(f.load))
         }
-    }else if(reg2plot == 'bed') {
+    } else if(reg2plot == 'bed') {
         stopifnot(!is.null(bed.file))
         bed.coord <- read.table(bed.file, sep="\t")
         if(ncol(bed.coord) <3){
@@ -171,7 +135,7 @@ SetupPlotCoord <- function(args.tbl, ctg.tbl, anno.tbl, anno.db.tbl, progpath, g
     if(!is.null(f.load)) {
         cat("\nUsing database:\n")
         cat(paste(f.load, "\n", sep=""))
-        f.load <- paste(f.load)
+        # f.load <- paste(f.load)
         load(f.load)  # load coordinates into variable: genome.coord
     }
 
@@ -191,10 +155,12 @@ SetupPlotCoord <- function(args.tbl, ctg.tbl, anno.tbl, anno.db.tbl, progpath, g
     # Determine plot coordinates for each unique region.
     coord.list <- vector('list', length(uniq.reg))
     names(coord.list) <- uniq.reg
+
     # Sample a vector but preserve its original sequential order.
     sampleInSequence <- function(x, samprate) {
         x[ifelse(runif(length(x)) <= samprate, T, F)]
     }
+
     for(i in 1:length(uniq.reg)) {
         ur <- uniq.reg[i]
  
@@ -217,19 +183,6 @@ SetupPlotCoord <- function(args.tbl, ctg.tbl, anno.tbl, anno.db.tbl, progpath, g
                 stop("\nGene subset size becomes zero. Are you using the correct database?\n")
             }
             
-            # subset.idx <- c(which(genome.coord$gname %in% gene.list & 
-            #                       genome.coord$byname.uniq),
-            #                 which(genome.coord$tid %in% gene.list))
-            # # Test if all gid are NA. If database=refseq, this is true.
-            # if(!all(is.na(genome.coord$gid))) {
-            #     subset.idx <- c(subset.idx, 
-            #                     which(genome.coord$gid %in% gene.list & 
-            #                           genome.coord$bygid.uniq))
-            # }
-            # if(length(subset.idx) == 0) {
-            #     stop("Gene subset size becomes zero. Are you using the correct database?\n")
-            # }
-
             if(samprate < 1) {
                 subset.idx <- sampleInSequence(subset.idx, samprate)
             }
@@ -243,7 +196,8 @@ SetupPlotCoord <- function(args.tbl, ctg.tbl, anno.tbl, anno.db.tbl, progpath, g
 
     # Add exon models to the result if RNA-seq.
     if(rnaseq.gb) {
-        em.load <- file.path(prefix, paste(genome, database, 'exonmodel.RData', sep='.'))
+        em.load <- file.path(prefix, paste(genome, database, 'exonmodel.RData', 
+                                           sep='.'))
         load(em.load)  # load exon models into variable: exonmodel
         res$exonmodel <- exonmodel
     }

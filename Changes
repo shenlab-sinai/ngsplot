@@ -3,6 +3,7 @@ Revision history for ngs.plot.
 
 Recent changes
     - Fixed a bug in plotting X-axis in avg. profiles introduced in v1.68.
+    - Allow mapping quality to be 0.
 
     
 

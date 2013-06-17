@@ -1,0 +1,16 @@
+{
+	"folders":
+	[
+		{
+			"folder_exclude_patterns":
+			[
+				"backup"
+			],
+			"file_exclude_patterns":
+			[
+				"*.zip", "*.bam", "*.bai", "*.pdf", "*.RData"
+			],
+			"path": "/home/lishen/Dropbox/svn/ngsplot/trunk"
+		}
+	]
+}

@@ -496,6 +496,7 @@ headerIndexBam <- function(bam.list) {
                         silent=T)
         if(class(map.prog) != "try-error") {
             v.map.bowtie[i] <- ifelse(map.prog %in% c('Bowtie', 'TopHat', 
+                                                      'bowtie2',
                                                       'BEDTools_bedToBam'), 
                                       T, F)
         } else {

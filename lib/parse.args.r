@@ -239,7 +239,7 @@ setupVars <- function(args.tbl, ctg.tbl, anno.tbl){
     #### Mapping quality cutoff ####
     if('-MQ' %in% names(args.tbl)) {
         vl$map.qual <- as.integer(args.tbl['-MQ'])
-        stopifnot(vl$map.qual > 0)
+        stopifnot(vl$map.qual >= 0)
     } else {
         vl$map.qual <- 20
     }

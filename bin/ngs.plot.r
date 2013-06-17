@@ -121,14 +121,15 @@ if(!suppressMessages(require(utils, warn.conflicts=F))) {
 cat('.')
 cat("Done\n")
 
-# Load table of database: anno.tbl, anno.db.tbl
-load(file.path(progpath, 'database/database.RData'))
+# Load tables of database: default.tbl, dbfile.tbl
+default.tbl <- read.delim(file.path(progpath, 'database', 'default.tbl'))
+dbfile.tbl <- read.delim(file.path(progpath, 'database', 'dbfile.tbl'))
 # Configuration: coverage-genelist-title relationships.
 cat("Configuring variables...")
 ctg.tbl <- ConfigTbl(args.tbl)
 
 # Setup variables from arguments.
-argvar.list <- setupVars(args.tbl, ctg.tbl, anno.tbl)
+argvar.list <- setupVars(args.tbl, ctg.tbl, default.tbl)
 genome <- argvar.list$genome  # genome name, such as mm9, hg19, rn4.
 reg2plot <- argvar.list$reg2plot  # tss, tes, genebody, bed...
 bed.file <- argvar.list$bed.file  # BED file name if reg2plot=bed.
@@ -168,7 +169,7 @@ if(cores.number == 0){
 
 # Setup plot-related coordinates and variables.
 source(file.path(progpath, 'lib', 'genedb.r'))
-plotvar.list <- SetupPlotCoord(args.tbl, ctg.tbl, anno.tbl, anno.db.tbl, 
+plotvar.list <- SetupPlotCoord(args.tbl, ctg.tbl, default.tbl, dbfile.tbl, 
                                progpath, genome, reg2plot, lgint, flanksize, 
                                bed.file, samprate)
 coord.list <- plotvar.list$coord.list  # list of coordinates for unique regions.

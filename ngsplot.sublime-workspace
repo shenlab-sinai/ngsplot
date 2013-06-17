@@ -1,0 +1,368 @@
+{
+	"auto_complete":
+	{
+		"selected_items":
+		[
+			[
+				"enri",
+				"enrichCombined"
+			],
+			[
+				"samp",
+				"sampleInSequence"
+			],
+			[
+				"seq",
+				"seqnames"
+			],
+			[
+				"spli",
+				"splined"
+			],
+			[
+				"enrich",
+				"enrichCombined"
+			],
+			[
+				"enrih",
+				"enrichCombined"
+			],
+			[
+				"iso",
+				"isoform_1"
+			],
+			[
+				"exonid",
+				"exonid_to_isoformid"
+			],
+			[
+				"exon",
+				"exons_1"
+			]
+		]
+	},
+	"buffers":
+	[
+		{
+			"file": "bin/ngsplotdb.py",
+			"settings":
+			{
+				"buffer_size": 2885,
+				"line_ending": "Unix"
+			}
+		}
+	],
+	"build_system": "",
+	"command_palette":
+	{
+		"height": 0.0,
+		"selected_items":
+		[
+		],
+		"width": 0.0
+	},
+	"console":
+	{
+		"height": 0.0
+	},
+	"distraction_free":
+	{
+		"menu_visible": true,
+		"show_minimap": false,
+		"show_open_files": false,
+		"show_tabs": false,
+		"side_bar_visible": false,
+		"status_bar_visible": false
+	},
+	"file_history":
+	[
+		"/C/Users/lishen/Dropbox/Finance/House/Edgewood Ln Ranch/Summary.txt",
+		"/C/Users/lishen/Dropbox/svn/ngsplot/trunk/bin/ngs.plot.r",
+		"/C/Users/lishen/Dropbox/svn/ngsplot/trunk/lib/genedb.r",
+		"/C/Users/lishen/Dropbox/svn/ngsplot/trunk/Changes",
+		"/C/Users/lishen/Dropbox/svn/ngsplot/trunk/lib/plotlib.r",
+		"/C/Users/lishen/Downloads/ngs.plot.web.version 1/ngs.plot.web.version 1/multiplot/multiplot.xml",
+		"/C/Users/lishen/Downloads/ngs.plot.web.version 1/ngs.plot.web.version 1/README.txt",
+		"/C/Users/lishen/Downloads/ngs.plot.web.version 1/ngs.plot.web.version 1/tool_conf.xml",
+		"/C/Users/lishen/Downloads/ngs.plot.web.version 1/ngs.plot.web.version 1/ngsplot/ngs.plot.xml",
+		"/C/Users/lishen/Downloads/ngs.plot.web.version 1/ngs.plot.web.version 1/ngsplot/ngs.plot.genebody_exon_cgi.sh",
+		"/C/Users/lishen/Downloads/human.datype.summ.txt",
+		"/C/Users/lishen/Downloads/mouse.datype.summ.txt",
+		"/C/Users/lishen/Downloads/test (1).sam",
+		"/C/Users/lishen/Dropbox/svn/ngsplot/trunk/tmp_backup/SplitDB.R",
+		"/C/Users/lishen/Downloads/test.sam",
+		"/C/Users/lishen/Dropbox/Code/genedb.r",
+		"/C/Users/lishen/Dropbox/Code/coverage.r",
+		"/C/Users/lishen/Dropbox/Code/parse.args.r",
+		"/C/Users/lishen/Dropbox/Code/ngs.plot.r",
+		"/C/Users/lishen/Dropbox/Code/plotlib.r",
+		"/C/Users/lishen/Dropbox/Code/README.txt",
+		"/C/Users/lishen/Downloads/Re__Bioinformatics_Researcher_–_Next_Generation_Sequencing/hw61.py",
+		"/C/Users/lishen/Downloads/Re__Bioinformatics_Researcher_–_Next_Generation_Sequencing/k-means_clustering.py",
+		"/C/Users/lishen/Downloads/VhRFAv2/VhRFAv2/src/Run/AnalyserGui.java",
+		"/C/Users/lishen/Downloads/VhRFAv2/VhRFAv2/src/libs/ReportClass.java",
+		"/C/Users/lishen/Dropbox/Travel/DC Cherry 2013 Mar/NOTES.txt",
+		"/C/Users/lishen/Dropbox/MyWorks/Mount Sinai/Projects/diffReps/manuscript_plos/Figures/Numbers.txt",
+		"/C/Users/lishen/Dropbox/MyWorks/Mount Sinai/Reviewer/2013-03 NIH Study Section/CD/CD password.txt",
+		"/C/Users/lishen/Dropbox/MyWorks/Mount Sinai/Projects/Anne BacTrap Microarray/Analysis/Anne_Study.TXT",
+		"/C/Users/lishen/Dropbox/MyWorks/Mount Sinai/Projects/Anne BacTrap Microarray/Analysis/Mouse430_2.0_Entrez.txt",
+		"/C/Users/lishen/Dropbox/MyWorks/Mount Sinai/Projects/Anne BacTrap Microarray/Anne_MG430 2.0_120109 d1 d2 cocaine saline g9a/rma.summary.txt",
+		"/C/Users/lishen/Dropbox/MyWorks/Mount Sinai/Projects/Anne BacTrap Microarray/Analysis/Anne_Probeset_padj0.05_simple.txt",
+		"/C/Users/lishen/Dropbox/MyWorks/Mount Sinai/Projects/Anne BacTrap Microarray/Analysis/Anne_ProbesetRMA.TXT",
+		"/C/Users/lishen/Dropbox/MyWorks/Mount Sinai/Projects/Anne BacTrap Microarray/CEL/rma.summary.txt",
+		"/C/Users/lishen/Dropbox/Memo/China home address.txt",
+		"/C/Users/lishen/Dropbox/Code/plotlib.newcomments.r",
+		"/C/Users/lishen/AppData/Roaming/Sublime Text 2/Packages/Default/Preferences.sublime-settings",
+		"/C/Users/lishen/AppData/Roaming/Sublime Text 2/Packages/User/Preferences.sublime-settings",
+		"/C/Users/lishen/Dropbox/China Ticket.txt",
+		"/C/Users/lishen/Dropbox/Finance/House/Refinance/Closing/passwd.txt",
+		"/C/Users/lishen/Dropbox/Finance/Tax/2011/Checklist.txt",
+		"/C/Users/lishen/Dropbox/Finance/Tax/2011/NOTES.txt",
+		"/C/Users/lishen/Dropbox/Memo/Jack home.txt",
+		"/C/Users/lishen/Dropbox/Important/account.txt",
+		"/C/Users/lishen/Dropbox/Code/plotmat.r",
+		"/C/Users/lishen/Dropbox/Code/reg_mark_enrich.r",
+		"/C/Users/lishen/Dropbox/Code/ngsplotdb.py",
+		"/C/Users/lishen/Dropbox/Code/extract_miso.py",
+		"/C/Users/lishen/Dropbox/ngsplotdb.py",
+		"/C/Users/lishen/Dropbox/extract_miso.py",
+		"/C/Users/lishen/Dropbox/Finance/Investment/Retirement planning.txt"
+	],
+	"find":
+	{
+		"height": 38.0
+	},
+	"find_in_files":
+	{
+		"height": 0.0,
+		"where_history":
+		[
+			""
+		]
+	},
+	"find_state":
+	{
+		"case_sensitive": false,
+		"find_history":
+		[
+			"retrieve",
+			"original",
+			"sn.list",
+			"pts",
+			"uniq.reg",
+			"args",
+			"confiMat",
+			"-H",
+			"browser",
+			"reg.hei",
+			"dopar",
+			"-L",
+			"exon.ranges",
+			"args",
+			"browser",
+			"args",
+			"coord.mat",
+			"go.algo",
+			"plotheat",
+			"progpath",
+			"paste",
+			"database",
+			"rnaseq.gb",
+			"plot.coord[k, ]",
+			"plot.list",
+			"vl$",
+			"finfo",
+			"samp.i",
+			"enrichList",
+			"doMC",
+			"shade.alp",
+			"args",
+			"shade.alp",
+			"plotmat",
+			"args",
+			"gen_",
+			"pint",
+			"pts",
+			"setup_",
+			"steup_",
+			"setup",
+			"pint",
+			"hm_cols",
+			"pts",
+			"start",
+			"tes",
+			"tss",
+			"exon",
+			"Exons",
+			"left",
+			"flankfactor",
+			"flanksize <-",
+			"flanksize",
+			"rnaseq",
+			"stderror.pos",
+			"pts",
+			"-SE",
+			"tab",
+			"air ",
+			"china",
+			"airline",
+			"confiMat",
+			"shade.alp",
+			"pointsize",
+			"plotmat",
+			"mat",
+			"etype",
+			"utr",
+			"len(isoform_2)",
+			"len(isoform_1)",
+			"1",
+			"exonid",
+			"gdb[",
+			"partition",
+			"_2",
+			"_1",
+			"1",
+			"dn",
+			"up",
+			"isoforms",
+			"int",
+			"up",
+			"exons_1",
+			"start",
+			"stop",
+			"start",
+			"3",
+			"up"
+		],
+		"highlight": true,
+		"in_selection": false,
+		"preserve_case": false,
+		"regex": false,
+		"replace_history":
+		[
+			"subset",
+			"rec",
+			"",
+			"end",
+			"start",
+			"right",
+			"left",
+			"middle",
+			"right",
+			"enrichList[[i]]",
+			"elen2",
+			"elen1",
+			"2",
+			"_1",
+			"_2",
+			"2",
+			"long",
+			"short",
+			"dn",
+			"exons_2",
+			"stop",
+			"5",
+			"dn"
+		],
+		"reverse": false,
+		"show_context": true,
+		"use_buffer2": true,
+		"whole_word": false,
+		"wrap": true
+	},
+	"groups":
+	[
+		{
+			"selected": 0,
+			"sheets":
+			[
+				{
+					"buffer": 0,
+					"file": "bin/ngsplotdb.py",
+					"settings":
+					{
+						"buffer_size": 2885,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								0,
+								0
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Python/Python.tmLanguage",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				}
+			]
+		}
+	],
+	"incremental_find":
+	{
+		"height": 0.0
+	},
+	"input":
+	{
+		"height": 0.0
+	},
+	"layout":
+	{
+		"cells":
+		[
+			[
+				0,
+				0,
+				1,
+				1
+			]
+		],
+		"cols":
+		[
+			0.0,
+			1.0
+		],
+		"rows":
+		[
+			0.0,
+			1.0
+		]
+	},
+	"menu_visible": true,
+	"replace":
+	{
+		"height": 70.0
+	},
+	"save_all_on_build": true,
+	"select_file":
+	{
+		"height": 0.0,
+		"selected_items":
+		[
+		],
+		"width": 0.0
+	},
+	"select_project":
+	{
+		"height": 0.0,
+		"selected_items":
+		[
+		],
+		"width": 0.0
+	},
+	"show_minimap": true,
+	"show_open_files": false,
+	"show_tabs": true,
+	"side_bar_visible": true,
+	"side_bar_width": 150.0,
+	"status_bar_visible": true
+}

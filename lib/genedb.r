@@ -21,15 +21,15 @@ FIScoreIntersect <- function(db.info, v.finfo){
     length(intersect(as.vector(db.info[c("FI.1", "FI.2", "FI.3")]), v.finfo))
 }
 
-SetupPlotCoord <- function(args.tbl, ctg.tbl, anno.tbl, anno.db.tbl, progpath, 
+SetupPlotCoord <- function(args.tbl, ctg.tbl, default.tbl, dbfile.tbl, progpath, 
                            genome, reg2plot, lgint, flanksize, bed.file, 
                            samprate) {
 # Load genomic coordinates for plot based on the input arguments.
 # Args:
 #   args.tbl: input argument table
 #   ctg.tbl: coverage-genelist-title table
-#   anno.tbl: default settings of databases and plot setting
-#   anno.db.tbl: details of databases
+#   default.tbl: default settings of databases and plot setting
+#   dbfile.tbl: details of database files(.RData).
 #   progpath: program path derived from NGSPLOT
 #   genome: genome name, such as mm9, hg19.
 #   reg2plot: tss, tes, genebody, etc.
@@ -38,14 +38,14 @@ SetupPlotCoord <- function(args.tbl, ctg.tbl, anno.tbl, anno.db.tbl, progpath,
 #   samprate: sampling rate
 
     # Subset using genome-region combination.
-    key <- paste(genome, reg2plot, sep='.')
-    if(!key %in% rownames(anno.tbl)) {
+    key <- default.tbl$Genome == genome & default.tbl$Region == reg2plot
+    if(sum(key) == 0) {
         stop("The combination of genome and region does not exist.\nYou may need to install the genome or the region does not exist yet.\n")
     }
-    anno.parameters <- anno.tbl[key, ]
-    db.match.mask <- anno.db.tbl$Genome==genome & 
-                     anno.db.tbl$Region==reg2plot
-    anno.db.candidates <- anno.db.tbl[db.match.mask, ]
+    anno.parameters <- default.tbl[key, ]
+    db.match.mask <- dbfile.tbl$Genome == genome & 
+                     dbfile.tbl$Region == reg2plot
+    anno.db.candidates <- dbfile.tbl[db.match.mask, ]
     
     # Database flavor.
     if('-D' %in% names(args.tbl)){  
@@ -55,6 +55,8 @@ SetupPlotCoord <- function(args.tbl, ctg.tbl, anno.tbl, anno.db.tbl, progpath,
     }else{
         database <- anno.parameters$DefaultDB
     }
+
+    anno.db.candidates <- anno.db.candidates[anno.db.candidates$DB == database, ]
 
     prefix <- file.path(progpath, 'database', genome)
 

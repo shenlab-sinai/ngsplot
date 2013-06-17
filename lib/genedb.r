@@ -53,7 +53,7 @@ SetupPlotCoord <- function(args.tbl, ctg.tbl, default.tbl, dbfile.tbl, progpath,
         database.allowed <- unique(anno.db.candidates$DB)
         stopifnot(database %in% database.allowed)
     }else{
-        database <- anno.parameters$DefaultDB
+        database <- as.character(anno.parameters$DefaultDB)
     }
 
     anno.db.candidates <- anno.db.candidates[anno.db.candidates$DB == database, ]
@@ -68,7 +68,7 @@ SetupPlotCoord <- function(args.tbl, ctg.tbl, default.tbl, dbfile.tbl, progpath,
     }
 
     if(reg2plot!='bed'){
-        Labs <- unlist(strsplit(anno.parameters$PointLab, ","))
+        Labs <- unlist(strsplit(as.character(anno.parameters$PointLab), ","))
         if(length(Labs)==1){
             pint <- TRUE
         }else{

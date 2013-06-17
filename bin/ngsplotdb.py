@@ -302,7 +302,7 @@ def install_pkg(root_path, pkg_file, new_gn, old_gn=None):
     if old_gn:
         print "Removing installed genome:{0}...".format(old_gn),
         sys.stdout.flush()
-        shutil.rmtree(root_path + '/database/', old_gn)
+        shutil.rmtree(root_path + '/database/' + old_gn)
         rm_dbtbl(root_path, old_gn)
         print "Done"
 

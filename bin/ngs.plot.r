@@ -9,14 +9,16 @@
 # Last Updated: Mar 2013.
 #
 
+ngsplot.version <- '2.00'
 
 # Deal with command line arguments.
 cmd.help <- function(){
     cat("\nVisit http://code.google.com/p/ngsplot/wiki/ProgramArguments101 for details\n")
+    cat(paste("Version:", ngsplot.version, sep=" "))
     cat("\nUsage: ngs.plot.r -G genome -R region -C [cov|config]file\n")
     cat("                  -O name [Options]\n")
     cat("\n## Mandatory parameters:\n")
-    cat("  -G   Genome name, currently supported: mm9, hg19, rn4, sacCer3(ensembl only)\n")
+    cat("  -G   Genome name. Use ngsplotdb.py list to show available genomes.\n")
     cat("  -R   Genomic regions to plot: tss, tes, genebody, exon, cgi or *.bed\n")
     cat("  -C   Indexed bam file or a configuration file for multiplot\n")
     cat("  -O   Name for output: multiple files will be generated\n")
@@ -63,7 +65,7 @@ cmd.help <- function(){
 ###########################################################################
 #################### Deal with program input arguments ####################
 args <- commandArgs(T)
-# args <- unlist(strsplit('-G rn4 -R genebody -C accepted_hits.bam -O test -F rnaseq -N 0.33', ' '))
+# args <- unlist(strsplit('-G hg19 -R tss -C hesc.H3k4me3.Rep1.1M.bam -O test', ' '))
 
 # Program environment variable.
 progpath <- Sys.getenv('NGSPLOT')

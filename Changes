@@ -8,6 +8,7 @@ Revision history for ngs.plot.
       minutes.
     - A python script - ngsplotdb.py is developed to list installed genomes, 
       remove genomes or install new genomes.
+    - Ensemble is now the default database.
     - Fixed a bug in plotting X-axis in avg. profiles introduced in v1.68.
     - Allow mapping quality to be 0.
 

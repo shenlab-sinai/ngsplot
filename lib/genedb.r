@@ -37,37 +37,37 @@ SetupPlotCoord <- function(args.tbl, ctg.tbl, default.tbl, dbfile.tbl, progpath,
 #   flanksize: flanking region size.
 #   samprate: sampling rate
 
-    # Subset using genome-region combination.
-    key <- default.tbl$Genome == genome & default.tbl$Region == reg2plot
-    if(sum(key) == 0) {
-        stop("The combination of genome and region does not exist.\nYou may need to install the genome or the region does not exist yet.\n")
-    }
-    anno.parameters <- default.tbl[key, ]
-    db.match.mask <- dbfile.tbl$Genome == genome & 
-                     dbfile.tbl$Region == reg2plot
-    anno.db.candidates <- dbfile.tbl[db.match.mask, ]
-    
-    # Database flavor.
-    if('-D' %in% names(args.tbl)){  
-        database <- as.character(args.tbl['-D'])
-        database.allowed <- unique(anno.db.candidates$DB)
-        stopifnot(database %in% database.allowed)
-    }else{
-        database <- as.character(anno.parameters$DefaultDB)
-    }
-
-    anno.db.candidates <- anno.db.candidates[anno.db.candidates$DB == database, ]
-
-    prefix <- file.path(progpath, 'database', genome)
-
-    # Further info to subset genomic regions.
-    if('-F' %in% names(args.tbl)){
-        finfo <- as.character(args.tbl['-F'])
-    } else {
-        finfo <- NULL
-    }
-
     if(reg2plot!='bed'){
+        # Subset using genome-region combination.
+        key <- default.tbl$Genome == genome & default.tbl$Region == reg2plot
+        if(sum(key) == 0) {
+            stop("The combination of genome and region does not exist.\nYou may need to install the genome or the region does not exist yet.\n")
+        }
+        anno.parameters <- default.tbl[key, ]
+        db.match.mask <- dbfile.tbl$Genome == genome & 
+                         dbfile.tbl$Region == reg2plot
+        anno.db.candidates <- dbfile.tbl[db.match.mask, ]
+        
+        # Database flavor.
+        if('-D' %in% names(args.tbl)){  
+            database <- as.character(args.tbl['-D'])
+            database.allowed <- unique(anno.db.candidates$DB)
+            stopifnot(database %in% database.allowed)
+        }else{
+            database <- as.character(anno.parameters$DefaultDB)
+        }
+
+        anno.db.candidates <- anno.db.candidates[anno.db.candidates$DB == database, ]
+
+        prefix <- file.path(progpath, 'database', genome)
+
+        # Further info to subset genomic regions.
+        if('-F' %in% names(args.tbl)){
+            finfo <- as.character(args.tbl['-F'])
+        } else {
+            finfo <- NULL
+        }
+
         Labs <- unlist(strsplit(as.character(anno.parameters$PointLab), ","))
         if(length(Labs)==1){
             pint <- TRUE

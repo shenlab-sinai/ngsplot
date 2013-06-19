@@ -1,11 +1,11 @@
 Revision history for ngs.plot.
 ==============================
 
-2.00 June 17, 2013
+2.00 June 18, 2013
     - Massive addition of support for other genomes such as rn5, mm10 and dm3 
       and other types of functional features like enhancers and dhs.
-    - We can now add support for any genome in UCSC or Ensembl within a few 
-      minutes.
+    - We can now add support for any genome in UCSC or Ensembl within a short 
+      time.
     - A python script - ngsplotdb.py is developed to list installed genomes, 
       remove genomes or install new genomes.
     - Ensemble is now the default database.

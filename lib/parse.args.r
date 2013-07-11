@@ -196,7 +196,13 @@ setupVars <- function(args.tbl, ctg.tbl, anno.tbl){
     #### Color scale string. ####
     if('-SC' %in% names(args.tbl)){ 
         vl$color.scale <- args.tbl['-SC']
-        stopifnot(vl$color.scale %in% c('local', 'region', 'global'))
+        if(!vl$color.scale %in% c('local', 'region', 'global')) {
+            scale.pair <- unlist(strsplit(vl$color.scale, ","))
+            if(length(scale.pair) != 2 || is.na(as.numeric(scale.pair[1])) ||
+               is.na(as.numeric(scale.pair[2]))) {
+                stop("Color scale format error: must be local, region, global or a pair of numerics separated by ','\n")
+            }
+        }
     } else {
         vl$color.scale <- 'local'
     }
@@ -216,6 +222,15 @@ setupVars <- function(args.tbl, ctg.tbl, anno.tbl){
         stopifnot(vl$go.algo %in% go.allowed)
     } else {
         vl$go.algo <- 'total'  # hierarchical clustering.
+    }
+
+    #### Algorithm for coverage vector normalization ####
+    if('-AL' %in% names(args.tbl)) {
+        vl$cov.algo <- args.tbl['-AL']
+        al.allowed <- c('spline', 'bin')
+        stopifnot(vl$cov.algo %in% al.allowed)
+    } else {
+        vl$cov.algo <- 'spline'
     }
 
     #### Gene chunk size ####
@@ -247,11 +262,15 @@ setupVars <- function(args.tbl, ctg.tbl, anno.tbl){
     vl
 }
 
-replotVars <- function(args.tbl){
+replotVars <- function(args.tbl, existing.vl) {
+# Setup replot variables.
+# Args:
+#   args.tbl: argument table.
+#   existing.vl: existing variable list.
 
     vl <- list()  # variable list to be exported.
-    vl$iname <- args.tbl['-I']
-    vl$oname <- args.tbl['-O']
+    # vl$iname <- args.tbl['-I']
+    # vl$oname <- args.tbl['-O']
 
     #### Shaded area alpha. ####
     if('-H' %in% names(args.tbl)){  
@@ -277,25 +296,6 @@ replotVars <- function(args.tbl){
         stopifnot(vl$flood.frac >= 0 && vl$flood.frac < 1)
     } 
 
-    #### Color scale string. ####
-    if('-SC' %in% names(args.tbl)){ 
-        vl$color.scale <- args.tbl['-SC']
-        stopifnot(vl$color.scale %in% c('local', 'region', 'global'))
-    }
-
-    #### Heatmap color. ####
-    if('-CO' %in% names(args.tbl)) {
-        vl$hm.color <- as.character(args.tbl['-CO'])
-    } else {
-        vl$hm.color <- NULL
-    }
-
-    #### Remove zero tag. ####
-    if('-RZ' %in% names(args.tbl)){ 
-        vl$rm.zero <- as.integer(args.tbl['-RZ'])
-        stopifnot(vl$rm.zero == 0 || vl$rm.zero == 1)
-    }
-
     #### Gene order algorithm ####
     if('-GO' %in% names(args.tbl)){ 
         vl$go.algo <- args.tbl['-GO']
@@ -309,12 +309,79 @@ replotVars <- function(args.tbl){
         stopifnot(vl$rr >= 1)
     }
 
+    # Variables that do not exist in ngs.plot.r or need a default value for
+    # backward compatibility.
+
+    #### Font size. ####
+    if('-FS' %in% names(args.tbl)) {
+        stopifnot(as.integer(args.tbl['-FS']) > 0)
+        vl$font.size <- as.integer(args.tbl['-FS'])
+    } else {
+        vl$font.size <- 12
+    }
+
+    #### Color scale string. ####
+    if('-SC' %in% names(args.tbl)){ 
+        vl$color.scale <- args.tbl['-SC']
+        if(!vl$color.scale %in% c('local', 'region', 'global')) {
+            scale.pair <- unlist(strsplit(vl$color.scale, ","))
+            if(length(scale.pair) != 2 || is.na(as.numeric(scale.pair[1])) ||
+               is.na(as.numeric(scale.pair[2]))) {
+                stop("Color scale format error: must be local, region, global or a pair of numerics separated by ','\n")
+            }
+        }
+    } else {
+        vl$color.scale <- 'local'
+    }
+
+    #### Heatmap color. ####
+    if('-CO' %in% names(args.tbl)) {
+        vl$hm.color <- as.character(args.tbl['-CO'])
+    } else {
+        vl$hm.color <- "default"
+    }
+
+    #### Remove zero tag. ####
+    if('-RZ' %in% names(args.tbl)){ 
+        vl$rm.zero <- as.integer(args.tbl['-RZ'])
+        stopifnot(vl$rm.zero == 0 || vl$rm.zero == 1)
+    } else if(!"rm.zero" %in% names(existing.vl)) {
+        vl$rm.zero <- 1
+    }
+
     ##### Set cores number. ####
     if('-P' %in% names(args.tbl)){
         stopifnot(as.integer(args.tbl['-P']) >= 0)
         vl$cores.number <- as.integer(args.tbl['-P'])
     }else{
         vl$cores.number <- as.integer(0)
+    }
+
+    #### Misc. options for avg. profiles. ####
+    vl$prof.misc <- list()
+    if('-LEG' %in% names(args.tbl)) {
+        stopifnot(as.integer(args.tbl['-LEG']) >= 0)
+        vl$prof.misc$legend <- as.integer(args.tbl['-LEG'])
+    } else {
+        vl$prof.misc$legend <- T
+    }
+    if('-BOX' %in% names(args.tbl)) {
+        stopifnot(as.integer(args.tbl['-BOX']) >= 0)
+        vl$prof.misc$box <- as.integer(args.tbl['-BOX'])
+    } else {
+        vl$prof.misc$box <- T
+    }
+    if('-VLN' %in% names(args.tbl)) {
+        stopifnot(as.integer(args.tbl['-VLN']) >= 0)
+        vl$prof.misc$vline <- as.integer(args.tbl['-VLN'])
+    } else {
+        vl$prof.misc$vline <- T
+    }
+    if('-XYL' %in% names(args.tbl)) {
+        stopifnot(as.integer(args.tbl['-XYL']) >= 0)
+        vl$prof.misc$xylab <- as.integer(args.tbl['-XYL'])
+    } else {
+        vl$prof.misc$xylab <- T
     }
 
     vl

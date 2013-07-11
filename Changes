@@ -1,6 +1,25 @@
 Revision history for ngs.plot.
 ==============================
 
+2.02 July 11, 2013
+    - Custom color scale for heatmap.
+    - Improved coverage calculation algorithm to make curves smoother.
+    - New bin-based approach to normalize coverage vectors(-AL bin).
+    - Options to turn on/off legend, figure box, axis labels and vertical 
+      lines.
+    - Option to change font size in replot.
+    - List chromosome names in ngsplotdb.py.
+    - Correct an error that the vertical line does not align X-axis ticks 
+      perfectly.
+    - Pattern match aligner programs.
+    - Minor changes to command line usage.
+    - Misc. minor bugs fixed.
+    - Moderate code refactoring.
+
+2.00.1 June 19, 2013
+    - This is a bug fix version. ngs.plot v2.00 will emit error if you want to 
+      use a BED file as genomic regions for plot. The bug has been fixed.
+
 2.00 June 18, 2013
     - Massive addition of support for other genomes such as rn5, mm10 and dm3 
       and other types of functional features like enhancers and dhs.

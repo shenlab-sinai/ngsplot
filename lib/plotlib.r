@@ -70,14 +70,14 @@ SetPtsSpline <- function(pint, lgint) {
     pts <- 100  # data points to plot: 0...pts
     if(pint){  # point interval.
         m.pts <- 1  # middle part points.
-        f.pts <- 50 # flanking part points.
+        f.pts <- pts / 2  # flanking part points.
     } else {
         if(lgint) {
             m.pts <- pts / 5 * 3 + 1
-            f.pts <- pts / 5
+            f.pts <- pts / 5 + 1
         } else {
             m.pts <- pts / 5 + 1
-            f.pts <- pts / 5 * 2
+            f.pts <- pts / 5 * 2 + 1
         }
     }
     list(pts=pts, m.pts=m.pts, f.pts=f.pts)
@@ -172,7 +172,7 @@ smoothplot <- function(m, radius, method=c('mean', 'median')){
 }
 
 genXticks <- function(reg2plot, pint, lgint, pts, flanksize, flankfactor, 
-                      Labs){
+                      Labs) {
 # Generate X-ticks for plotting.
 # Args:
 #   reg2plot: string representation of region.
@@ -196,26 +196,26 @@ genXticks <- function(reg2plot, pint, lgint, pts, flanksize, flankfactor,
         if(lgint){  # large interval: fla int int int fla
             if(flankfactor > 0){  # show percentage at x-tick.
                 tick.lab <- c(sprintf("%d%%", -flankfactor*100), 
-                    left.lab, '33%', '66%', right.lab,
-                    sprintf("%d%%", flankfactor*100))
+                              left.lab, '33%', '66%', right.lab,
+                              sprintf("%d%%", flankfactor*100))
             } else{  # show bps at x-tick.
                 tick.lab <- c(as.character(-flanksize),
-                    left.lab, '33%', '66%', right.lab,
-                    as.character(flanksize))
+                              left.lab, '33%', '66%', right.lab,
+                              as.character(flanksize))
             }
         } else {    # small interval: fla fla int fla fla.
             if(flankfactor > 0){
                 tick.lab <- c(sprintf("%d%%", -flankfactor*100), 
-                    sprintf("%d%%", -flankfactor*50), 
-                    left.lab, right.lab,
-                    sprintf("%d%%", flankfactor*50), 
-                    sprintf("%d%%", flankfactor*100))
+                              sprintf("%d%%", -flankfactor*50), 
+                              left.lab, right.lab,
+                              sprintf("%d%%", flankfactor*50), 
+                              sprintf("%d%%", flankfactor*100))
             } else {
                 tick.lab <- c(as.character(-flanksize),
-                    as.character(-flanksize/2),
-                    left.lab, right.lab,
-                    as.character(flanksize/2),
-                    as.character(flanksize))
+                              as.character(-flanksize/2),
+                              left.lab, right.lab,
+                              as.character(flanksize/2),
+                              as.character(flanksize))
             }
         }
     }
@@ -223,18 +223,23 @@ genXticks <- function(reg2plot, pint, lgint, pts, flanksize, flankfactor,
 }
 
 plotmat <- function(regcovMat, title2plot, bam.pair, xticks, pts, m.pts, f.pts, 
-                    pint, shade.alp=0, confiMat=NULL, mw=1){
+                    pint, shade.alp=0, confiMat=NULL, mw=1, 
+                    misc.options=list(legend=T, box=T, vline=T, xylab=T)) {
 # Plot avg. profiles and standard errors around them.
 # Args:
 #   regcovMat: matrix for avg. profiles.
 #   title2plot: profile names, will be shown in figure legend.
-#   xticks: as is
+#   bam.pair: boolean for bam-pair data.
+#   xticks: X-axis ticks.
 #   pts: data points
 #   m.pts: middle part data points
 #   f.pts: flanking part data points
 #   pint: tag for point interval
 #   shade.alp: shading area alpha
 #   confiMat: matrix for standard errors.
+#   mw: moving window size for smoothing function.
+#   misc.options: list of misc. options - legend, box around plot, 
+#       verticle lines, X- and Y-axis labels.
 
     # Smooth avg. profiles if specified.
     if(mw > 1){
@@ -258,9 +263,15 @@ plotmat <- function(regcovMat, title2plot, bam.pair, xticks, pts, m.pts, f.pts,
                               "Read count Per Million mapped reads")
     xrange <- 0:pts
     matplot(xrange, regcovMat, xaxt='n', type="l", col=col2use, 
-            lty="solid", lwd=3,
-            xlab="Genomic Region (5' -> 3')", ylab=ytext)
+            lty="solid", lwd=3, frame.plot=F, ann=F)
+    if(misc.options$xylab) {
+        title(xlab="Genomic Region (5' -> 3')", ylab=ytext)
+    }
     axis(1, at=xticks$pos, labels=xticks$lab, lwd=3, lwd.ticks=3)
+    if(misc.options$box) {
+        # box around plot.
+        box()
+    }
 
     # Add shade area.
     if(shade.alp > 0){
@@ -288,16 +299,20 @@ plotmat <- function(regcovMat, title2plot, bam.pair, xticks, pts, m.pts, f.pts,
         }
     }
 
-    # Add gray lines indicating feature boundaries.
-    abline(v=f.pts, col="gray", lwd=2)
-
-    # If not point interval, add an extra vertical line.
-    if(!pint){
-        abline(v=f.pts + m.pts, col="gray", lwd=2)
+    if(misc.options$vline) {
+        # Add gray lines indicating feature boundaries.
+        if(pint) {
+            abline(v=f.pts, col="gray", lwd=2)
+        } else {
+            abline(v=f.pts - 1, col="gray", lwd=2)
+            abline(v=f.pts + m.pts - 2, col="gray", lwd=2)
+        }
     }
 
-    # Legend.
-    legend("topright", title2plot, text.col=col2use)
+    if(misc.options$legend) {
+        # Legend.
+        legend("topright", title2plot, text.col=col2use)
+    }
 }
 
 spline_mat <- function(mat, n=100){
@@ -390,7 +405,7 @@ OrderGenesHeatmap <- function(n, enrichCombined,
 
 plotheat <- function(reg.list, uniq.reg, enrichList, go.algo, title2plot, 
                      bam.pair, xticks, rm.zero=1, flood.q=.02, do.plot=T,
-                     hm.color=NULL, color.scale='local') {
+                     hm.color="default", color.scale='local') {
 # Plot heatmaps with genes ordered according to some algorithm.
 # Args:
 #   reg.list: factor vector of regions as in configuration.
@@ -407,12 +422,10 @@ plotheat <- function(reg.list, uniq.reg, enrichList, go.algo, title2plot,
 #   scale: string for the method to adjust color scale.
 # Returns: ordered gene names for each unique region as a list.
 
-    # browser()
-
     # Setup basic parameters.
     ncolor <- 256
     if(bam.pair) {
-        if(!is.null(hm.color)) {
+        if(hm.color != "default") {
             two.colors <- unlist(strsplit(hm.color, ':'))
             if(length(two.colors) != 2 || !two.colors[1] %in% colors() ||
                !two.colors[2] %in% colors()) {
@@ -431,7 +444,7 @@ plotheat <- function(reg.list, uniq.reg, enrichList, go.algo, title2plot,
                                                bias=.6, interpolate='spline')
         }
     } else {
-        if(!is.null(hm.color)) {
+        if(hm.color != "default") {
             if(hm.color %in% colors()) {
                 enrich.palette <- colorRampPalette(c('snow', hm.color))
             } else {
@@ -470,6 +483,17 @@ plotheat <- function(reg.list, uniq.reg, enrichList, go.algo, title2plot,
         } else {
             seq(min.e, max.e, length.out=ncolor + 1)
         }
+    }
+
+    if(grepl(",", color.scale)) {
+        scale.pair <- unlist(strsplit(color.scale, ","))
+        scale.min <- as.numeric(scale.pair[1])
+        scale.max <- as.numeric(scale.pair[2])
+        if(scale.min >= scale.max) {
+            warning("Color scale min value is >= max value.\n")
+        }
+        flood.pts <- c(scale.min, scale.max)
+        brk.use <- ColorBreaks(scale.max, scale.min, bam.pair, ncolor)
     }
 
     # If color scale is global, calculate breaks and quantile here.

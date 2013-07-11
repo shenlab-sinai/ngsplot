@@ -15,10 +15,16 @@ cmd.help <- function(){
     cat("\n## Mandatory parameters:\n")
     cat("    -I  Result zip file created by ngs.plot\n")
     cat("    -O  Output name\n")
+    cat("## Optional parameters:\n")
+    cat("    -FS Font size(default=12).\n")
     cat("## Avg. profiles parameters:\n")
     cat("    -SE  Shall standard errors be plotted?(0 or 1)\n")
     cat("    -MW  Moving window width to smooth avg. profiles, must be integer\n")
     cat("           1=no(default); 3=slightly; 5=somewhat; 9=quite; 13=super.\n")
+    cat("    -LEG Draw legend? 1(default) or 0.\n")
+    cat("    -BOX Draw box around plot? 1(default) or 0.\n")
+    cat("    -VLN Draw vertical lines? 1(default) or 0.\n")
+    cat("    -XYL Draw X- and Y-axis labels? 1(default) or 0.\n")
     cat("    -H   Opacity of shaded area, suggested value:[0, 0.5]\n")
     cat("           default=0, i.e. no shading, just curves\n")
     cat("## Heatmap parameters:\n")
@@ -31,6 +37,7 @@ cmd.help <- function(){
     cat("           local(default): base on each individual heatmap\n")
     cat("           region: base on all heatmaps belong to the same region\n")
     cat("           global: base on all heatmaps together\n")
+    cat("           min_val,max_val: custom scale using a pair of numerics\n")
     cat("    -FC  Flooding fraction:[0, 1), default=0.02\n")
     cat("    -CO  Color for heatmap. For bam-pair, use color-pair(neg_color:pos_color).\n")
     cat("           Hint: must use R colors, such as darkgreen, yellow and blue2.\n")
@@ -42,7 +49,7 @@ cmd.help <- function(){
 
 # Read command.
 args <- commandArgs(T)
-# args <- unlist(strsplit('heatmap -I h123vsTot.cgi.ProximalPromoter.zip -O test.scale -SC local', ' '))
+# args <- unlist(strsplit('prof -I test2.zip -O test2.rep -BOX 0 -LEG 0 -VLN 0', ' '))
 if(length(args) < 1) {
     cmd.help()
     stop("No arguments provided.\n")
@@ -67,45 +74,39 @@ if(is.null(args.tbl)){
     cmd.help()
     stop('Error in parsing command line arguments. Stop.\n')
 }
-repvar.list <- replotVars(args.tbl)
-oname <- repvar.list$oname
-iname <- repvar.list$iname
-cores.number <- repvar.list$cores.number
-hm.color <- repvar.list$hm.color
-# oname: output file root name
-# iname: input zip file name
-# shade.alp: shade area alpha
-# mw: moving window width for smooth function.
-# se: tag for plotting stand errors
-# flood.frac: flooding fraction.
-# go.algo: gene order algorithm used in heatmaps.
-# rr: reduce ratio
-# cores.number: number of CPUs to use.
+iname <- args.tbl['-I']  # iname: input zip file name
+oname <- args.tbl['-O']  # oname: output file root name
 
-
-################################################
-# Load plotting procedures and do it.
+# Load plotting parameters and data.
 ifolder <- sub('.zip$', '', basename(iname))
 if(ifolder == basename(iname)) {
     stop("Input filename must end with .zip\n")
 }
-source(file.path(progpath, 'lib', 'plotlib.r'))
-
 if(command == 'prof') {
     load(unz(iname, file.path(ifolder, 'avgprof.RData')))
+} else if(command == 'heatmap') {
+    load(unz(iname, file.path(ifolder, 'heatmap.RData')))
+} else {
+    # pass.
+}
+# Update or add new variables to the environment.
+existing.vl <- ls()
+repvar.list <- replotVars(args.tbl, existing.vl)
+for(i in 1:length(repvar.list)) {
+    vn <- names(repvar.list)[i]
+    eval(parse(text=sprintf("%s <- repvar.list$%s", vn, vn)))
+}
+
+################################################
+# Load plotting procedures and do it.
+source(file.path(progpath, 'lib', 'plotlib.r'))
+if(command == 'prof') {
+    # load(unz(iname, file.path(ifolder, 'avgprof.RData')))
     # Update some parameters.
-    if('shade.alp' %in% names(repvar.list)) {
-        shade.alp <- repvar.list$shade.alp
-    }
-    if('mw' %in% names(repvar.list)) {
-        mw <- repvar.list$mw
-    }
-    if('se' %in% names(repvar.list)) {
-        se <- repvar.list$se
-    }
     # Do plot.
     out.plot <- paste(oname, '.pdf', sep='')
-    pdf(out.plot, width=default.width, height=default.height)
+    pdf(out.plot, width=default.width, height=default.height, 
+        pointsize=font.size)
     if(!se) {
         confiMat <- NULL
     }
@@ -115,15 +116,15 @@ if(command == 'prof') {
             stop('Loading package caTools failed!')
         }
     }
-    plotmat(regcovMat, ctg.tbl$title, bam.pair, xticks, pts, m.pts, f.pts, pint,
-            shade.alp, confiMat, mw)
+    plotmat(regcovMat, ctg.tbl$title, bam.pair, xticks, pts, m.pts, f.pts, 
+            pint, shade.alp, confiMat, mw, prof.misc)
     out.dev <- dev.off()
     # Save replot data.
     out.dat <- paste(oname, '.RData', sep='')
     save(shade.alp, mw, se, file=out.dat)
 
 } else if(command == 'heatmap') {
-    load(unz(iname, file.path(ifolder, 'heatmap.RData')))
+    # load(unz(iname, file.path(ifolder, 'heatmap.RData')))
     # Setup multi-core doMC.
     if(!suppressMessages(require(doMC, warn.conflicts=F))) {
         install.packages('doMC')
@@ -138,26 +139,6 @@ if(command == 'prof') {
         registerDoMC(cores.number)
     }
 
-    # Update some parameters.
-    if('flood.frac' %in% names(repvar.list)) {
-        flood.frac <- repvar.list$flood.frac
-    }
-    if('color.scale' %in% names(repvar.list)) {
-        color.scale <- repvar.list$color.scale
-    } else if(!'color.scale' %in% ls()) {  # backward compatibility.
-        color.scale <- 'local'
-    }
-    if('rm.zero' %in% names(repvar.list)) {
-        rm.zero <- repvar.list$rm.zero
-    } else if(!'rm.zero' %in% ls()) {  # backward compatibility.
-        rm.zero <- 1
-    }
-    if('go.algo' %in% names(repvar.list)) {
-        go.algo <- repvar.list$go.algo
-    }
-    if('rr' %in% names(repvar.list)) {
-        rr <- repvar.list$rr
-    }
     # Setup heatmap device.
     hd <- SetupHeatmapDevice(reg.list, uniq.reg, ng.list, pts, reduce.ratio=rr)
     reg.hei <- hd$reg.hei  # list of image heights for unique regions.
@@ -167,7 +148,7 @@ if(command == 'prof') {
     heatmap.mar <- hd$heatmap.mar  # heatmap.mar: heatmap margins.
     # Do plot.
     out.hm <- paste(oname, '.pdf', sep='')
-    pdf(out.hm, width=hm.width, height=hm.height)
+    pdf(out.hm, width=hm.width, height=hm.height, pointsize=font.size)
     par(mai=heatmap.mar)
     layout(lay.mat, heights=reg.hei)
     # Do heatmap plotting.
@@ -178,7 +159,6 @@ if(command == 'prof') {
     # Save replot data.
     out.dat <- paste(oname, '.RData', sep='')
     save(flood.frac, rm.zero, go.algo, rr, go.list, file=out.dat)
-
 } else {
     # Pass.
 }

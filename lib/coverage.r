@@ -6,7 +6,20 @@ checkBound <- function(start, end, range, chrlen){
         return(TRUE)
 }
 
-SplineRev3Sec <- function(cov.list, v.fls, pts.list, v.strand) {
+Bin <- function(v, n) {
+# Function to bin a coverage vector.
+# Args:
+#   v: coverage vector.
+#   n: number of bins.
+# Return: vector of binned values.
+
+    bin.bound <- seq(1, length(v), length.out=n + 1)
+    sapply(1:n, function(i) {
+            mean(v[bin.bound[i]:bin.bound[i + 1]])
+        })
+}
+
+SplineRev3Sec <- function(cov.list, v.fls, pts.list, v.strand, algo="spline") {
 # For 3 sections of continuous coverage, spline each according to specified 
 # data points and return concatenated, interpolated curves.
 # Args:
@@ -14,13 +27,14 @@ SplineRev3Sec <- function(cov.list, v.fls, pts.list, v.strand) {
 #   v.fls: vector of flanking region size.
 #   pts.list: a list of three integers for data points.
 #   v.strand: factor vector of strands.
+#   algo: algorithm used to normalize coverage vectors (spline, bin).
 # Return: matrix of interpolated coverage: each row represents a gene; each 
 #         column represents a data point. Coverage from exons are concatenated.
 # Notes: the names of cov.list and pts.list must be the same for index purpose.
 # Suggested: use 'l', 'm', and 'r' for the names.
 
     # Create an empty coveage matrix first.
-    tot.pts <- sum(unlist(pts.list))
+    tot.pts <- sum(unlist(pts.list)) - 2
     cov.mat <- matrix(nrow=length(cov.list), ncol=tot.pts)
 
     for(i in 1:length(cov.list)) {
@@ -28,42 +42,56 @@ SplineRev3Sec <- function(cov.list, v.fls, pts.list, v.strand) {
         right.cov <- tail(cov.list[[i]], n=v.fls[i])
         mid.cov <- window(cov.list[[i]], start=v.fls[i] + 1, 
                           width=length(cov.list[[i]]) - 2*v.fls[i])
-        left.cov <- spline(1:length(left.cov), left.cov, n=pts.list$l)$y
-        right.cov <- spline(1:length(right.cov), right.cov, n=pts.list$r)$y
-        mid.cov <- spline(1:length(mid.cov), mid.cov, n=pts.list$m)$y
-        if(v.strand[i] == '+') {
-            cov.mat[i, ] <- c(left.cov, mid.cov, right.cov)
+        if(algo == "spline") {
+            left.cov <- spline(1:length(left.cov), left.cov, n=pts.list$l)$y
+            right.cov <- spline(1:length(right.cov), right.cov, n=pts.list$r)$y
+            mid.cov <- spline(1:length(mid.cov), mid.cov, n=pts.list$m)$y
+        } else if(algo == "bin") {
+            left.cov <- Bin(left.cov, n=pts.list$l)
+            right.cov <- Bin(right.cov, n=pts.list$r)
+            mid.cov <- Bin(mid.cov, n=pts.list$m)
         } else {
-            cov.mat[i, ] <- rev(c(left.cov, mid.cov, right.cov))
+            # pass.
+        }
+        # Fuse the two points at the boundary and concatenate.
+        f1 <- (tail(left.cov, n=1) + head(mid.cov, n=1)) / 2
+        f2 <- (tail(mid.cov, n=1) + head(right.cov, n=1)) / 2
+        con.cov <- c(left.cov[-length(left.cov)], f1, 
+                     mid.cov[-c(1, length(mid.cov))], 
+                     f2, right.cov[-1])
+        # browser()
+        if(v.strand[i] == '+') {
+            cov.mat[i, ] <- con.cov
+        } else {
+            cov.mat[i, ] <- rev(con.cov)
         }
     }
 
     cov.mat
 }
 
-extrCov3Sec <- function(bam.file, sn.inbam, v.chrom, v.start, v.end, v.fls, 
-                        bufsize, m.pts, f.pts, v.strand, fraglen, map.qual, 
-                        bowtie) {
+extrCov3Sec <- function(v.chrom, v.start, v.end, v.fls, v.strand, m.pts, f.pts, 
+                        bufsize, algo, ...) {
 # Extract and interpolate coverage vectors from genomic regions with 3 sections.
 # Args:
-#   bam.file: character string refers to the path of a bam file.
 #   v.chrom: factor vector of chromosome names.
 #   v.start: integer vector of region start.
 #   v.end: integer vector of region end.
 #   v.fls: integer vector of flanking region size in bps.
+#   v.strand: factor vector of gene strands.
 #   m.pts: data points for middle interval.
 #   f.pts: data points for flanking region.
-#   v.strand: factor vector of gene strands.
-#   fraglen: expected fragment length.
-#   map.qual: map quality score cutoff.
+#   bufsize: integer; buffers are added to both ends of each region.
+#   algo: algorithm used to normalize coverage vectors.
 # Return: matrix of interpolated coverage: each row represents a gene; each 
 #         column represents a data point.
 
     interflank.gr <- GRanges(seqnames=v.chrom, ranges=IRanges(
                              start=v.start - v.fls - bufsize, 
                              end=v.end + v.fls + bufsize))
-    interflank.cov <- covBam(bam.file, sn.inbam, interflank.gr, fraglen, 
-                             map.qual, bowtie)
+    # interflank.cov <- covBam(bam.file, sn.inbam, interflank.gr, fraglen, 
+    #                          map.qual, bowtie)
+    interflank.cov <- covBam(interflank.gr, ...)
 
     # Trim buffers from coverage vectors.
     interflank.cov <- lapply(interflank.cov, function(v) {
@@ -72,24 +100,8 @@ extrCov3Sec <- function(bam.file, sn.inbam, v.chrom, v.start, v.end, v.fls,
 
     # Interpolate and reverse coverage vectors.
     SplineRev3Sec(interflank.cov, v.fls, list(l=f.pts, m=m.pts, r=f.pts), 
-                  v.strand)
+                  v.strand, algo)
 }
-
-# extrCovSec <- function(chrcov, start, end, flanking, pts, strand, weight){
-# # This function should be deprecated.
-
-#     cov <- as.vector(seqselect(chrcov, start - flanking, end + flanking))
-#     cov.intp <- spline(1:length(cov), cov, n=pts)$y
-#     if(weight){
-#         cov.intp <- (length(cov) / pts) * cov.intp
-#     }
-#     if(strand == '+'){
-#         cov.intp
-#     }else{
-#         rev(cov.intp)
-#     }
-# }
-
 
 sub3CovList <- function(all.cov, v.left, v.right) {
 # For a list of coverage vectors, separate them into three lists.
@@ -113,27 +125,25 @@ sub3CovList <- function(all.cov, v.left, v.right) {
     list(l=left.cov, m=mid.cov, r=right.cov)
 }
 
-extrCovExons <- function(bam.file, sn.inbam, v.chrom, ranges.list, v.fls, 
-                         bufsize, m.pts, f.pts, v.strand, fraglen, map.qual, 
-                         bowtie) {
+extrCovExons <- function(v.chrom, exonranges.list, v.fls, v.strand, 
+                         m.pts, f.pts, bufsize, algo, ...) {
 # Extract coverage vectors for transcripts with exon models.
 # Args:
-#   bam.file: character string refers to the path of a bam file.
 #   v.chrom: factor vector of chromosome names.
-#   ranges.list: list of IRanges objects for exon coordinates.
+#   exonranges.list: list of IRanges objects for exon coordinates.
 #   v.fls: integer vector of flanking region size in bps.
+#   v.strand: factor vector of gene strands.
 #   m.pts: data points for middle interval.
 #   f.pts: data points for flanking region.
-#   v.strand: factor vector of gene strands.
-#   fraglen: expected fragment length.
-#   map.qual: map quality score cutoff.
+#   bufsize: integer; buffers are added to both ends of each region.
+#   algo: algorithm used to normalize coverage vectors.
 # Return: matrix of interpolated coverage: each row represents a gene; each 
 #         column represents a data point. Coverage from exons are concatenated.
 
     # Construct ranges including exon and flanking regions.
-    exonflank.list <- vector('list', length=length(ranges.list))
-    for(i in 1:length(ranges.list)) {
-        r.mod <- ranges.list[[i]]  # IRanges object to be modified.
+    exonflank.list <- vector('list', length=length(exonranges.list))
+    for(i in 1:length(exonranges.list)) {
+        r.mod <- exonranges.list[[i]]  # IRanges object to be modified.
         n <- length(r.mod)
         # Add flanking and buffer regions.
         start(r.mod)[1] <- start(r.mod)[1] - v.fls[i] - bufsize
@@ -141,41 +151,38 @@ extrCovExons <- function(bam.file, sn.inbam, v.chrom, ranges.list, v.fls,
         exonflank.list[[i]] <- GRanges(seqnames=v.chrom[i], ranges=r.mod)
     }
 
-    exonflank.cov <- covBamExons(bam.file, sn.inbam, exonflank.list, fraglen, 
-                                 map.qual, bowtie)
+    exonflank.cov <- covBamExons(exonflank.list, ...)
 
     # Trim buffers from coverage vectors.
     exonflank.cov <- lapply(exonflank.cov, function(v) {
             window(v, start=bufsize + 1, width=length(v) - 2 * bufsize)
         })
 
-    # Extract the left, exon and right parts into separate lists.
-    # cov3.list <- sub3CovList(exonflank.cov, v.fls, v.fls)
-
     SplineRev3Sec(exonflank.cov, v.fls, list(l=f.pts, m=m.pts, r=f.pts), 
-                  v.strand)
+                  v.strand, algo)
 }
 
 
-extrCovMidp <- function(bam.file, sn.inbam, v.chrom, v.midp, flanksize, 
-                        bufsize, pts, v.strand, fraglen, map.qual, bowtie) {
+extrCovMidp <- function(v.chrom, v.midp, flanksize, v.strand, pts, bufsize, 
+                        algo, ...) {
 # Extract coverage vectors with a middle point and symmetric flanking regions.
 # Args:
-#   bam.file: character string refers to the path of a bam file.
 #   v.chrom: factor vector of chromosome names.
 #   v.midp: integer vector of middle points.
 #   flanksize: integer of flanking region size in bps.
-#   pts: data points to spline into.
 #   v.strand: factor vector of gene strands.
-#   fraglen: expected fragment length.
-#   map.qual: map quality score cutoff.
+#   pts: data points to spline into.
+#   bufsize: integer; buffers are added to both ends of each region.
+#   algo: algorithm used to normalize coverage vectors.
 # Return: matrix of interpolated coverage: each row represents a gene; each 
 #         column represents a data point.
     
     granges <- GRanges(seqnames=v.chrom, ranges=IRanges(
                        start=v.midp - flanksize - bufsize, 
                        end=v.midp + flanksize + bufsize))
-    cov.list <- covBam(bam.file, sn.inbam, granges, fraglen, map.qual, bowtie)
+    # cov.list <- covBam(bam.file, sn.inbam, granges, fraglen, map.qual, bowtie)
+    # browser()
+    cov.list <- covBam(granges, ...)
 
     # Trim buffers from coverage vectors.
     cov.list <- lapply(cov.list, function(v) {
@@ -190,8 +197,14 @@ extrCovMidp <- function(bam.file, sn.inbam, v.chrom, v.midp, flanksize,
             cov.mat[i, ] <- vector('integer', length=pts)
             # cov.mat[i, ] <- vector('integer', length=length(cov.list[[1]]))
         } else {
-            cov.mat[i, ] <- spline(1:length(cov.list[[i]]), cov.list[[i]], 
-                                   n=pts)$y
+            if(algo == "spline") {
+                cov.mat[i, ] <- spline(1:length(cov.list[[i]]), cov.list[[i]], 
+                                       n=pts)$y
+            } else if(algo == "bin") {
+                cov.mat[i, ] <- Bin(cov.list[[i]], n=pts)
+            } else {
+                # pass.
+            }
             # cov.mat[i, ] <- cov.list[[i]]
             if(v.strand[i] == '-') {
                 cov.mat[i, ] <- rev(cov.mat[i, ])
@@ -227,18 +240,23 @@ genZeroList <- function(llen, v.vlen) {
     res
 }
 
-covBam <- function(bam.file, sn.inbam, granges, fraglen, 
-                   map.qual=20, bowtie=F) {
+covBam <- function(granges, bam.file, sn.inbam, fraglen, map.qual=20, 
+                   bowtie=F) {
 # Extract coverage vectors from bam file for a list of genes.
 # Args:
+#   granges: list of GRanges objects representing genomic coordinates 
+#            to extract coverge from. In the case of RNA-seq, each GRanges
+#            object has multiple ranges representing exons and flanking 
+#            regions. In the case of ChIP-seq, each GRanges object has one
+#            range representing left boundary to right boundary.
 #   bam.file: character string refers to the path of a bam file.
-#   granges.list: list of GRanges objects representing genomic coordinates 
-#                 to extract coverge from. In the case of RNA-seq, each GRanges
-#                 object has multiple ranges representing exons and flanking 
-#                 regions. In the case of ChIP-seq, each GRanges object has one
-#                 range representing left boundary to right boundary.
+#   sn.inbam: vector of chromosome names in the bam file.
+#   fraglen: fragment length.
+#   map.qual: mapping quality to filter reads.
+#   bowtie: boolean to indicate whether the aligner was Bowtie-like or not.
 # Return: list of coverage vectors, each vector represents a gene.
 
+    # browser()
     g.start <- start(ranges(granges))  # vector of gene start sites.
     g.end <- end(ranges(granges))  # vector of gene end sites.
     gb.len <- g.end - g.start + 1
@@ -317,17 +335,19 @@ covBam <- function(bam.file, sn.inbam, granges, fraglen,
 }
 
 
-covBamExons <- function(bam.file, sn.inbam, granges.list, fraglen, 
-                        map.qual=20, bowtie=F) {
+covBamExons <- function(granges.list, bam.file, sn.inbam, fraglen, map.qual=20, 
+                        bowtie=F) {
 # Extract coverage vectors from bam file for a list of transcripts of multiple
 # exons.
 # Args:
-#   bam.file: character string refers to the path of a bam file.
 #   granges.list: list of GRanges objects representing genomic coordinates 
 #                 to extract coverge from. Each GRanges object has multiple
 #                 ranges representing exons and flanking regions. 
+#   bam.file: character string refers to the path of a bam file.
+#   sn.inbam: vector of chromosome names in the bam file.
 #   fraglen: fragment length.
 #   map.qual: mapping quality to filter reads.
+#   bowtie: boolean to indicate whether the aligner was Bowtie-like or not.
 # Return: list of coverage vectors, each vector represents a transcript.
 
     # Obtain start and end sites for each gene.
@@ -495,10 +515,8 @@ headerIndexBam <- function(bam.list) {
         map.prog <- try(strsplit(header[[1]]$text$'@PG'[[1]], ':')[[1]][2], 
                         silent=T)
         if(class(map.prog) != "try-error") {
-            v.map.bowtie[i] <- ifelse(map.prog %in% c('Bowtie', 'TopHat', 
-                                                      'bowtie2',
-                                                      'BEDTools_bedToBam'), 
-                                      T, F)
+            v.map.bowtie[i] <- grepl('tophat|bowtie|bedtools', map.prog, 
+                                     ignore.case=T)
         } else {
             cat("\n")
             warning(sprintf("Aligner for: %s cannot be determined. Will automatically convert mapping scores of 255.", bam.file))
@@ -586,10 +604,18 @@ chunkIndex <- function(tot.gene, gcs) {
     chkidx.list
 }
 
-covMatrix <- function(bam.file, libsize, sn.inbam, chr.tag, coord, 
-                      chkidx.list, rnaseq.gb, exonmodel, reg2plot, pint, 
-                      flanksize, flankfactor, bufsize, fraglen, map.qual, 
-                      m.pts, f.pts, is.bowtie, spit.dot=T) {
+covMatrix <- function(chkidx.list, coord, rnaseq.gb, exonmodel, libsize, 
+                      spit.dot=T, ...) {
+# Function to generate a coverage matrix for all genes.
+# Args:
+#   chkidx.list: list of (start, end) indices for each chunk.
+#   coord: dataframe of gene coordinates.
+#   rnaseq.gb: boolean for RNA-seq genebody plot.
+#   exonmodel: exon model data object.
+#   libsize: total read count for this bam file.
+#   spit.dot: boolean to control sptting '.' to consoles.
+# Return: normalized coverage matrix for all genes, each row represents a gene.
+
     
     # Extract coverage and combine into a matrix.
     result.matrix <- foreach(chk=chkidx.list, .combine='rbind', 
@@ -604,20 +630,17 @@ covMatrix <- function(bam.file, libsize, sn.inbam, chr.tag, coord,
         } else {
             exonranges.list <- NULL
         }
-        doCov(coord[i, ], chr.tag, reg2plot, pint, bam.file, sn.inbam, 
-              flanksize, flankfactor, bufsize, fraglen, map.qual, 
-              m.pts, f.pts, is.bowtie, exonranges.list)
+        doCov(coord[i, ], exonranges.list, ...)
     }
 
     # Floor negative values which are caused by spline.
     result.matrix[result.matrix < 0] <- 0
-
     result.matrix / libsize * 1e6  # normalize to RPM.
 
 
     ########### For debug #############
-    # pts <- m.pts + 2 * f.pts
-    # result.matrix <- matrix(0, nrow=nrow(coord), ncol=pts)
+    # pts <- m.pts + 2 * f.pts - 2
+    # result.matrix <- matrix(0, nrow=nrow(coord), ncol=101)
     # for(c in 1:length(chkidx.list)) {
     #     chk <- chkidx.list[[c]]
     #     i <- chk[1]:chk[2]  # chunk: start -> end
@@ -628,10 +651,8 @@ covMatrix <- function(bam.file, libsize, sn.inbam, chr.tag, coord,
     #     } else {
     #         exonranges.list <- NULL
     #     }
-    #     result.matrix[i, ] <- doCov(coord[i, ], chr.tag, reg2plot, 
-    #           pint, bam.file, sn.inbam, flanksize, flankfactor, bufsize, 
-    #           fraglen, map.qual, m.pts, f.pts, is.bowtie, 
-    #           exonranges.list)
+    #     browser()
+    #     result.matrix[i, ] <- doCov(coord[i, ], exonranges.list, ...)
     # }
     # # Floor negative values which are caused by spline.
     # result.matrix[result.matrix < 0] <- 0
@@ -640,24 +661,19 @@ covMatrix <- function(bam.file, libsize, sn.inbam, chr.tag, coord,
 }
 
 
-doCov <- function(coord.mat, chr.tag, reg2plot, pint, bam.file, sn.inbam, 
-                  flanksize, flankfactor, bufsize, fraglen, map.qual, m.pts, 
-                  f.pts, bowtie, exonranges.list=NULL) {
+doCov <- function(coord.mat, exonranges.list, chr.tag, pint, reg2plot, 
+                  flanksize, flankfactor, m.pts, f.pts, ...) {
 # Extract coverage from bam file into a matrix. According to the parameter
 # values, call corresponding functions.
 # Args:
 #   coord.mat: matrix of genomic coordinates to extract coverage.
-#   reg2plot: string of region to plot.
+#   exonranges.list: list of IRanges objects, each represents a group of exons.
 #   pint: boolean of point interval.
-#   bam.file: character string refers to the path of a bam file.
+#   reg2plot: string of region to plot.
 #   flanksize: flanking region size.
 #   flankfactor: flanking region factor.
-#   fraglen: expected fragment length.
-#   map.qual: map quality score cutoff.
 #   m.pts: data points for middle interval.
 #   f.pts: data points for flanking region.
-#   bowtie: boolean of bowtie mapping method.
-#   exonranges.list: list of IRanges objects, each represents a group of exons.
 # Return: matrix of interpolated coverage: each row represents a gene; each 
 #         column represents a data point. Coverage from exons are concatenated.
 
@@ -673,14 +689,13 @@ doCov <- function(coord.mat, chr.tag, reg2plot, pint, bam.file, sn.inbam,
         if(!is.null(exonranges.list)) {  # RNA-seq
             if(flankfactor > 0) {
                 v.fls <- sapply(exonranges.list, function(t) {
-                            sum(end(t) - start(t) + 1)
+                            sum(end(t) - start(t) + 1) * flankfactor
                         })
             } else {
                 v.fls <- rep(flanksize, length=nrow(coord.mat))
             }
-            extrCovExons(bam.file, sn.inbam, v.chrom, exonranges.list, v.fls, 
-                         bufsize, m.pts, f.pts, v.strand, fraglen, map.qual, 
-                         bowtie)
+            extrCovExons(v.chrom, exonranges.list, v.fls, v.strand, 
+                         m.pts, f.pts, ...)
         } else {  # ChIP-seq with intervals.
             v.start <- coord.mat$start
             v.end <- coord.mat$end
@@ -689,9 +704,8 @@ doCov <- function(coord.mat, chr.tag, reg2plot, pint, bam.file, sn.inbam,
             } else {
                 v.fls <- rep(flanksize, length=nrow(coord.mat))
             }
-            extrCov3Sec(bam.file, sn.inbam, v.chrom, v.start, v.end, v.fls, 
-                        bufsize, m.pts, f.pts, v.strand, fraglen, map.qual, 
-                        bowtie)
+            extrCov3Sec(v.chrom, v.start, v.end, v.fls, v.strand, 
+                        m.pts, f.pts, ...)
         }
     } else {  # point center with flanking regions.
         v.midp <- vector('integer', length=nrow(coord.mat))
@@ -704,7 +718,7 @@ doCov <- function(coord.mat, chr.tag, reg2plot, pint, bam.file, sn.inbam,
                 v.midp[r] <- coord.mat$end[r]
             }
         }
-        extrCovMidp(bam.file, sn.inbam, v.chrom, v.midp, flanksize, bufsize,
-                    m.pts + f.pts*2, v.strand, fraglen, map.qual, bowtie)
+        # browser()
+        extrCovMidp(v.chrom, v.midp, flanksize, v.strand, m.pts + f.pts*2, ...)
     }
 }

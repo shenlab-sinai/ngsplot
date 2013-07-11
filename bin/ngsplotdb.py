@@ -181,6 +181,7 @@ def install(root_path, args):
 
        Args:
          root_path: ngs.plot installation directory.
+         args.yes: say yes to all questions.
          args.pkg: path of package file.
        Returns:
          None.
@@ -189,6 +190,7 @@ def install(root_path, args):
     import tarfile
     import sys
 
+    yestoall = args.yes
     pkg_file = args.pkg
     # Package name: e.g. ngsplotdb_mm10_71_1.0.tar.gz.
     # Information about the genome is in mm10/.metainfo.
@@ -242,46 +244,61 @@ def install(root_path, args):
             print "Will upgrade the genome {0}:".format(gn_inst)
             print "Ensembl: {0}==>{1}; ngs.plot: {2}==>{3}.".\
                   format(installed_ens, ens_ver, installed_np, np_ver),
-            ans = raw_input("Continue?(y/n): ")
-            while True:
-                if(ans == "y" or ans == "Y" or ans == "n" or ans == "N"):
-                    break
-                else:
-                    ans = raw_input("Answer must be y/Y or n/N: ")
-            if(ans == "y" or ans == "Y"):
+            if yestoall:
                 install_pkg(root_path, pkg_file, gn_inst, gn_inst)
                 update_gnlist(root_path, g_tbl, gn_inst, assembly, \
                               species, ens_ver, np_ver)
+            else:
+                ans = raw_input("Continue?(y/n): ")
+                while True:
+                    if(ans == "y" or ans == "Y" or ans == "n" or ans == "N"):
+                        break
+                    else:
+                        ans = raw_input("Answer must be y/Y or n/N: ")
+                if(ans == "y" or ans == "Y"):
+                    install_pkg(root_path, pkg_file, gn_inst, gn_inst)
+                    update_gnlist(root_path, g_tbl, gn_inst, assembly, \
+                                  species, ens_ver, np_ver)
         # Install an older version.
         else:
             print "Will install the same or older version",
             print "of the genome {0}:".format(gn_inst)
             print "Ensembl: {0}==>{1}; ngs.plot: {2}==>{3}.".\
                   format(installed_ens, ens_ver, installed_np, np_ver),
+            if yestoall:
+                install_pkg(root_path, pkg_file, gn_inst, gn_inst)
+                update_gnlist(root_path, g_tbl, gn_inst, assembly, \
+                              species, ens_ver, np_ver)
+            else:
+                ans = raw_input("Continue?(y/n): ")
+                while True:
+                    if(ans == "y" or ans == "Y" or ans == "n" or ans == "N"):
+                        break
+                    else:
+                        ans = raw_input("Answer must be y/Y or n/N: ")
+                if(ans == "y" or ans == "Y"):
+                    install_pkg(root_path, pkg_file, gn_inst, gn_inst)
+                    update_gnlist(root_path, g_tbl, gn_inst, assembly, \
+                                  species, ens_ver, np_ver)
+    else:
+        print "Will install new genome {0}:".format(gn_inst),
+        print "Ensembl=> v{0}; ngs.plot=> v{1}.".format(ens_ver, np_ver),
+        if yestoall:
+            install_pkg(root_path, pkg_file, gn_inst)
+            update_gnlist(root_path, g_tbl, gn_inst, assembly, \
+                          species, ens_ver, np_ver)
+        else:
             ans = raw_input("Continue?(y/n): ")
+                            
             while True:
                 if(ans == "y" or ans == "Y" or ans == "n" or ans == "N"):
                     break
                 else:
-                    ans = raw_input("Answer must be y/Y or n/N: ")
+                    ans = raw_input("Answer must be y/Y or n/N:")
             if(ans == "y" or ans == "Y"):
-                install_pkg(root_path, pkg_file, gn_inst, gn_inst)
+                install_pkg(root_path, pkg_file, gn_inst)
                 update_gnlist(root_path, g_tbl, gn_inst, assembly, \
                               species, ens_ver, np_ver)
-    else:
-        print "Will install new genome {0}:".format(gn_inst),
-        print "Ensembl=> v{0}; ngs.plot=> v{1}.".format(ens_ver, np_ver),
-        ans = raw_input("Continue?(y/n): ")
-                        
-        while True:
-            if(ans == "y" or ans == "Y" or ans == "n" or ans == "N"):
-                break
-            else:
-                ans = raw_input("Answer must be y/Y or n/N:")
-        if(ans == "y" or ans == "Y"):
-            install_pkg(root_path, pkg_file, gn_inst)
-            update_gnlist(root_path, g_tbl, gn_inst, assembly, \
-                          species, ens_ver, np_ver)
 
 
 def install_pkg(root_path, pkg_file, new_gn, old_gn=None):
@@ -387,6 +404,7 @@ def remove(root_path, args):
 
        Args:
          root_path: ngs.plot installation directory.
+         args.yes: say yes to all questions.
          args.gn: genome name.
        Returns:
          None.
@@ -395,18 +413,26 @@ def remove(root_path, args):
     import shutil
     import sys
 
+    yestoall = args.yes
+
     (h_sp, g_tbl, v_cw) = read_gnlist(root_path, "hash")
     gn = args.gn
 
     if gn in g_tbl:
         print "Will remove genome {0} from database.".format(gn),
-        ans = raw_input("Continue?(y/n): ")
-        while True:
-            if ans == 'y' or ans == 'Y' or ans == 'n' or ans == 'N':
-                break
-            else:
-                ans = raw_input("The answer must be y/Y or n/N: ")
-        if ans == 'y' or ans == 'Y':
+        do_rm = False
+        if yestoall:
+            do_rm = True
+        else:
+            ans = raw_input("Continue?(y/n): ")
+            while True:
+                if ans == 'y' or ans == 'Y' or ans == 'n' or ans == 'N':
+                    break
+                else:
+                    ans = raw_input("The answer must be y/Y or n/N: ")
+            if ans == 'y' or ans == 'Y':
+                do_rm = True
+        if do_rm:
             folder_to_rm = root_path + "/database/" + gn
             print "Removing genome...",
             sys.stdout.flush()
@@ -420,7 +446,7 @@ def remove(root_path, args):
 
 
 def rm_dbtbl(root_path, gn):
-    """Add a new genome into database meta tables.
+    """Remove a genome from database meta tables.
 
        Args:
          root_path: ngs.plot installation directory.
@@ -432,6 +458,39 @@ def rm_dbtbl(root_path, gn):
 
     subprocess.call(["remove.db.tables.r", gn])
 
+def chrnames(root_path, args):
+    """List chromosome names for a given genome.
+
+       Args:
+         root_path: ngs.plot installation directory.
+         args.gn: genome name to remove.
+         args.db: database(ensembl or refseq).
+       Returns: None.
+    """
+
+    import sys
+
+    db = args.db
+    gn = args.gn
+
+    if db != "ensembl" and db != "refseq":
+        print "Unrecognized database name: database must be ensembl or refseq."
+        sys.exit()
+
+    chrnames_file = root_path + "/database/" + gn + "/.chrnames." + db
+
+    try:
+        chrf = open(chrnames_file)
+    except IOError:
+        print "Open file: {0} error.".format(chrnames_file),
+        print "Your database may be corrupted or you have an older version."
+        sys.exit()
+
+    chr_list = chrf.read(1000000)  # set 1MB limit to avoid nasty input.
+    chrf.close()
+
+    chr_list = chr_list.strip()
+    print chr_list
 
 
 
@@ -453,6 +512,9 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Manipulate ngs.plot's \
                                                   annotation database",
                                      prog="ngsplotdb.py")
+    parser.add_argument("-y", "--yes", help="Say yes to all prompted questions",
+                        action="store_true")
+
     subparsers = parser.add_subparsers(title="Subcommands",
                                        help="additional help")
 
@@ -475,6 +537,14 @@ if __name__ == "__main__":
     parser_remove.add_argument("gn", help="Name of genome to be \
                                            removed(e.g. hg18)", type=str)
     parser_remove.set_defaults(func=remove)
+
+    # ngsplotdb.py chromosome names parser.
+    parser_chrnames = subparsers.add_parser("chrnames", 
+                                            help="List chromosome names")
+    parser_chrnames.add_argument("gn", help="Genome name(e.g. mm9)", type=str)
+    parser_chrnames.add_argument("db", help="Database(ensembl or refseq)",
+                                 type=str)
+    parser_chrnames.set_defaults(func=chrnames)
 
 
     args = parser.parse_args()

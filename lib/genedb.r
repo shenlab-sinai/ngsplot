@@ -68,7 +68,7 @@ SetupPlotCoord <- function(args.tbl, ctg.tbl, default.tbl, dbfile.tbl, progpath,
             finfo <- NULL
         }
 
-        Labs <- unlist(strsplit(as.character(anno.parameters$PointLab), ","))
+        Labs <- unlist(strsplit(as.character(anno.parameters$PointLab[1]), ","))
         if(length(Labs)==1){
             pint <- TRUE
         }else{

@@ -6,10 +6,13 @@
 #
 # -- by Li Shen, MSSM
 # Created:      Nov 2011.
-# Last Updated: Mar 2013.
+# Last Updated: Jul 2013.
 #
 
-ngsplot.version <- '2.00'
+# library(compiler)
+# enableJIT(3)
+
+ngsplot.version <- '2.02'
 
 # Deal with command line arguments.
 cmd.help <- function(){
@@ -19,7 +22,7 @@ cmd.help <- function(){
     cat("                  -O name [Options]\n")
     cat("\n## Mandatory parameters:\n")
     cat("  -G   Genome name. Use ngsplotdb.py list to show available genomes.\n")
-    cat("  -R   Genomic regions to plot: tss, tes, genebody, exon, cgi or *.bed\n")
+    cat("  -R   Genomic regions to plot: tss, tes, genebody, exon, cgi, enhancer, dhs or *.bed\n")
     cat("  -C   Indexed bam file or a configuration file for multiplot\n")
     cat("  -O   Name for output: multiple files will be generated\n")
     cat("## Optional parameters related to configuration file:\n")
@@ -40,6 +43,7 @@ cmd.help <- function(){
     cat("## Misc. parameters:\n")
     cat("  -GO  Gene order algorithm used in heatmaps: total(default), hc, max,\n")
     cat("         prod, diff, pca and none(according to gene list supplied)\n")
+    cat("  -AL  Algorithm used to normalize coverage vectors: spline(default), bin\n")
     cat("  -CS  Chunk size for loading genes in batch(default=100)\n")
     cat("  -FL  Fragment length used to calculate physical coverage(default=150)\n")
     cat("  -MQ  Mapping quality cutoff to filter reads(default=20)\n")
@@ -51,6 +55,7 @@ cmd.help <- function(){
     cat("         local(default): base on each individual heatmap\n")
     cat("         region: base on all heatmaps belong to the same region\n")
     cat("         global: base on all heatmaps together\n")
+    cat("         min_val,max_val: custom scale using a pair of numerics\n")
     cat("  -FC  Flooding fraction:[0, 1), default=0.02\n")
     cat("  -FI  Forbid image output if set to 1(default=0)\n")
     cat("  -MW  Moving window width to smooth avg. profiles, must be integer\n")
@@ -65,7 +70,7 @@ cmd.help <- function(){
 ###########################################################################
 #################### Deal with program input arguments ####################
 args <- commandArgs(T)
-# args <- unlist(strsplit('-G hg19 -R tss -C hesc.H3k4me3.Rep1.1M.bam -O test', ' '))
+# args <- unlist(strsplit('-G mm9 -R tss -C h3k4me3r.C1.mono.bam -O test', ' '))
 
 # Program environment variable.
 progpath <- Sys.getenv('NGSPLOT')
@@ -155,6 +160,7 @@ color.scale <- argvar.list$color.scale  # string for color scale.
 flood.frac <- argvar.list$flood.frac  # flooding fraction.
 rm.zero <- argvar.list$rm.zero  # remove all zero tag.
 go.algo <- argvar.list$go.algo  # gene order algorithm used in heatmaps.
+cov.algo <- argvar.list$cov.algo  # coverage normalization algorithm.
 gcs <- argvar.list$gcs  # gcs: chunk size for grouping genes.
 fraglen <- argvar.list$fraglen  # fragment length for physical coverage.
 map.qual <- argvar.list$map.qual  # mapping quality cutoff.
@@ -239,11 +245,12 @@ for(r in 1:nrow(ctg.tbl)) {
     if(class(chr.tag) == 'character') {
         stop(sprintf("Read %s error: %s", bam.files[1], chr.tag))
     }
-    result.matrix <- covMatrix(bam.files[1], libsize, sn.inbam, chr.tag, 
-                               coord.list[[reg]], chkidx.list, rnaseq.gb, 
-                               exonmodel, reg2plot, pint, flanksize, 
-                               flankfactor, bufsize, fraglen, map.qual, m.pts, 
-                               f.pts, is.bowtie)
+    # browser()
+    result.matrix <- covMatrix(chkidx.list, coord.list[[reg]], rnaseq.gb, 
+                               exonmodel, libsize, TRUE, chr.tag, pint, 
+                               reg2plot, flanksize, flankfactor, m.pts, f.pts, 
+                               bufsize, cov.algo, bam.files[1], sn.inbam, 
+                               fraglen, map.qual, is.bowtie)
     if(bam.pair) {  # calculate background.
         pseudo.rpm <- 1e-9
         libsize <- v.lib.size[bam.files[2]]
@@ -253,11 +260,11 @@ for(r in 1:nrow(ctg.tbl)) {
         if(class(chr.tag) == 'character') {
             stop(sprintf("Read %s error: %s", bam.files[2], chr.tag))
         }
-        bkg.matrix <- covMatrix(bam.files[2], libsize, sn.inbam, chr.tag, 
-                                coord.list[[reg]], chkidx.list, rnaseq.gb, 
-                                exonmodel, reg2plot, pint, flanksize, 
-                                flankfactor, bufsize, fraglen, map.qual, m.pts, 
-                                f.pts, is.bowtie)
+        bkg.matrix <- covMatrix(chkidx.list, coord.list[[reg]], rnaseq.gb, 
+                                exonmodel, libsize, TRUE, chr.tag, pint, 
+                                reg2plot, flanksize, flankfactor, m.pts, f.pts, 
+                                bufsize, cov.algo, bam.files[2], sn.inbam, 
+                                fraglen, map.qual, is.bowtie)
         # browser()
         result.matrix <- log2((result.matrix + pseudo.rpm) / 
                               (bkg.matrix + pseudo.rpm))

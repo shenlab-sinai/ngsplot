@@ -222,13 +222,15 @@ genXticks <- function(reg2plot, pint, lgint, pts, flanksize, flankfactor,
     list(pos=tick.pos, lab=tick.lab)
 }
 
-plotmat <- function(regcovMat, title2plot, bam.pair, xticks, pts, m.pts, f.pts, 
-                    pint, shade.alp=0, confiMat=NULL, mw=1, 
-                    misc.options=list(legend=T, box=T, vline=T, xylab=T)) {
+plotmat <- function(regcovMat, title2plot, plot.colors, bam.pair, xticks, 
+                    pts, m.pts, f.pts, pint, shade.alp=0, confiMat=NULL, mw=1, 
+                    misc.options=list(legend=T, box=T, vline=T, xylab=T, 
+                                      line.wd=3)) {
 # Plot avg. profiles and standard errors around them.
 # Args:
 #   regcovMat: matrix for avg. profiles.
 #   title2plot: profile names, will be shown in figure legend.
+#   plot.colors: vector of color specifications for all curves.
 #   bam.pair: boolean for bam-pair data.
 #   xticks: X-axis ticks.
 #   pts: data points
@@ -239,7 +241,7 @@ plotmat <- function(regcovMat, title2plot, bam.pair, xticks, pts, m.pts, f.pts,
 #   confiMat: matrix for standard errors.
 #   mw: moving window size for smoothing function.
 #   misc.options: list of misc. options - legend, box around plot, 
-#       verticle lines, X- and Y-axis labels.
+#       verticle lines, X- and Y-axis labels, line width.
 
     # Smooth avg. profiles if specified.
     if(mw > 1){
@@ -248,13 +250,17 @@ plotmat <- function(regcovMat, title2plot, bam.pair, xticks, pts, m.pts, f.pts,
     }
 
     # Choose colors.
-    ncurve <- ncol(regcovMat)
-    if(ncurve <= 8) {
-        suppressMessages(require(RColorBrewer, warn.conflicts=F))
-        col2use <- brewer.pal(ifelse(ncurve >= 3, ncurve, 3), 'Dark2')
-        col2use <- col2use[1:ncurve]
+    if(any(is.na(plot.colors))) {
+        ncurve <- ncol(regcovMat)
+        if(ncurve <= 8) {
+            suppressMessages(require(RColorBrewer, warn.conflicts=F))
+            col2use <- brewer.pal(ifelse(ncurve >= 3, ncurve, 3), 'Dark2')
+            col2use <- col2use[1:ncurve]
+        } else {
+            col2use <- rainbow(ncurve)
+        }
     } else {
-        col2use <- rainbow(ncurve)
+        col2use <- plot.colors
     }
     col2use <- col2alpha(col2use, 0.8)
 
@@ -263,7 +269,7 @@ plotmat <- function(regcovMat, title2plot, bam.pair, xticks, pts, m.pts, f.pts,
                               "Read count Per Million mapped reads")
     xrange <- 0:pts
     matplot(xrange, regcovMat, xaxt='n', type="l", col=col2use, 
-            lty="solid", lwd=3, frame.plot=F, ann=F)
+            lty="solid", lwd=misc.options$line.wd, frame.plot=F, ann=F)
     if(misc.options$xylab) {
         title(xlab="Genomic Region (5' -> 3')", ylab=ytext)
     }
@@ -427,31 +433,16 @@ plotheat <- function(reg.list, uniq.reg, enrichList, go.algo, title2plot,
     if(bam.pair) {
         if(hm.color != "default") {
             two.colors <- unlist(strsplit(hm.color, ':'))
-            if(length(two.colors) != 2 || !two.colors[1] %in% colors() ||
-               !two.colors[2] %in% colors()) {
-                warning(sprintf("Color specification:%s is incorrect or they are not R colors. Use default.", hm.color))
-                enrich.palette <- colorRampPalette(c('green', 'black', 'red'), 
-                                                   bias=.6, 
-                                                   interpolate='spline')
-            } else {
-                enrich.palette <- colorRampPalette(c(two.colors[1], 'black', 
-                                                     two.colors[2]), 
-                                                   bias=.6, 
-                                                   interpolate='spline')
-            }
+            enrich.palette <- colorRampPalette(c(two.colors[1], 'black', 
+                                                 two.colors[2]), 
+                                               bias=.6, interpolate='spline')
         } else {
             enrich.palette <- colorRampPalette(c('green', 'black', 'red'), 
                                                bias=.6, interpolate='spline')
         }
     } else {
         if(hm.color != "default") {
-            if(hm.color %in% colors()) {
-                enrich.palette <- colorRampPalette(c('snow', hm.color))
-            } else {
-                warning(sprintf("Color:%s is not R color. Use default.", 
-                                hm.color))
-                enrich.palette <- colorRampPalette(c('snow', 'red2'))
-            }
+            enrich.palette <- colorRampPalette(c('snow', hm.color))
         } else {
             enrich.palette <- colorRampPalette(c('snow', 'red2'))    
         }

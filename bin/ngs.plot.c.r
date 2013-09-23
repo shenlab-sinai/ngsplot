@@ -12,7 +12,7 @@
 # library(compiler)
 # enableJIT(3)
 
-ngsplot.version <- '2.07'
+ngsplot.version <- '2.00.1'
 
 # Deal with command line arguments.
 cmd.help <- function(){
@@ -22,11 +22,11 @@ cmd.help <- function(){
     cat("                  -O name [Options]\n")
     cat("\n## Mandatory parameters:\n")
     cat("  -G   Genome name. Use ngsplotdb.py list to show available genomes.\n")
-    cat("  -R   Genomic regions to plot: tss, tes, genebody, exon, cgi, enhancer, dhs or bed\n")
+    cat("  -R   Genomic regions to plot: tss, tes, genebody, exon, cgi, enhancer, dhs or *.bed\n")
     cat("  -C   Indexed bam file or a configuration file for multiplot\n")
     cat("  -O   Name for output: multiple files will be generated\n")
     cat("## Optional parameters related to configuration file:\n")
-    cat("  -E   Gene list to subset regions OR bed file for custom region\n")
+    cat("  -E   Gene list to subset regions\n")
     cat("  -T   Image title\n")
     cat("## Important optional parameters:\n")
     cat("  -F   Further information provided to select database table or plottype:\n")
@@ -43,7 +43,6 @@ cmd.help <- function(){
     cat("## Misc. parameters:\n")
     cat("  -GO  Gene order algorithm used in heatmaps: total(default), hc, max,\n")
     cat("         prod, diff, pca and none(according to gene list supplied)\n")
-    cat("  -AL  Algorithm used to normalize coverage vectors: spline(default), bin\n")
     cat("  -CS  Chunk size for loading genes in batch(default=100)\n")
     cat("  -FL  Fragment length used to calculate physical coverage(default=150)\n")
     cat("  -MQ  Mapping quality cutoff to filter reads(default=20)\n")
@@ -55,7 +54,6 @@ cmd.help <- function(){
     cat("         local(default): base on each individual heatmap\n")
     cat("         region: base on all heatmaps belong to the same region\n")
     cat("         global: base on all heatmaps together\n")
-    cat("         min_val,max_val: custom scale using a pair of numerics\n")
     cat("  -FC  Flooding fraction:[0, 1), default=0.02\n")
     cat("  -FI  Forbid image output if set to 1(default=0)\n")
     cat("  -MW  Moving window width to smooth avg. profiles, must be integer\n")
@@ -69,8 +67,11 @@ cmd.help <- function(){
 
 ###########################################################################
 #################### Deal with program input arguments ####################
-args <- commandArgs(T)
-# args <- unlist(strsplit('-G mm9 -R tss -C h3k4me3r.C1.mono.bam -O test', ' '))
+# args <- commandArgs(T)
+# args <- unlist(strsplit('-G hg19 -R tss -C hesc.H3k4me3.Rep1.1M.bam -O test', ' '))
+# print(args)
+
+args <- unlist(strsplit(argstr, ' '))
 
 # Program environment variable.
 progpath <- Sys.getenv('NGSPLOT')
@@ -79,8 +80,9 @@ if(progpath == "") {
           See README for details.\n")
 }
 
+# library(compiler)
 # Input argument parser.
-source(file.path(progpath, 'lib', 'parse.args.r'))
+loadcmp(file.path(progpath, 'lib', 'parse.args.Rc'))
 args.tbl <- parseArgs(args, c('-G', '-C', '-R', '-O'))
 if(is.null(args.tbl)){
     cmd.help()
@@ -128,15 +130,18 @@ if(!suppressMessages(require(utils, warn.conflicts=F))) {
 cat('.')
 cat("Done\n")
 
-cat("Configuring variables...")
 # Load tables of database: default.tbl, dbfile.tbl
 default.tbl <- read.delim(file.path(progpath, 'database', 'default.tbl'))
 dbfile.tbl <- read.delim(file.path(progpath, 'database', 'dbfile.tbl'))
+# Configuration: coverage-genelist-title relationships.
+cat("Configuring variables...")
+ctg.tbl <- ConfigTbl(args.tbl)
 
 # Setup variables from arguments.
-argvar.list <- setupVars(args.tbl, default.tbl)
+argvar.list <- setupVars(args.tbl, ctg.tbl, default.tbl)
 genome <- argvar.list$genome  # genome name, such as mm9, hg19, rn4.
 reg2plot <- argvar.list$reg2plot  # tss, tes, genebody, bed...
+bed.file <- argvar.list$bed.file  # BED file name if reg2plot=bed.
 oname <- argvar.list$oname  # output file root name.
 galaxy <- argvar.list$galaxy  # tag for Galaxy use.
 if(galaxy) {
@@ -157,15 +162,12 @@ color.scale <- argvar.list$color.scale  # string for color scale.
 flood.frac <- argvar.list$flood.frac  # flooding fraction.
 rm.zero <- argvar.list$rm.zero  # remove all zero tag.
 go.algo <- argvar.list$go.algo  # gene order algorithm used in heatmaps.
-cov.algo <- argvar.list$cov.algo  # coverage normalization algorithm.
 gcs <- argvar.list$gcs  # gcs: chunk size for grouping genes.
 fraglen <- argvar.list$fraglen  # fragment length for physical coverage.
 map.qual <- argvar.list$map.qual  # mapping quality cutoff.
 bufsize <- argvar.list$bufsize  # buffer is to ensure smooth coverage at both 
                                 # ends of the coverage vector.
 
-# Configuration: coverage-genelist-title relationships.
-ctg.tbl <- ConfigTbl(args.tbl, fraglen)
 
 # Register doMC with CPU number.
 if(cores.number == 0){
@@ -175,10 +177,10 @@ if(cores.number == 0){
 }
 
 # Setup plot-related coordinates and variables.
-source(file.path(progpath, 'lib', 'genedb.r'))
+loadcmp(file.path(progpath, 'lib', 'genedb.Rc'))
 plotvar.list <- SetupPlotCoord(args.tbl, ctg.tbl, default.tbl, dbfile.tbl, 
                                progpath, genome, reg2plot, lgint, flanksize, 
-                               samprate)
+                               bed.file, samprate)
 coord.list <- plotvar.list$coord.list  # list of coordinates for unique regions.
 rnaseq.gb <- plotvar.list$rnaseq.gb  # tag for RNA-seq data.
 lgint <- plotvar.list$lgint  # lgint: automatically determined if not specified.
@@ -189,7 +191,7 @@ exonmodel <- plotvar.list$exonmodel  # exon ranges if rnaseq.gb=True.
 Labs <- plotvar.list$Labs # labels for the plot.
 
 # Setup data points for plot.
-source(file.path(progpath, 'lib', 'plotlib.r'))
+loadcmp(file.path(progpath, 'lib', 'plotlib.Rc'))
 pts.list <- SetPtsSpline(pint, lgint)
 pts <- pts.list$pts  # data points for avg. profile and standard errors.
 m.pts <- pts.list$m.pts  # middle data points. For pint, m.pts=1.
@@ -210,7 +212,7 @@ cat("Done\n")
 
 # Load coverage extraction lib.
 cat("Analyze bam files and calculate coverage")
-source(file.path(progpath, 'lib', 'coverage.r'))
+loadcmp(file.path(progpath, 'lib', 'coverage.Rc'))
 
 # Extract bam file names from configuration and determine if bam-pair is used.
 bfl.res <- bamFileList(ctg.tbl)
@@ -236,10 +238,6 @@ for(r in 1:nrow(ctg.tbl)) {
 
     # Do coverage for each bam file.
     bam.files <- unlist(strsplit(ctg.tbl$cov[r], ':'))
-
-    # Obtain fraglen for each bam file.
-    fraglens <- as.integer(unlist(strsplit(ctg.tbl$fraglen[r], ':')))
-
     # Obtain bam file basic info.
     libsize <- v.lib.size[bam.files[1]]
     sn.inbam <- sn.list[[bam.files[1]]]
@@ -248,15 +246,13 @@ for(r in 1:nrow(ctg.tbl)) {
     if(class(chr.tag) == 'character') {
         stop(sprintf("Read %s error: %s", bam.files[1], chr.tag))
     }
-    # browser()
-    result.matrix <- covMatrix(chkidx.list, coord.list[[reg]], rnaseq.gb, 
-                               exonmodel, libsize, TRUE, chr.tag, pint, 
-                               reg2plot, flanksize, flankfactor, m.pts, f.pts, 
-                               bufsize, cov.algo, bam.files[1], sn.inbam, 
-                               fraglens[1], map.qual, is.bowtie)
+    result.matrix <- covMatrix(bam.files[1], libsize, sn.inbam, chr.tag, 
+                               coord.list[[reg]], chkidx.list, rnaseq.gb, 
+                               exonmodel, reg2plot, pint, flanksize, 
+                               flankfactor, bufsize, fraglen, map.qual, m.pts, 
+                               f.pts, is.bowtie)
     if(bam.pair) {  # calculate background.
         pseudo.rpm <- 1e-9
-        fraglen2 <- ifelse(length(fraglens) > 1, fraglens[2], fraglens[1])
         libsize <- v.lib.size[bam.files[2]]
         sn.inbam <- sn.list[[bam.files[2]]]
         chr.tag <- chrTag(sn.inbam)
@@ -264,11 +260,11 @@ for(r in 1:nrow(ctg.tbl)) {
         if(class(chr.tag) == 'character') {
             stop(sprintf("Read %s error: %s", bam.files[2], chr.tag))
         }
-        bkg.matrix <- covMatrix(chkidx.list, coord.list[[reg]], rnaseq.gb, 
-                                exonmodel, libsize, TRUE, chr.tag, pint, 
-                                reg2plot, flanksize, flankfactor, m.pts, f.pts, 
-                                bufsize, cov.algo, bam.files[2], sn.inbam, 
-                                fraglen2, map.qual, is.bowtie)
+        bkg.matrix <- covMatrix(bam.files[2], libsize, sn.inbam, chr.tag, 
+                                coord.list[[reg]], chkidx.list, rnaseq.gb, 
+                                exonmodel, reg2plot, pint, flanksize, 
+                                flankfactor, bufsize, fraglen, map.qual, m.pts, 
+                                f.pts, is.bowtie)
         # browser()
         result.matrix <- log2((result.matrix + pseudo.rpm) / 
                               (bkg.matrix + pseudo.rpm))
@@ -314,8 +310,8 @@ if(!fi_tag){
         out.plot <- paste(oname, '.avgprof.pdf', sep='')
     }
     pdf(out.plot, width=default.width, height=default.height)
-    plotmat(regcovMat, ctg.tbl$title, ctg.tbl$color, bam.pair, xticks, pts, 
-            m.pts, f.pts, pint, shade.alp, confiMat, mw)
+    plotmat(regcovMat, ctg.tbl$title, bam.pair, xticks, pts, m.pts, f.pts, pint,
+            shade.alp, confiMat, mw)
     out.dev <- dev.off()
 
     #### Heatmap. ####

@@ -1,15 +1,25 @@
 #!/usr/bin/env Rscript
 #
+# Program: ngs.plot.r
+# Purpose: Plot sequencing coverages at different genomic regions.
+#          Allow overlaying various coverages with gene lists.
+#
+# -- by Li Shen, MSSM
+# Created:      Nov 2011.
+# Last Updated: Mar 2013.
+#
 
 
 # Deal with command line arguments.
 cmd.help <- function(){
-    cat("\nUsage: time.tabix.r -G genome -R region -C [cov|config]file\n")
+    cat("\nVisit http://code.google.com/p/ngsplot/wiki/ProgramArguments101 for details\n")
+    cat("\nUsage: time.ngs.plot.r -G genome -R region -C [cov|config]file\n")
     cat("                  [Options]\n")
     cat("\n## Mandatory parameters:\n")
     cat("  -G   Genome name, currently supported: mm9, hg19, rn4, sacCer3(ensembl only)\n")
     cat("  -R   Genomic regions to plot: tss, tes, genebody, exon, cgi or *.bed\n")
-    cat("  -C   Tabix file\n")
+    cat("  -C   Indexed bam file or a configuration file for multiplot\n")
+    cat("  -O   Name for output: multiple files will be generated\n")
     cat("## Optional parameters related to configuration file:\n")
     cat("  -E   Gene list to subset regions\n")
     cat("  -T   Image title\n")
@@ -50,7 +60,7 @@ cmd.help <- function(){
 ###########################################################################
 #################### Deal with program input arguments ####################
 args <- commandArgs(T)
-# args <- unlist(strsplit('-G mm9 -R tss -C benchmark_morp_k9m2/k9_down_10M.tab.gz -S 0.05', ' '))
+# args <- unlist(strsplit('-G mm9 -R tss -C H2bub_MB.sorted.bam -O test_full', ' '))
 
 # Program environment variable.
 progpath <- Sys.getenv('NGSPLOT')
@@ -181,235 +191,16 @@ bam.list <- bfl.res$bam.list  # bam file list.
 
 # Determine if bowtie is used to generate the bam files.
 # Index bam files if not done yet.
-# v.map.bowtie <- headerIndexBam(bam.list)
+v.map.bowtie <- headerIndexBam(bam.list)
 
 # Retrieve chromosome names for each bam file.
-# sn.list <- seqnamesBam(bam.list)
-seqnamesTbx <- function(bam.list) {
-
-    sn.list <- lapply(bam.list, function(t) {
-            seqnamesTabix(t)
-        })
-    names(sn.list) <- bam.list
-
-    sn.list
-}
-sn.list <- seqnamesTbx(bam.list)
+sn.list <- seqnamesBam(bam.list)
 
 # Calculate library size from bam files for normalization.
-# v.lib.size <- libSizeBam(bam.list)
-
-############ Define some custome routines here ###############
+v.lib.size <- libSizeBam(bam.list)
 
 
-covTbx <- function(tbx, sn.inbam, granges, fraglen, 
-                   map.qual=20, bowtie=F) {
-
-    # Assume input Tabix is 0-based.
-    g.start <- start(ranges(granges)) - 1 # vector of gene start sites.
-    g.end <- end(ranges(granges))  # vector of gene end sites.
-    gb.len <- g.end - g.start
-        
-    # Filter gene ranges based on available chromosomes in bam file.
-    # It seems scanBam will terminate if it querys a chromosome that does not
-    # exist in bam file.
-    inbam.mask <- as.vector(seqnames(granges)) %in% sn.inbam
-    if(!any(inbam.mask)) {  # none matches.
-        return(genZeroList(length(granges), gb.len))
-    }
-
-    # Retrieve coverage from Tabix file.
-    if(!isOpen(tbx)) {
-        tbx <- open(tbx)
-    }
-    rec.in.ranges <- scanTabix(tbx, param=granges[inbam.mask])
-
-    # Calculate coverage for each gene range.
-    inbam.counter <- rep(0, length(inbam.mask))
-    inbam.counter[inbam.mask] <- 1:sum(inbam.mask)
-    lapply(1:length(granges), function(i) {
-        v <- Rle(0, gb.len[i])
-        c <- inbam.counter[i]
-        if(!inbam.mask[i] || length(rec.in.ranges[[c]]) == 0) {
-            return(v)
-        }
-        # Convert string records into numeric vectors.
-        pd <- sapply(rec.in.ranges[[c]], function(r) {
-            r.sp <- unlist(strsplit(r, "\t", fixed=T))
-            r.start <- as.integer(r.sp[2])
-            r.depth <- as.integer(r.sp[3])
-            c(r.start - g.start[i] + 1, r.depth)
-            })
-        # browser()
-        v[pd[1, ]] <- pd[2, ]
-
-        v
-    })
-}
-
-extrCov3SecTbx <- function(tbx, sn.inbam, v.chrom, v.start, v.end, v.fls, 
-                        bufsize, m.pts, f.pts, v.strand, fraglen, map.qual, 
-                        bowtie) {
-
-    interflank.gr <- GRanges(seqnames=v.chrom, ranges=IRanges(
-                             start=v.start - v.fls, 
-                             end=v.end + v.fls))
-    interflank.cov <- covTbx(tbx, sn.inbam, interflank.gr, fraglen, 
-                             map.qual, bowtie)
-
-    # Interpolate and reverse coverage vectors.
-    SplineRev3Sec(interflank.cov, v.fls, list(l=f.pts, m=m.pts, r=f.pts), 
-                  v.strand)
-}
-
-extrCovMidpTbx <- function(tbx, sn.inbam, v.chrom, v.midp, flanksize, 
-                        bufsize, pts, v.strand, fraglen, map.qual, bowtie) {
-    
-    granges <- GRanges(seqnames=v.chrom, ranges=IRanges(
-                       start=v.midp - flanksize, 
-                       end=v.midp + flanksize))
-    cov.list <- covTbx(tbx, sn.inbam, granges, fraglen, map.qual, bowtie)
-
-    # Interpolate and reverse coverage vectors and assemble into a matrix.
-    cov.mat <- matrix(nrow=length(cov.list), ncol=pts)
-    # cov.mat <- matrix(nrow=length(cov.list), ncol=length(cov.list[[1]]))
-    for(i in 1:length(cov.list)) {
-        if(is.null(cov.list[[i]])) {
-            cov.mat[i, ] <- vector('integer', length=pts)
-            # cov.mat[i, ] <- vector('integer', length=length(cov.list[[1]]))
-        } else {
-            cov.mat[i, ] <- spline(1:length(cov.list[[i]]), cov.list[[i]], 
-                                   n=pts)$y
-            # cov.mat[i, ] <- cov.list[[i]]
-            if(v.strand[i] == '-') {
-                cov.mat[i, ] <- rev(cov.mat[i, ])
-            }
-        }
-    }
-    # browser()
-    cov.mat
-}
-
-doCovTbx <- function(coord.mat, chr.tag, reg2plot, pint, tbx, sn.inbam, 
-                     flanksize, flankfactor, bufsize, fraglen, map.qual, m.pts, 
-                     f.pts, bowtie, exonranges.list=NULL) {
-
-    v.chrom <- coord.mat$chrom
-    if(!chr.tag) {
-        v.chrom <- sub('chr', '', v.chrom)
-    }
-    v.chrom <- as.factor(v.chrom)
-    v.strand <- as.factor(coord.mat$strand)
-
-    # Figure out interval region sizes and calculate flanking region sizes.
-    if(!pint) {  # interval regions.
-        if(!is.null(exonranges.list)) {  # RNA-seq
-            if(flankfactor > 0) {
-                v.fls <- sapply(exonranges.list, function(t) {
-                            sum(end(t) - start(t) + 1)
-                        })
-            } else {
-                v.fls <- rep(flanksize, length=nrow(coord.mat))
-            }
-            # extrCovExons(tbx.file, sn.inbam, v.chrom, exonranges.list, v.fls, 
-            #              bufsize, m.pts, f.pts, v.strand, fraglen, map.qual, 
-            #              bowtie)
-        } else {  # ChIP-seq with intervals.
-            v.start <- coord.mat$start
-            v.end <- coord.mat$end
-            if(flankfactor > 0) {
-                v.fls <- round((v.end - v.start + 1) * flankfactor)
-            } else {
-                v.fls <- rep(flanksize, length=nrow(coord.mat))
-            }
-            extrCov3SecTbx(tbx, sn.inbam, v.chrom, v.start, v.end, v.fls, 
-                        bufsize, m.pts, f.pts, v.strand, fraglen, map.qual, 
-                        bowtie)
-        }
-    } else {  # point center with flanking regions.
-        v.midp <- vector('integer', length=nrow(coord.mat))
-        for(r in 1:nrow(coord.mat)) {
-            if(reg2plot == 'tss' && v.strand[r] == '+' || 
-               reg2plot == 'tes' && v.strand[r] == '-') {
-                # the left site is center.
-                v.midp[r] <- coord.mat$start[r]
-            } else {  # this also includes BED supplied point center.
-                v.midp[r] <- coord.mat$end[r]
-            }
-        }
-        extrCovMidpTbx(tbx, sn.inbam, v.chrom, v.midp, flanksize, bufsize,
-                    m.pts + f.pts*2, v.strand, fraglen, map.qual, bowtie)
-    }
-}
-
-
-covMatrixTbx <- function(tbx.file, libsize, sn.inbam, chr.tag, coord, 
-                         chkidx.list, rnaseq.gb, exonmodel, reg2plot, pint, 
-                         flanksize, flankfactor, bufsize, fraglen, map.qual, 
-                         m.pts, f.pts, is.bowtie, spit.dot=T) {
-    
-    tbx <- open(TabixFile(tbx.file))
-    # browser()
-    # Extract coverage and combine into a matrix.
-    result.matrix <- foreach(chk=chkidx.list, .combine='rbind', 
-                             .multicombine=T) %dopar% {
-        if(spit.dot) {
-            cat(".")
-        }
-        i <- chk[1]:chk[2]  # chunk: start -> end
-        # If RNA-seq, retrieve exon ranges.
-        if(rnaseq.gb) {
-            exonranges.list <- unlist(exonmodel[coord[i, ]$tid])
-        } else {
-            exonranges.list <- NULL
-        }
-        doCovTbx(coord[i, ], chr.tag, reg2plot, pint, tbx, sn.inbam, 
-                 flanksize, flankfactor, bufsize, fraglen, map.qual, 
-                 m.pts, f.pts, is.bowtie, exonranges.list)
-    }
-
-    # Floor negative values which are caused by spline.
-    result.matrix[result.matrix < 0] <- 0
-
-    # result.matrix / libsize * 1e6  # normalize to RPM.
-
-
-    ########### For debug #############
-    # pts <- m.pts + 2 * f.pts
-    # result.matrix <- matrix(0, nrow=nrow(coord), ncol=pts)
-    # for(c in 1:length(chkidx.list)) {
-    #     chk <- chkidx.list[[c]]
-    #     i <- chk[1]:chk[2]  # chunk: start -> end
-    #     if(spit.dot) {
-    #         cat(".")
-    #     }
-    #     # If RNA-seq, retrieve exon ranges.
-    #     if(rnaseq.gb) {
-    #         exonranges.list <- unlist(exonmodel[coord[i, ]$tid])
-    #     } else {
-    #         exonranges.list <- NULL
-    #     }
-    #     result.matrix[i, ] <- doCovTbx(coord[i, ], chr.tag, reg2plot, 
-    #           pint, tbx, sn.inbam, flanksize, flankfactor, bufsize, 
-    #           fraglen, map.qual, m.pts, f.pts, is.bowtie, 
-    #           exonranges.list)
-    # }
-    # # Floor negative values which are caused by spline.
-    # result.matrix[result.matrix < 0] <- 0
-
-    # result.matrix / libsize * 1e6  # normalize to RPM.
-    ########### For debug #############
-
-    result.matrix
-}
-
-
-
-
-############ End of routines ############
-
-
-
+# ptm <- proc.time()
 # Process the config file row by row.
 res.time <- system.time(for(r in 1:nrow(ctg.tbl)) {
 
@@ -420,34 +211,32 @@ res.time <- system.time(for(r in 1:nrow(ctg.tbl)) {
     # Do coverage for each bam file.
     bam.files <- unlist(strsplit(ctg.tbl$cov[r], ':'))
     # Obtain bam file basic info.
-    # libsize <- v.lib.size[bam.files[1]]
+    libsize <- v.lib.size[bam.files[1]]
     sn.inbam <- sn.list[[bam.files[1]]]
     chr.tag <- chrTag(sn.inbam)
-    # is.bowtie <- v.map.bowtie[bam.files[1]]
-    is.bowtie <- F
+    is.bowtie <- v.map.bowtie[bam.files[1]]
     if(class(chr.tag) == 'character') {
         stop(sprintf("Read %s error: %s", bam.files[1], chr.tag))
     }
-    result.matrix <- covMatrixTbx(bam.files[1], libsize, sn.inbam, chr.tag, 
-                               coord.list[[reg]], chkidx.list, rnaseq.gb, 
-                               exonmodel, reg2plot, pint, flanksize, 
-                               flankfactor, bufsize, fraglen, map.qual, m.pts, 
-                               f.pts, is.bowtie, spit.dot=F)
+    result.matrix <- covMatrix(chkidx.list, coord.list[[reg]], rnaseq.gb, 
+                               exonmodel, libsize, F, chr.tag, pint, 
+                               reg2plot, flanksize, flankfactor, m.pts, f.pts, 
+                               bufsize, "spline", bam.files[1], sn.inbam, 
+                               fraglen, map.qual, is.bowtie, TRUE)
     if(bam.pair) {  # calculate background.
         pseudo.rpm <- 1e-9
-        # libsize <- v.lib.size[bam.files[2]]
+        libsize <- v.lib.size[bam.files[2]]
         sn.inbam <- sn.list[[bam.files[2]]]
         chr.tag <- chrTag(sn.inbam)
-        # is.bowtie <- v.map.bowtie[bam.files[2]]
-        is.bowtie <- F
+        is.bowtie <- v.map.bowtie[bam.files[2]]
         if(class(chr.tag) == 'character') {
             stop(sprintf("Read %s error: %s", bam.files[2], chr.tag))
         }
-        bkg.matrix <- covMatrixTbx(bam.files[2], libsize, sn.inbam, chr.tag, 
-                                coord.list[[reg]], chkidx.list, rnaseq.gb, 
-                                exonmodel, reg2plot, pint, flanksize, 
-                                flankfactor, bufsize, fraglen, map.qual, m.pts, 
-                                f.pts, is.bowtie, spit.dot=F)
+        bkg.matrix <- covMatrix(chkidx.list, coord.list[[reg]], rnaseq.gb, 
+                                   exonmodel, libsize, F, chr.tag, pint, 
+                                   reg2plot, flanksize, flankfactor, m.pts, f.pts, 
+                                   bufsize, "spline", bam.files[2], sn.inbam, 
+                                   fraglen, map.qual, is.bowtie, TRUE)
         # browser()
         result.matrix <- log2((result.matrix + pseudo.rpm) / 
                               (bkg.matrix + pseudo.rpm))

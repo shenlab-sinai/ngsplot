@@ -202,7 +202,7 @@ sn.list <- seqnamesTbx(bam.list)
 ############ Define some custome routines here ###############
 
 
-covTbx <- function(tbx, sn.inbam, granges, fraglen, 
+covTbx2 <- function(tbx, sn.inbam, granges, fraglen, 
                    map.qual=20, bowtie=F) {
 
     # Assume input Tabix is 0-based.
@@ -237,11 +237,16 @@ covTbx <- function(tbx, sn.inbam, granges, fraglen,
         pd <- sapply(rec.in.ranges[[c]], function(r) {
             r.sp <- unlist(strsplit(r, "\t", fixed=T))
             r.start <- as.integer(r.sp[2])
-            r.depth <- as.integer(r.sp[3])
-            c(r.start - g.start[i] + 1, r.depth)
+            r.end <- as.integer(r.sp[3])
+            r.depth <- as.integer(r.sp[4])
+            s.start <- ifelse(r.start - g.start[i] < 0, 0, r.start - g.start[i])
+            s.end <- ifelse(r.end - g.start[i] > gb.len[i], gb.len[i], r.end - g.start[i])
+            c(s.start + 1, s.end, r.depth)
             })
         # browser()
-        v[pd[1, ]] <- pd[2, ]
+        apply(pd, 2, function(col) {
+                v[ col[1]:col[2] ] <- col[3]
+            })
 
         v
     })
@@ -254,7 +259,7 @@ extrCov3SecTbx <- function(tbx, sn.inbam, v.chrom, v.start, v.end, v.fls,
     interflank.gr <- GRanges(seqnames=v.chrom, ranges=IRanges(
                              start=v.start - v.fls, 
                              end=v.end + v.fls))
-    interflank.cov <- covTbx(tbx, sn.inbam, interflank.gr, fraglen, 
+    interflank.cov <- covTbx2(tbx, sn.inbam, interflank.gr, fraglen, 
                              map.qual, bowtie)
 
     # Interpolate and reverse coverage vectors.
@@ -268,7 +273,7 @@ extrCovMidpTbx <- function(tbx, sn.inbam, v.chrom, v.midp, flanksize,
     granges <- GRanges(seqnames=v.chrom, ranges=IRanges(
                        start=v.midp - flanksize, 
                        end=v.midp + flanksize))
-    cov.list <- covTbx(tbx, sn.inbam, granges, fraglen, map.qual, bowtie)
+    cov.list <- covTbx2(tbx, sn.inbam, granges, fraglen, map.qual, bowtie)
 
     # Interpolate and reverse coverage vectors and assemble into a matrix.
     cov.mat <- matrix(nrow=length(cov.list), ncol=pts)

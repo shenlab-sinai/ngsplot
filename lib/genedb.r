@@ -22,8 +22,7 @@ FIScoreIntersect <- function(db.info, v.finfo){
 }
 
 SetupPlotCoord <- function(args.tbl, ctg.tbl, default.tbl, dbfile.tbl, progpath, 
-                           genome, reg2plot, lgint, flanksize, bed.file, 
-                           samprate) {
+                           genome, reg2plot, lgint, flanksize, samprate) {
 # Load genomic coordinates for plot based on the input arguments.
 # Args:
 #   args.tbl: input argument table
@@ -41,7 +40,8 @@ SetupPlotCoord <- function(args.tbl, ctg.tbl, default.tbl, dbfile.tbl, progpath,
         # Subset using genome-region combination.
         key <- default.tbl$Genome == genome & default.tbl$Region == reg2plot
         if(sum(key) == 0) {
-            stop("The combination of genome and region does not exist.\nYou may need to install the genome or the region does not exist yet.\n")
+            stop("The combination of genome and region does not exist.
+  You may need to install the genome or the region does not exist yet.\n")
         }
         anno.parameters <- default.tbl[key, ]
         db.match.mask <- dbfile.tbl$Genome == genome & 
@@ -95,59 +95,20 @@ SetupPlotCoord <- function(args.tbl, ctg.tbl, default.tbl, dbfile.tbl, progpath,
         f.load <- file.path(prefix, anno.db.candidates$"db.file"[1])
 
         if (!file.exists(f.load)){
-            stop("The requested database file does not exist. You may have a corrupted database.\nConsider reinstalling the genome.\n")
+            stop("The requested database file does not exist. You may have a corrupted database.
+  Consider reinstalling the genome.\n")
             # cat("\nDownloading database:\n")
             # download.file(anno.db.candidates$"URL"[1], destfile=f.load, 
             #               method="curl")
             # stopifnot(file.exists(f.load))
         }
-    } else if(reg2plot == 'bed') {
-        stopifnot(!is.null(bed.file))
-        bed.coord <- read.table(bed.file, sep="\t")
-        if(ncol(bed.coord) <3){
-            stop('Input file must contain at least 3 columns!')
-        }
-        genome.coord <- data.frame(chrom=chromFormat(bed.coord[, 1]), 
-                                   start=bed.coord[, 2]+1, end=bed.coord[, 3], 
-                                   gid=NA, gname='N', tid='N', strand='+', 
-                                   byname.uniq=T, bygid.uniq=NA)
-        if(ncol(bed.coord) >=4){
-            genome.coord$gname <- bed.coord[, 4]
-        }
-        if(ncol(bed.coord) >=5){
-            genome.coord$tid <- bed.coord[, 5]
-        }
-        if(ncol(bed.coord) >=6){
-            genome.coord$strand <- bed.coord[, 6]
-        }
-        # Set tag for point interval, i.e. interval=1bp.
-        if(all(genome.coord$end == genome.coord$start)) {
-            pint <- TRUE
-            Labs <- c("Center")
-        } else{
-            pint <- FALSE
-            Labs <- c("Left", "Right")
-        }
-        f.load <- NULL
-        rnaseq.gb <- FALSE
-        # bed.tag <- T
-    }
-
-    # Load genomic coordinates.
-    if(!is.null(f.load)) {
+        # Load genomic coordinates.
         cat("\nUsing database:\n")
         cat(paste(f.load, "\n", sep=""))
-        # f.load <- paste(f.load)
         load(f.load)  # load coordinates into variable: genome.coord
-    }
 
-    # Determine interval size automatically.
-    if(!pint && is.na(lgint)) {
-        if(median(genome.coord$end - genome.coord$start + 1) > flanksize) {
-            lgint <- 1
-        } else {
-            lgint <- 0
-        }
+    } else if(reg2plot == 'bed') {
+        rnaseq.gb <- FALSE
     }
 
     # Identify unique regions.
@@ -158,6 +119,45 @@ SetupPlotCoord <- function(args.tbl, ctg.tbl, default.tbl, dbfile.tbl, progpath,
     coord.list <- vector('list', length(uniq.reg))
     names(coord.list) <- uniq.reg
 
+    ReadBedCoord <- function(bed.file) {
+    # Read a bed into memory as a dataframe.
+    # Args:
+    #   bed.file: path of the bed file to be read.
+    # Returns: genome coordinates as a dataframe.
+
+        if(length(grep("\\.bed([0-9]+)?$", bed.file, ignore.case=T)) == 0) {
+            warning(sprintf("File name: '%s' does not seem to a correct name for bed file.\n", bed.file))
+        }
+        bed.coord <- read.table(bed.file, sep="\t")
+        if(ncol(bed.coord) <3){
+            stop("A bed file must contain at least 3 columns!
+  The format is: chrom, start, end, gname, tid, strand. Columns 4-6 are optional\n")
+        }
+        genome.coord <- data.frame(chrom=chromFormat(bed.coord[, 1]), 
+                                   start=bed.coord[, 2] + 1, 
+                                   end=bed.coord[, 3], 
+                                   gid=NA, gname='N', tid='N', strand='+', 
+                                   byname.uniq=T, bygid.uniq=NA)
+        # Perform sanity check for bed file.
+        if(!all(genome.coord$start <= genome.coord$end)) {
+            stop(sprintf("Sanity check for bed file: %s failed.
+  Bed files are 0-based and right-side open.\n", bed.file))
+        }
+
+        # Deal with columns 4-6 (Optional).
+        if(ncol(bed.coord) >=4){
+            genome.coord$gname <- bed.coord[, 4]
+        }
+        if(ncol(bed.coord) >=5){
+            genome.coord$tid <- bed.coord[, 5]
+        }
+        if(ncol(bed.coord) >=6){
+            genome.coord$strand <- bed.coord[, 6]
+        }
+
+        genome.coord
+    }
+
     # Sample a vector but preserve its original sequential order.
     sampleInSequence <- function(x, samprate) {
         x[ifelse(runif(length(x)) <= samprate, T, F)]
@@ -166,14 +166,10 @@ SetupPlotCoord <- function(args.tbl, ctg.tbl, default.tbl, dbfile.tbl, progpath,
     for(i in 1:length(uniq.reg)) {
         ur <- uniq.reg[i]
  
-        if(ur == '-1') {  # use whole genome.
-            g.uniq <- which(genome.coord$byname.uniq)
-            if(samprate < 1){
-                coord.list[[i]] <- genome.coord[sampleInSequence(g.uniq, 
-                                                                 samprate), ]
-            } else {
-                coord.list[[i]] <- genome.coord[g.uniq, ]
-            }
+        if(reg2plot == "bed") {
+            coord.list[[i]] <- ReadBedCoord(ur)
+        } else if(ur == '-1') {  # use whole genome.
+            coord.list[[i]] <- genome.coord[genome.coord$byname.uniq, ]
         } else {  # read gene list from text file.
             gene.list <- read.table(ur, as.is=T, comment.char='#')$V1
             gid.match <- match(gene.list, genome.coord$gid, nomatch=0)
@@ -184,12 +180,34 @@ SetupPlotCoord <- function(args.tbl, ctg.tbl, default.tbl, dbfile.tbl, progpath,
             if(length(subset.idx) == 0) {
                 stop("\nGene subset size becomes zero. Are you using the correct database?\n")
             }
-            
-            if(samprate < 1) {
-                subset.idx <- sampleInSequence(subset.idx, samprate)
-            }
-
             coord.list[[i]] <- genome.coord[subset.idx, ]
+        }
+
+        # Do sampling.
+        if(samprate < 1) {
+            samp.idx <- sampleInSequence(1:nrow(coord.list[[i]]), samprate)
+            coord.list[[i]] <- coord.list[[i]][samp.idx, ]
+        }
+    }
+
+    # If bed file, set boolean tag for point interval, i.e. interval=1bp.
+    if(reg2plot == "bed") {
+        pint <- all(sapply(coord.list, function(cd) all(cd$start == cd$end)))
+        if(pint) {
+            Labs <- c("Center")
+        } else {
+            Labs <- c("5'End", "3'End")
+        }
+    }
+
+    # Set boolean tag for large interval display.
+    if(!pint && is.na(lgint)) {
+        if(median(sapply(coord.list, function(cd) {
+                median(cd$end - cd$start + 1)
+            })) > flanksize) {
+            lgint <- 1
+        } else {
+            lgint <- 0
         }
     }
 

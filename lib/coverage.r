@@ -241,7 +241,7 @@ genZeroList <- function(llen, v.vlen) {
 }
 
 covBam <- function(granges, bam.file, sn.inbam, fraglen, map.qual=20, 
-                   bowtie=F) {
+                   bowtie=F, extr.only=F) {
 # Extract coverage vectors from bam file for a list of genes.
 # Args:
 #   granges: list of GRanges objects representing genomic coordinates 
@@ -254,6 +254,7 @@ covBam <- function(granges, bam.file, sn.inbam, fraglen, map.qual=20,
 #   fraglen: fragment length.
 #   map.qual: mapping quality to filter reads.
 #   bowtie: boolean to indicate whether the aligner was Bowtie-like or not.
+#   extr.only: boolean for doing extraction only.
 # Return: list of coverage vectors, each vector represents a gene.
 
     # browser()
@@ -289,7 +290,7 @@ covBam <- function(granges, bam.file, sn.inbam, fraglen, map.qual=20,
     scan.counter <- 0
     covg.allgenes <- vector('list', length(granges))  # coverage list to return.
     for(i in 1:length(granges)) {
-        if(!inbam.mask[i]) {
+        if(!inbam.mask[i] || extr.only) {
             covg.allgenes[[i]] <- Rle(0, gb.len[i])
             next
         }

@@ -1,6 +1,6 @@
 # PERL scripts to extract regions from Cufflinks.
 BINCUFF=bin/alter2bed.pl bin/combine_diff.pl bin/coordinat.pl \
-		bin/difflist2bed.pl bin/get_difflist.pl bin/gtf2tree.pl \
+		bin/difflist2bed.pl bin/get_difflist.pl \
 		bin/parse_diff.pl bin/alt_reg_cufflinks
 
 # ngs.plot R executable R scripts.
@@ -20,15 +20,18 @@ OTHERS=database example README Changes galaxy
 # ngs.plot distribution folder
 DISTFOLDER=ngsplot
 
+# ngs.plot current version
+CURVER := $(shell grep 'ngsplot.version' bin/ngs.plot.r |grep -oE '[0-9]\.[0-9]+')
+
 # example bam files.
 BAM=example.bam
 
 all: program bam
 
-program: ngsplot-dist.tar.gz
+program: ngsplot-$(CURVER).tar.gz
 bam: example.bam.tar.gz
 
-ngsplot-dist.tar.gz: $(BINCUFF) $(BINNGSP) $(LIB) $(OTHERS)
+ngsplot-$(CURVER).tar.gz: $(BINCUFF) $(BINNGSP) $(LIB) $(OTHERS)
 	rm -rf ${DISTFOLDER}
 	mkdir -p ${DISTFOLDER}/bin ${DISTFOLDER}/lib
 	cp -rL $(BINCUFF) $(BINNGSP) ${DISTFOLDER}/bin
@@ -47,4 +50,4 @@ example.bam.tar.gz: $(BAM)
 	tar czvf $@ $(BAM)
 
 clean:
-	rm -rf ngsplot-dist.tar.gz example.bam.tar.gz
+	rm -rf ngsplot-*.tar.gz example.bam.tar.gz

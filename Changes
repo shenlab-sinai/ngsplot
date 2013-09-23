@@ -1,6 +1,14 @@
 Revision history for ngs.plot.
 ==============================
 
+2.07 September 20, 2013
+    - Specify individual bed file for each bam file in configuration.
+    - Custom colors in configuration file
+    - Allow fragment length to be modified for each bam file.
+    - Adjust line width in replot.
+    - Sanity check for bed file.
+    - Misc. minor bugs fixed.
+
 2.02 July 11, 2013
     - Custom color scale for heatmap.
     - Improved coverage calculation algorithm to make curves smoother.

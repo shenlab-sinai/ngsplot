@@ -233,15 +233,15 @@ covTbx <- function(tbx, sn.inbam, granges, fraglen,
         if(!inbam.mask[i] || length(rec.in.ranges[[c]]) == 0) {
             return(v)
         }
-        # Convert string records into numeric vectors.
-        pd <- sapply(rec.in.ranges[[c]], function(r) {
-            r.sp <- unlist(strsplit(r, "\t", fixed=T))
-            r.start <- as.integer(r.sp[2])
-            r.depth <- as.integer(r.sp[3])
-            c(r.start - g.start[i] + 1, r.depth)
-            })
-        # browser()
-        v[pd[1, ]] <- pd[2, ]
+        # # Convert string records into numeric vectors.
+        # pd <- sapply(rec.in.ranges[[c]], function(r) {
+        #     r.sp <- unlist(strsplit(r, "\t", fixed=T))
+        #     r.start <- as.integer(r.sp[2])
+        #     r.depth <- as.integer(r.sp[3])
+        #     c(r.start - g.start[i] + 1, r.depth)
+        #     })
+        # # browser()
+        # v[pd[1, ]] <- pd[2, ]
 
         v
     })

@@ -1,3 +1,6 @@
+- Sep 5, 2013
+* Add sanity check for BED file. (done)
+
 - July 9, 2013
 * Use bin avg. instead of spline? (done)
 * Add font size control (done).
@@ -6,7 +9,7 @@
 * Turn off legend option (done).
 
 - June 27, 2013
-* Custom avg. profile colors.
+* Custom avg. profile colors. (done)
 * Label clusters by colors and numbers.
 
 - June 4, 2013

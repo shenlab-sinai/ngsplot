@@ -25,6 +25,7 @@ cmd.help <- function(){
     cat("    -BOX Draw box around plot? 1(default) or 0.\n")
     cat("    -VLN Draw vertical lines? 1(default) or 0.\n")
     cat("    -XYL Draw X- and Y-axis labels? 1(default) or 0.\n")
+    cat("    -LWD Line width(default=3).\n")
     cat("    -H   Opacity of shaded area, suggested value:[0, 0.5]\n")
     cat("           default=0, i.e. no shading, just curves\n")
     cat("## Heatmap parameters:\n")
@@ -91,11 +92,15 @@ if(command == 'prof') {
 }
 # Update or add new variables to the environment.
 existing.vl <- ls()
-repvar.list <- replotVars(args.tbl, existing.vl)
+repvar.list <- replotVars(args.tbl, existing.vl, bam.pair)
 for(i in 1:length(repvar.list)) {
     vn <- names(repvar.list)[i]
     eval(parse(text=sprintf("%s <- repvar.list$%s", vn, vn)))
 }
+if(!"color" %in% colnames(ctg.tbl)) {  # backward compatibility.
+    ctg.tbl <- data.frame(ctg.tbl, color=NA)
+}
+
 
 ################################################
 # Load plotting procedures and do it.
@@ -116,8 +121,8 @@ if(command == 'prof') {
             stop('Loading package caTools failed!')
         }
     }
-    plotmat(regcovMat, ctg.tbl$title, bam.pair, xticks, pts, m.pts, f.pts, 
-            pint, shade.alp, confiMat, mw, prof.misc)
+    plotmat(regcovMat, ctg.tbl$title, ctg.tbl$color, bam.pair, xticks, 
+            pts, m.pts, f.pts, pint, shade.alp, confiMat, mw, prof.misc)
     out.dev <- dev.off()
     # Save replot data.
     out.dat <- paste(oname, '.RData', sep='')

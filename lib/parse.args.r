@@ -28,14 +28,45 @@ parseArgs <- function(args, manditories){
     res
 }
 
-# Create configuration table from program arguments.
-ConfigTbl <- function(args.tbl, ctg.tbl){
+ConfigTbl <- function(args.tbl, fraglen){
+# Create configuration table from "-C" argument.
+# Args:
+#   args.tbl: named vector of program arguments.
+#   fraglen: fragment length.
+# Returns: dataframe of configuration.
 
     covfile <- args.tbl['-C']
 
-    if(length(grep('.txt$', covfile)) > 0) {  # config file.
-        read.table(covfile, sep="\t", col.names=c('cov', 'glist', 'title'), 
-                   colClasses='character', as.is=T, comment.char='#')
+    if(length(grep('.txt$', covfile, ignore.case=T)) > 0) {  # config file.
+        ctg.tbl <- read.table(covfile, sep="\t", colClasses='character', 
+                              comment.char='#')
+        if(ncol(ctg.tbl) < 3) {
+            stop("Configuration file must contain at least 3 columns! Insufficient information provided.\n")
+        }
+        colnames(ctg.tbl)[1:3] <- c('cov', 'glist', 'title')
+        if(ncol(ctg.tbl) >= 4) {
+            colnames(ctg.tbl)[4] <- 'fraglen'
+            fraglen.sp <- strsplit(ctg.tbl$fraglen, ":")
+            if(!all(sapply(fraglen.sp, function(x) {
+                        length(x) == 1 || length(x) == 2}))) {
+                stop("Fragment length format must be X or X:Y; X and Y are integers.\n")
+            }
+            if(!all(as.integer(unlist(fraglen.sp)) > 0)) {
+                stop("Fragment length must be positive integers! Check your configuration file.\n")
+            }
+        } else {
+            ctg.tbl <- data.frame(ctg.tbl, fraglen=as.character(fraglen),
+                                  stringsAsFactors=F)
+        }
+        if(ncol(ctg.tbl) >= 5) {
+            colnames(ctg.tbl)[5] <- 'color'
+            # Validate color specifications.
+            col.validated <- col2rgb(ctg.tbl$color)
+        } else {
+            ctg.tbl <- data.frame(ctg.tbl, color=NA)
+        }
+        ctg.tbl
+
     } else {  # a single bam file.
         if('-E' %in% names(args.tbl)) {
             glist <- args.tbl['-E']
@@ -47,12 +78,18 @@ ConfigTbl <- function(args.tbl, ctg.tbl){
         } else {
             title <- 'Noname'
         }
-        data.frame(cov=covfile, glist=glist, title=title, stringsAsFactors=F)
+        data.frame(cov=covfile, glist=glist, title=title, 
+                   fraglen=as.character(fraglen), color=NA, 
+                   stringsAsFactors=F)
     }
 }
 
-# Setup misc. variables from program arguments for later use.
-setupVars <- function(args.tbl, ctg.tbl, anno.tbl){
+setupVars <- function(args.tbl, anno.tbl){
+# Setup variables from program arguments.
+# Args:
+#   args.tbl: named vector of program arguments.
+#   anno.tbl: the database defaults table.
+# Returns: list of variables.
 
     vl <- list()  # variable list to be exported.
     vl$genome <- args.tbl['-G']
@@ -69,13 +106,11 @@ setupVars <- function(args.tbl, ctg.tbl, anno.tbl){
        vl$galaxy <- as.integer(0)
     }
     
-    #### Tag for use of bed file ####
-    prefix.regions <- unique(anno.tbl$Region)
-    if(!vl$reg2plot %in% prefix.regions) {
-        vl$bed.file <- vl$reg2plot  # save bed file name.
-        vl$reg2plot <- 'bed'  # assume BED input.
-    } else {
-        vl$bed.file <- NULL
+    #### Check region to plot ####
+    region.allowed <- c(as.vector(unique(anno.tbl$Region)), "bed")
+    if(!vl$reg2plot %in% region.allowed) {
+        stop(paste(c("Unknown region specified. Must be one of:", 
+                     region.allowed, "\n"), collapse=" "))
     }
 
     #### Image output forbidden tag. ####
@@ -262,11 +297,12 @@ setupVars <- function(args.tbl, ctg.tbl, anno.tbl){
     vl
 }
 
-replotVars <- function(args.tbl, existing.vl) {
+replotVars <- function(args.tbl, existing.vl, bam.pair) {
 # Setup replot variables.
 # Args:
 #   args.tbl: argument table.
 #   existing.vl: existing variable list.
+#   bam.pair: boolean for bam-pair use.
 
     vl <- list()  # variable list to be exported.
     # vl$iname <- args.tbl['-I']
@@ -337,6 +373,11 @@ replotVars <- function(args.tbl, existing.vl) {
     #### Heatmap color. ####
     if('-CO' %in% names(args.tbl)) {
         vl$hm.color <- as.character(args.tbl['-CO'])
+        v.colors <- unlist(strsplit(vl$hm.color, ":"))
+        if(bam.pair && length(v.colors) != 2 || 
+           !bam.pair && length(v.colors) != 1) {
+            stop("Heatmap color specifications must correspond to bam-pair!\n")
+        }
     } else {
         vl$hm.color <- "default"
     }
@@ -382,6 +423,12 @@ replotVars <- function(args.tbl, existing.vl) {
         vl$prof.misc$xylab <- as.integer(args.tbl['-XYL'])
     } else {
         vl$prof.misc$xylab <- T
+    }
+    if('-LWD' %in% names(args.tbl)) {
+        stopifnot(as.integer(args.tbl['-LWD']) > 0)
+        vl$prof.misc$line.wd <- as.integer(args.tbl['-LWD'])
+    } else {
+        vl$prof.misc$line.wd <- 3
     }
 
     vl

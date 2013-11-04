@@ -242,6 +242,7 @@ for(r in 1:nrow(ctg.tbl)) {
 
     # Obtain bam file basic info.
     libsize <- v.lib.size[bam.files[1]]
+    result.pseudo.rpm <- 1000000/libsize
     sn.inbam <- sn.list[[bam.files[1]]]
     chr.tag <- chrTag(sn.inbam)
     is.bowtie <- v.map.bowtie[bam.files[1]]
@@ -255,9 +256,9 @@ for(r in 1:nrow(ctg.tbl)) {
                                bufsize, cov.algo, bam.files[1], sn.inbam, 
                                fraglens[1], map.qual, is.bowtie)
     if(bam.pair) {  # calculate background.
-        pseudo.rpm <- 1e-9
         fraglen2 <- ifelse(length(fraglens) > 1, fraglens[2], fraglens[1])
         libsize <- v.lib.size[bam.files[2]]
+        bkg.pseudo.rpm <- 1000000/libsize
         sn.inbam <- sn.list[[bam.files[2]]]
         chr.tag <- chrTag(sn.inbam)
         is.bowtie <- v.map.bowtie[bam.files[2]]
@@ -270,8 +271,8 @@ for(r in 1:nrow(ctg.tbl)) {
                                 bufsize, cov.algo, bam.files[2], sn.inbam, 
                                 fraglen2, map.qual, is.bowtie)
         # browser()
-        result.matrix <- log2((result.matrix + pseudo.rpm) / 
-                              (bkg.matrix + pseudo.rpm))
+        result.matrix <- log2((result.matrix + result.pseudo.rpm) / 
+                              (bkg.matrix + bkg.pseudo.rpm))
     }
 
     # Calculate SEM if needed. Shut off SEM in single gene case.

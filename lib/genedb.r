@@ -21,6 +21,37 @@ FIScoreIntersect <- function(db.info, v.finfo){
     length(intersect(as.vector(db.info[c("FI.1", "FI.2", "FI.3")]), v.finfo))
 }
 
+ValidateGeneSubset <- function(gid.match, tid.match, gname.match){
+# To validate that there is no ambiguous gene name in the gene list.
+# Args:
+#   gid.match: hits of gene names in gid.
+#   tid.match: hits of gene names in tid.
+#   gname.match: hits of gene names in gname.
+
+    subset.matrix <- cbind(gid.match, tid.match, gname.match)
+    # if the entry of the list is unambiguous, the hits should be zero or equal.
+    UniuqueValuesOfRows <- function(x){
+        y <- unique(x)
+        if(length(y) == 3){
+            return(FALSE)
+        }else{
+            if((length(y) == 2) & (0 %in% y)){
+                return(TRUE)
+            }else{
+                return(FALSE)
+            }
+            return(TRUE)
+        }
+    }
+
+    validated.result <- unique(apply(subset.matrix, 1, UniuqueValuesOfRows))
+    if(length(validated.result) == 2){
+        return(FALSE)
+    }else{
+        return(TRUE)
+    }
+}
+
 SetupPlotCoord <- function(args.tbl, ctg.tbl, default.tbl, dbfile.tbl, progpath, 
                            genome, reg2plot, lgint, flanksize, samprate) {
 # Load genomic coordinates for plot based on the input arguments.
@@ -175,8 +206,13 @@ SetupPlotCoord <- function(args.tbl, ctg.tbl, default.tbl, dbfile.tbl, progpath,
             gid.match <- match(gene.list, genome.coord$gid, nomatch=0)
             gname.match <- match(gene.list, genome.coord$gname, nomatch=0)
             tid.match <- match(gene.list, genome.coord$tid, nomatch=0)
-            subset.idx <- gid.match + tid.match + gname.match
+            subset.idx <- pmax(gid.match, tid.match, gname.match)
             subset.idx <- subset.idx[subset.idx != 0]
+            # to test if gid, tid, gname get same results
+            if(ValidateGeneSubset(gid.match, tid.match, gname.match)){
+                stop("\nGene list hit ambiguous genes. Are you using the correct database?\n")
+            }
+            
             if(length(subset.idx) == 0) {
                 stop("\nGene subset size becomes zero. Are you using the correct database?\n")
             }

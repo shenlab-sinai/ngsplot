@@ -242,7 +242,7 @@ for(r in 1:nrow(ctg.tbl)) {
 
     # Obtain bam file basic info.
     libsize <- v.lib.size[bam.files[1]]
-    result.pseudo.rpm <- 1000000/libsize
+    result.pseudo.rpm <- 1e6/libsize
     sn.inbam <- sn.list[[bam.files[1]]]
     chr.tag <- chrTag(sn.inbam)
     is.bowtie <- v.map.bowtie[bam.files[1]]
@@ -258,7 +258,7 @@ for(r in 1:nrow(ctg.tbl)) {
     if(bam.pair) {  # calculate background.
         fraglen2 <- ifelse(length(fraglens) > 1, fraglens[2], fraglens[1])
         libsize <- v.lib.size[bam.files[2]]
-        bkg.pseudo.rpm <- 1000000/libsize
+        bkg.pseudo.rpm <- 1e6/libsize
         sn.inbam <- sn.list[[bam.files[2]]]
         chr.tag <- chrTag(sn.inbam)
         is.bowtie <- v.map.bowtie[bam.files[2]]

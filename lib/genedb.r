@@ -21,37 +21,6 @@ FIScoreIntersect <- function(db.info, v.finfo){
     length(intersect(as.vector(db.info[c("FI.1", "FI.2", "FI.3")]), v.finfo))
 }
 
-ValidateGeneSubset <- function(gid.match, tid.match, gname.match){
-# To validate that there is no ambiguous gene name in the gene list.
-# Args:
-#   gid.match: hits of gene names in gid.
-#   tid.match: hits of gene names in tid.
-#   gname.match: hits of gene names in gname.
-
-    subset.matrix <- cbind(gid.match, tid.match, gname.match)
-    # if the entry of the list is unambiguous, the hits should be zero or equal.
-    UniuqueValuesOfRows <- function(x){
-        y <- unique(x)
-        if(length(y) == 3){
-            return(FALSE)
-        }else{
-            if((length(y) == 2) & (0 %in% y)){
-                return(TRUE)
-            }else{
-                return(FALSE)
-            }
-            return(TRUE)
-        }
-    }
-
-    validated.result <- unique(apply(subset.matrix, 1, UniuqueValuesOfRows))
-    if(length(validated.result) == 2){
-        return(FALSE)
-    }else{
-        return(TRUE)
-    }
-}
-
 SetupPlotCoord <- function(args.tbl, ctg.tbl, default.tbl, dbfile.tbl, progpath, 
                            genome, reg2plot, lgint, flanksize, samprate) {
 # Load genomic coordinates for plot based on the input arguments.
@@ -71,8 +40,8 @@ SetupPlotCoord <- function(args.tbl, ctg.tbl, default.tbl, dbfile.tbl, progpath,
         # Subset using genome-region combination.
         key <- default.tbl$Genome == genome & default.tbl$Region == reg2plot
         if(sum(key) == 0) {
-            stop("The combination of genome and region does not exist.
-  You may need to install the genome or the region does not exist yet.\n")
+            stop("The combination of genome and region does not exist. You 
+       may need to install the genome or the region does not exist yet.\n")
         }
         anno.parameters <- default.tbl[key, ]
         db.match.mask <- dbfile.tbl$Genome == genome & 
@@ -126,8 +95,8 @@ SetupPlotCoord <- function(args.tbl, ctg.tbl, default.tbl, dbfile.tbl, progpath,
         f.load <- file.path(prefix, anno.db.candidates$"db.file"[1])
 
         if (!file.exists(f.load)){
-            stop("The requested database file does not exist. You may have a corrupted database.
-  Consider reinstalling the genome.\n")
+            stop("The requested database file does not exist. You may have a 
+       corrupted database. Consider reinstalling the genome.\n")
             # cat("\nDownloading database:\n")
             # download.file(anno.db.candidates$"URL"[1], destfile=f.load, 
             #               method="curl")
@@ -157,12 +126,13 @@ SetupPlotCoord <- function(args.tbl, ctg.tbl, default.tbl, dbfile.tbl, progpath,
     # Returns: genome coordinates as a dataframe.
 
         if(length(grep("\\.bed([0-9]+)?$", bed.file, ignore.case=T)) == 0) {
-            warning(sprintf("File name: '%s' does not seem to a correct name for bed file.\n", bed.file))
+            warning(sprintf("File name: '%s' does not seem to a correct name 
+for bed file.\n", bed.file))
         }
         bed.coord <- read.table(bed.file, sep="\t")
         if(ncol(bed.coord) <3){
-            stop("A bed file must contain at least 3 columns!
-  The format is: chrom, start, end, gname, tid, strand. Columns 4-6 are optional\n")
+            stop("A bed file must contain at least 3 columns! The format is: 
+       chrom, start, end, gname, tid, strand. Columns 4-6 are optional\n")
         }
         genome.coord <- data.frame(chrom=chromFormat(bed.coord[, 1]), 
                                    start=bed.coord[, 2] + 1, 
@@ -171,8 +141,8 @@ SetupPlotCoord <- function(args.tbl, ctg.tbl, default.tbl, dbfile.tbl, progpath,
                                    byname.uniq=T, bygid.uniq=NA)
         # Perform sanity check for bed file.
         if(!all(genome.coord$start <= genome.coord$end)) {
-            stop(sprintf("Sanity check for bed file: %s failed.
-  Bed files are 0-based and right-side open.\n", bed.file))
+            stop(sprintf("Sanity check for bed file: %s failed. Bed files are 
+       0-based and right-side open.\n", bed.file))
         }
 
         # Deal with columns 4-6 (Optional).
@@ -194,6 +164,20 @@ SetupPlotCoord <- function(args.tbl, ctg.tbl, default.tbl, dbfile.tbl, progpath,
         x[ifelse(runif(length(x)) <= samprate, T, F)]
     }
 
+    ValidateGeneSubset <- function(gid.match, tid.match, gname.match) {
+    # To validate that there is no ambiguous hits in gene match.
+    # Args:
+    #   XXX.match: positional hits with respect to the gene database. 0 means 
+    #              no hit.
+
+        subset.matrix <- rbind(gid.match, tid.match, gname.match)
+        g.valid <- sapply(subset.matrix, function(col.hits) {
+            length(unique(col.hits[col.hits > 0])) <= 1
+        })
+
+        all(g.valid)
+    }
+
     for(i in 1:length(uniq.reg)) {
         ur <- uniq.reg[i]
  
@@ -206,15 +190,16 @@ SetupPlotCoord <- function(args.tbl, ctg.tbl, default.tbl, dbfile.tbl, progpath,
             gid.match <- match(gene.list, genome.coord$gid, nomatch=0)
             gname.match <- match(gene.list, genome.coord$gname, nomatch=0)
             tid.match <- match(gene.list, genome.coord$tid, nomatch=0)
-            subset.idx <- pmax(gid.match, tid.match, gname.match)
-            subset.idx <- subset.idx[subset.idx != 0]
-            # to test if gid, tid, gname get same results
-            if(ValidateGeneSubset(gid.match, tid.match, gname.match)){
-                stop("\nGene list hit ambiguous genes. Are you using the correct database?\n")
+            if(!ValidateGeneSubset(gid.match, tid.match, gname.match)) {
+                stop("\nAmbiguous hits in gene database. This shall never 
+       happen! Contact ngs.plot maintainers.\n")
             }
-            
+            subset.idx <- pmax(gid.match, tid.match, gname.match)
+            # subset.idx <- gid.match + tid.match + gname.match
+            subset.idx <- subset.idx[subset.idx != 0]
             if(length(subset.idx) == 0) {
-                stop("\nGene subset size becomes zero. Are you using the correct database?\n")
+                stop("\nGene subset size becomes zero. Are you using the 
+       correct database?\n")
             }
             coord.list[[i]] <- genome.coord[subset.idx, ]
         }

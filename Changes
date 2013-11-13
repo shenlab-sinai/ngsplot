@@ -1,6 +1,12 @@
 Revision history for ngs.plot.
 ==============================
 
+2.08 November 13, 2013
+    - Changed the pseudo-count calculation method in bam-pair. The new method 
+      seems to give much better results in our tests.
+    - Corrected a bug that causes wrong matches when using a subset gene list 
+      with genomes such as Yeast.
+
 2.07 September 20, 2013
     - Specify individual bed file for each bam file in configuration.
     - Custom colors in configuration file

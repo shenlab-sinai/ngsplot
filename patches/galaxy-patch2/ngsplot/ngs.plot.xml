@@ -1,0 +1,314 @@
+<tool id="ngs_plot_1" name="ngs.plot">
+	<command interpreter="bash">
+#if  $gene_list_source_type.gene_list == "plot_whole_genome":
+#if $genomic_region_source_type.genomic_region == "tss": 
+ngs.plot.tss_tes.sh $genome_name $genomic_region_source_type.genomic_region $bam_file  $out_zip  $out_avg_png  $out_hm_png    "$image_title"  $gene_database   $genomic_region_source_type.flanking_region_size1   $randomly_sample   $gene_order  $chunk_size  $fragement_length  $quality_requirement $standard_error $radius_size $flooding_fraction  $smooth_method  $shaded_area   
+#else if $genomic_region_source_type.genomic_region == "tes": 
+ngs.plot.tss_tes.sh $genome_name $genomic_region_source_type.genomic_region $bam_file  $out_zip  $out_avg_png  $out_hm_png    "$image_title"  $gene_database   $genomic_region_source_type.flanking_region_size2   $randomly_sample   $gene_order  $chunk_size  $fragement_length  $quality_requirement $standard_error $radius_size $flooding_fraction  $smooth_method  $shaded_area
+#else if $genomic_region_source_type.genomic_region == "genebody":
+#if $genomic_region_source_type.flanking_region_option_source_type1.flanking_region_option3 == "flanking_region_size":  
+ngs.plot.genebody_exon_cgi.sh  $genome_name $genomic_region_source_type.genomic_region $bam_file  $out_zip  $out_avg_png  $out_hm_png    "$image_title"  $gene_database   $randomly_sample   $gene_order  $chunk_size  $fragement_length  $quality_requirement $standard_error $radius_size $flooding_fraction  $smooth_method  $shaded_area $genomic_region_source_type.flanking_region_option_source_type1.flanking_region_option3    $genomic_region_source_type.flanking_region_option_source_type1.flanking_region_size3  $genomic_region_source_type.further_information1  $genomic_region_source_type.interval_size1
+#else if $genomic_region_source_type.flanking_region_option_source_type1.flanking_region_option3 == "flanking_floating_size":
+ngs.plot.genebody_exon_cgi.sh  $genome_name $genomic_region_source_type.genomic_region $bam_file  $out_zip  $out_avg_png  $out_hm_png    "$image_title"  $gene_database   $randomly_sample   $gene_order  $chunk_size  $fragement_length  $quality_requirement $standard_error $radius_size $flooding_fraction  $smooth_method  $shaded_area $genomic_region_source_type.flanking_region_option_source_type1.flanking_region_option3    $genomic_region_source_type.flanking_region_option_source_type1.specify_flanking_region3  $genomic_region_source_type.further_information1  $genomic_region_source_type.interval_size1
+#end if 
+#else if $genomic_region_source_type.genomic_region == "exon":
+#if $genomic_region_source_type.flanking_region_option_source_type2.flanking_region_option4 == "flanking_region_size":  
+ngs.plot.genebody_exon_cgi.sh  $genome_name $genomic_region_source_type.genomic_region $bam_file  $out_zip  $out_avg_png  $out_hm_png    "$image_title"  $gene_database   $randomly_sample   $gene_order  $chunk_size  $fragement_length  $quality_requirement $standard_error $radius_size $flooding_fraction  $smooth_method  $shaded_area $genomic_region_source_type.flanking_region_option_source_type2.flanking_region_option4    $genomic_region_source_type.flanking_region_option_source_type2.flanking_region_size4  $genomic_region_source_type.further_information2  $genomic_region_source_type.interval_size2
+#else if $genomic_region_source_type.flanking_region_option_source_type2.flanking_region_option4 == "flanking_floating_size":
+ngs.plot.genebody_exon_cgi.sh  $genome_name $genomic_region_source_type.genomic_region $bam_file  $out_zip  $out_avg_png  $out_hm_png    "$image_title"  $gene_database   $randomly_sample   $gene_order  $chunk_size  $fragement_length  $quality_requirement $standard_error $radius_size $flooding_fraction  $smooth_method  $shaded_area $genomic_region_source_type.flanking_region_option_source_type2.flanking_region_option4    $genomic_region_source_type.flanking_region_option_source_type2.specify_flanking_region4  $genomic_region_source_type.further_information2  $genomic_region_source_type.interval_size2
+#end if
+#else if $genomic_region_source_type.genomic_region == "cgi":
+#if $genomic_region_source_type.flanking_region_option_source_type3.flanking_region_option5 == "flanking_region_size":  
+ngs.plot.genebody_exon_cgi.sh  $genome_name $genomic_region_source_type.genomic_region $bam_file  $out_zip  $out_avg_png  $out_hm_png    "$image_title"  $gene_database   $randomly_sample   $gene_order  $chunk_size  $fragement_length  $quality_requirement $standard_error $radius_size $flooding_fraction  $smooth_method  $shaded_area $genomic_region_source_type.flanking_region_option_source_type3.flanking_region_option5    $genomic_region_source_type.flanking_region_option_source_type3.flanking_region_size5  $genomic_region_source_type.further_information3  $genomic_region_source_type.interval_size3
+#else if $genomic_region_source_type.flanking_region_option_source_type3.flanking_region_option5 == "flanking_floating_size": 
+ngs.plot.genebody_exon_cgi.sh  $genome_name $genomic_region_source_type.genomic_region $bam_file  $out_zip  $out_avg_png  $out_hm_png    "$image_title"  $gene_database   $randomly_sample   $gene_order  $chunk_size  $fragement_length  $quality_requirement $standard_error $radius_size $flooding_fraction  $smooth_method  $shaded_area $genomic_region_source_type.flanking_region_option_source_type3.flanking_region_option5    $genomic_region_source_type.flanking_region_option_source_type3.specify_flanking_region5  $genomic_region_source_type.further_information3  $genomic_region_source_type.interval_size3
+#end if
+#else if $genomic_region_source_type.genomic_region == "bed":
+#if $genomic_region_source_type.flanking_region_option_source_type4.flanking_region_option6 == "flanking_region_size":  
+ngs.plot.bed.sh  $genome_name $bed_file  $bam_file  $out_zip  $out_avg_png  $out_hm_png    "$image_title"  $gene_database   $randomly_sample   $gene_order  $chunk_size  $fragement_length  $quality_requirement $standard_error $radius_size $flooding_fraction  $smooth_method  $shaded_area $genomic_region_source_type.flanking_region_option_source_type4.flanking_region_option6    $genomic_region_source_type.flanking_region_option_source_type4.flanking_region_size6 $genomic_region_source_type.interval_size4
+#else if $genomic_region_source_type.flanking_region_option_source_type4.flanking_region_option6 == "flanking_floating_size": 
+ngs.plot.bed.sh  $genome_name $bed_file  $bam_file  $out_zip  $out_avg_png  $out_hm_png    "$image_title"  $gene_database   $randomly_sample   $gene_order  $chunk_size  $fragement_length  $quality_requirement $standard_error $radius_size $flooding_fraction  $smooth_method  $shaded_area $genomic_region_source_type.flanking_region_option_source_type4.flanking_region_option6    $genomic_region_source_type.flanking_region_option_source_type4.specify_flanking_region6  $genomic_region_source_type.interval_size4
+#end if
+#end if
+#else if  $gene_list_source_type.gene_list == "offer_gene_list":
+#if $genomic_region_source_type.genomic_region == "tss": 
+ngs.plot.tss_tes_genelist.sh $genome_name $genomic_region_source_type.genomic_region $bam_file  $out_zip  $out_avg_png  $out_hm_png    "$image_title"  $gene_database   $genomic_region_source_type.flanking_region_size1   $randomly_sample   $gene_order  $chunk_size  $fragement_length  $quality_requirement $standard_error $radius_size $flooding_fraction  $smooth_method  $shaded_area   $gene_list_source_type.gene_list_detail
+#else if $genomic_region_source_type.genomic_region == "tes": 
+ngs.plot.tss_tes_genelist.sh $genome_name $genomic_region_source_type.genomic_region $bam_file  $out_zip  $out_avg_png  $out_hm_png    "$image_title"  $gene_database   $genomic_region_source_type.flanking_region_size2   $randomly_sample   $gene_order  $chunk_size  $fragement_length  $quality_requirement $standard_error $radius_size $flooding_fraction  $smooth_method  $shaded_area   $gene_list_source_type.gene_list_detail
+#else if $genomic_region_source_type.genomic_region == "genebody":
+#if $genomic_region_source_type.flanking_region_option_source_type1.flanking_region_option3 == "flanking_region_size":
+ngs.plot.genebody_exon_cgi_genelist.sh  $genome_name $genomic_region_source_type.genomic_region $bam_file  $out_zip  $out_avg_png  $out_hm_png    "$image_title"  $gene_database   $randomly_sample   $gene_order  $chunk_size  $fragement_length  $quality_requirement $standard_error $radius_size $flooding_fraction  $smooth_method  $shaded_area $genomic_region_source_type.flanking_region_option_source_type1.flanking_region_option3    $genomic_region_source_type.flanking_region_option_source_type1.flanking_region_size3  $genomic_region_source_type.further_information1  $genomic_region_source_type.interval_size1  $gene_list_source_type.gene_list_detail
+#else if $genomic_region_source_type.flanking_region_option_source_type1.flanking_region_option3 == "flanking_floating_size":
+ngs.plot.genebody_exon_cgi_genelist.sh  $genome_name $genomic_region_source_type.genomic_region $bam_file  $out_zip  $out_avg_png  $out_hm_png    "$image_title"  $gene_database   $randomly_sample   $gene_order  $chunk_size  $fragement_length  $quality_requirement $standard_error $radius_size $flooding_fraction  $smooth_method  $shaded_area $genomic_region_source_type.flanking_region_option_source_type1.flanking_region_option3    $genomic_region_source_type.flanking_region_option_source_type1.specify_flanking_region3  $genomic_region_source_type.further_information1  $genomic_region_source_type.interval_size1  $gene_list_source_type.gene_list_detail
+#end if
+#else if $genomic_region_source_type.genomic_region == "exon":
+#if $genomic_region_source_type.flanking_region_option_source_type2.flanking_region_option4 == "flanking_region_size":
+ngs.plot.genebody_exon_cgi_genelist.sh  $genome_name $genomic_region_source_type.genomic_region $bam_file  $out_zip  $out_avg_png  $out_hm_png    "$image_title"  $gene_database   $randomly_sample   $gene_order  $chunk_size  $fragement_length  $quality_requirement $standard_error $radius_size $flooding_fraction  $smooth_method  $shaded_area $genomic_region_source_type.flanking_region_option_source_type2.flanking_region_option4    $genomic_region_source_type.flanking_region_option_source_type2.flanking_region_size4  $genomic_region_source_type.further_information2  $genomic_region_source_type.interval_size2  $gene_list_source_type.gene_list_detail
+#else if $genomic_region_source_type.flanking_region_option_source_type2.flanking_region_option4 == "flanking_floating_size":
+ngs.plot.genebody_exon_cgi_genelist.sh  $genome_name $genomic_region_source_type.genomic_region $bam_file  $out_zip  $out_avg_png  $out_hm_png    "$image_title"  $gene_database   $randomly_sample   $gene_order  $chunk_size  $fragement_length  $quality_requirement $standard_error $radius_size $flooding_fraction  $smooth_method  $shaded_area $genomic_region_source_type.flanking_region_option_source_type2.flanking_region_option4    $genomic_region_source_type.flanking_region_option_source_type2.specify_flanking_region4  $genomic_region_source_type.further_information2  $genomic_region_source_type.interval_size2  $gene_list_source_type.gene_list_detail
+#end if
+#else if $genomic_region_source_type.genomic_region == "cgi":
+#if $genomic_region_source_type.flanking_region_option_source_type3.flanking_region_option5 == "flanking_region_size":
+ngs.plot.genebody_exon_cgi_genelist.sh  $genome_name $genomic_region_source_type.genomic_region $bam_file  $out_zip  $out_avg_png  $out_hm_png    "$image_title"  $gene_database   $randomly_sample   $gene_order  $chunk_size  $fragement_length  $quality_requirement $standard_error $radius_size $flooding_fraction  $smooth_method  $shaded_area $genomic_region_source_type.flanking_region_option_source_type3.flanking_region_option5    $genomic_region_source_type.flanking_region_option_source_type3.flanking_region_size5  $genomic_region_source_type.further_information3  $genomic_region_source_type.interval_size3  $gene_list_source_type.gene_list_detail
+#else if $genomic_region_source_type.flanking_region_option_source_type3.flanking_region_option5 == "flanking_floating_size":
+ngs.plot.genebody_exon_cgi_genelist.sh  $genome_name $genomic_region_source_type.genomic_region $bam_file  $out_zip  $out_avg_png  $out_hm_png    "$image_title"  $gene_database   $randomly_sample   $gene_order  $chunk_size  $fragement_length  $quality_requirement $standard_error $radius_size $flooding_fraction  $smooth_method  $shaded_area $genomic_region_source_type.flanking_region_option_source_type3.flanking_region_option5    $genomic_region_source_type.flanking_region_option_source_type3.specify_flanking_region5  $genomic_region_source_type.further_information3  $genomic_region_source_type.interval_size3  $gene_list_source_type.gene_list_detail
+#end if
+#else if $genomic_region_source_type.genomic_region == "bed":
+#if $genomic_region_source_type.flanking_region_option_source_type4.flanking_region_option6 == "flanking_region_size":  
+ngs.plot.bed_genelist.sh  $genome_name $bed_file  $bam_file  $out_zip  $out_avg_png  $out_hm_png    "$image_title"  $gene_database   $randomly_sample   $gene_order  $chunk_size  $fragement_length  $quality_requirement $standard_error $radius_size $flooding_fraction  $smooth_method  $shaded_area $genomic_region_source_type.flanking_region_option_source_type4.flanking_region_option6    $genomic_region_source_type.flanking_region_option_source_type4.flanking_region_size6  $genomic_region_source_type.interval_size4  $gene_list_source_type.gene_list_detail
+#else if $genomic_region_source_type.flanking_region_option_source_type4.flanking_region_option6 == "flanking_floating_size": 
+ngs.plot.bed_genelist.sh  $genome_name $bed_file  $bam_file  $out_zip  $out_avg_png  $out_hm_png    "$image_title"  $gene_database   $randomly_sample   $gene_order  $chunk_size  $fragement_length  $quality_requirement $standard_error $radius_size $flooding_fraction  $smooth_method  $shaded_area $genomic_region_source_type.flanking_region_option_source_type4.flanking_region_option6    $genomic_region_source_type.flanking_region_option_source_type4.specify_flanking_region6  $genomic_region_source_type.interval_size4  $gene_list_source_type.gene_list_detail
+#end if
+#end if
+#end if
+        </command>
+	<inputs>
+                <param  type="data"  name="bam_file" label="BAM File for Plotting"/>
+                <param  type="select" name="genome_name" label="Choose Genome">
+                        <option value="hg19">hg19</option>
+                        <option value="mm9">mm9</option>
+                        <option value="rn4">rn4</option>
+                </param>
+	    <conditional name="genomic_region_source_type">
+               <param type="select" name="genomic_region" label="Genomic Region interested in">
+			<option value="tss">tss</option>
+			<option value="tes">tes</option>
+			<option value="genebody">genebody</option>
+                        <option value="exon">exon</option>
+                        <option value="cgi">cgi</option>
+                        <option value="bed">customized bed file</option> 
+		</param>
+                <when value="tss">
+<!--                   <param type="select" name="flanking_region_option1" label="Choose one method of below two options for plotting flanking region. If choosing one option, You need give this option's value, and ignore the other option and value">
+                        <option value="flanking_region_size">Using flanking region size</option>
+                        <option value="flanking_floating_size">Using floating size with interval size</option>
+                   </param>
+-->
+                   <param name="flanking_region_size1" size="30" type="text" value="2000" label="Flanking Region Size"/>
+<!--                    <param name="specify_flanking_region1" size="30" type="text" value="0.33" label="2) Specify flanking region as a multiple(or fraction) of interval size, can be less than 1. In this case, flanking region has floating size with interval size. default: 33%"/>
+-->
+                </when>
+                <when value="tes">
+<!--                    <param type="select" name="flanking_region_option2" label="Choose one method of below two options for plotting flanking region. If choosing one option, You need give this option's value, and ignore the other option and value">
+                        <option value="flanking_region_size">Using flanking region size</option>
+                        <option value="flanking_floating_size">Using floating size with interval size</option>
+                   </param>
+-->
+                   <param name="flanking_region_size2" size="30" type="text" value="2000" label="Flanking Region Size"/>
+<!--                   <param name="specify_flanking_region2" size="30" type="text" value="0.33" label="2) Specify flanking region as a multiple(or fraction) of interval size, can be less than 1. In this case, flanking region has floating size with interval size. default: 33%"/>
+-->
+                </when>
+                <when value="genebody"> 
+                    <param type="select" name="further_information1"  label="If you select genebody, further information can be provided for specific regions to plot: ChIP-seq(default), RNA-seq">
+                    <option value="chipseq">ChIP-seq</option>
+                    <option value="rnaseq">RNA-seq</option>
+                    </param>
+                    <param name="interval_size1" type="select" label="Internal Region Size"> 
+                    <option value="automatic">Automatic</option>
+                    <option value="0">0</option>
+                    <option value="1">1</option>
+                    </param>
+
+                    <conditional name="flanking_region_option_source_type1">
+                        <param type="select" name="flanking_region_option3" label="Choose one method below for plotting flanking region">
+                            <option value="flanking_region_size">Using flanking region size</option>
+                            <option value="flanking_floating_size">Using floating size with  interval size</option>
+                        </param>
+                        <when value="flanking_region_size">
+                            <param name="flanking_region_size3" size="30" type="text" value="2000" label="Flanking Region Size"/>
+                        </when>
+                        <when value="flanking_floating_size">
+                            <param name="specify_flanking_region3" size="30" type="text" value="0.33" label="Flanking Region Factor"/>
+                        </when>
+                   </conditional>            
+                </when>
+                <when value="exon"> 
+                    <param type="select" name="further_information2"  label="If you select exon, further information can be provided for specific regions to plot: canonical(default), variant, promoter, polyA, altAcceptor, altDonor, altBoth">
+                    <option value="canonical">canonical</option>
+                    <option value="variant">variant</option>
+                    <option value="promoter">promoter</option>
+                    <option value="polyA">polyA</option>
+                    <option value="altAcceptor">altAcceptor</option>
+                    <option value="altDonor">altDonor</option>
+                    <option value="altBoth">altBoth</option>
+                    </param>
+                    <param name="interval_size2" type="select" label="Internal Region Size"> 
+                    <option value="automatic">Automatic</option>
+                    <option value="0">0</option>
+                    <option value="1">1</option>
+                    </param>
+
+                    <conditional name="flanking_region_option_source_type2">
+                        <param type="select" name="flanking_region_option4" label="Choose one method below for plotting flanking region">
+                            <option value="flanking_region_size">Using flanking region size</option>
+                            <option value="flanking_floating_size">Using floating size with interval size</option>
+                        </param>
+                        <when value="flanking_region_size">
+                            <param name="flanking_region_size4" size="30" type="text" value="500" label="Flanking Region Size"/>
+                        </when>
+                        <when value="flanking_floating_size">
+                            <param name="specify_flanking_region4" size="30" type="text" value="0.33" label="Flanking Region Factor"/>
+                        </when>
+                    </conditional>
+                 </when>
+                 <when value="cgi"> 
+                    <param type="select" name="further_information3"  label="If you select cgi, further information can be provided for specific regions to plot: proximalpromoter(default), genebody, genedesert, otherintergenic, pericentromere, promoter1k, promoter3k">
+                    <option value="ProximalPromoter">proximalpromoter</option>
+                    <option value="Genebody">genebody</option>
+                    <option value="Genedesert">genedesert</option>
+                    <option value="OtherIntergenic">otherintergenic</option>
+                    <option value="Pericentromere">pericentromere</option>
+                    <option value="Promoter1k">promoter1k</option>
+                    <option value="Promoter3k">promoter3k</option>
+                    </param>
+                    <param name="interval_size3" type="select" label="Internal Region Size"> 
+                    <option value="automatic">Automatic</option>
+                    <option value="0">0</option>
+                    <option value="1">1</option>
+                    </param>
+
+                    <conditional name="flanking_region_option_source_type3">
+                        <param type="select" name="flanking_region_option5" label="Choose one method below for plotting flanking region">
+                            <option value="flanking_region_size">Using flanking region size</option>
+                            <option value="flanking_floating_size">Using floating size with interval size</option>
+                        </param>
+                        <when value="flanking_region_size">
+                            <param name="flanking_region_size5" size="30" type="text" value="500" label="Flanking Region Size"/> 
+                        </when>
+                        <when value="flanking_floating_size">
+                            <param name="specify_flanking_region5" size="30" type="text" value="0.33" label="Flanking Region Factor"/>  
+                        </when>
+                    </conditional>
+                 </when> 
+
+
+                 <when value="bed"> 
+                      <param  type="data"  name="bed_file" label="customized *.bed file for plotting"/>
+                    <param name="interval_size4" type="select" label="Internal Region Size">
+                    <option value="automatic">Automatic</option>
+                    <option value="0">0</option>
+                    <option value="1">1</option>
+                    </param>
+
+                        
+                     <conditional name="flanking_region_option_source_type4">
+                        <param type="select" name="flanking_region_option6" label="Choose one method below for plotting flanking region">
+                            <option value="flanking_region_size">Using flanking region size</option>
+                            <option value="flanking_floating_size">Using floating size with interval size</option>
+                        </param>
+                        <when value="flanking_region_size">
+                            <param name="flanking_region_size6" size="30" type="text" value="1000" label="Flanking Region Size"/>
+                        </when>
+                        <when value="flanking_floating_size">
+                            <param name="specify_flanking_region6" size="30" type="text" value="0.33" label="Flanking Region Factor"/>
+                        </when>
+                     </conditional>
+                 </when>
+
+              </conditional>
+                 <param type="select" name="gene_database" label="Gene Database">
+                        <option value="refseq">refseq</option>
+                        <option value="ensembl">ensembl</option>
+                </param>
+                <param name="image_title" size="30" type="text" value="Noname" label="Image title"/>          
+
+           <conditional name="gene_list_source_type">  
+                <param type="select"  name="gene_list" label="Choose scale for ploting">
+                    <option value="plot_whole_genome">Plot whole genome</option>  
+                    <option value="offer_gene_list">Offer gene list</option>
+                </param>  
+                <when value="plot_whole_genome">  
+                </when>    
+                <when value="offer_gene_list"> 
+                    <param   name="gene_list_detail"   type="data"  label="Choose the uploaded gene list for plotting"/>
+                </when>  
+           </conditional> 
+
+<!--                <param name="interval_size" size="30" type="text" value="3000" label="Interval size(optional, default varies by type: genebody=3000;exon=250;cgi=500)"/> 
+                <param name="flanking_region_size" size="30" type="text" value="1000" label="Flanking region size(optional, default varies by type: tss,tes,genebody=1000;exon=500;cgi=500)"/> 
+                <param name="specify_flanking_region" size="30" type="text" value="specify_flanking_region" label="Specify flanking region as a multiple(or fraction) of interval size, can be less than 1. In this case, flanking region has floating size with interval size."/>  -->
+                <param name="randomly_sample" size="10" type="text" value="1" label="Randomly sample the regions for plotting"/>
+                <param type="select" name="gene_order" label="Gene order algorithm">
+                        <option value="total">total</option>
+                        <option value="hc">hc</option>
+                        <option value="max">max</option>
+                        <option value="prod">prod</option>
+                        <option value="diff">diff</option>
+                        <option value="pca">pca</option>
+                        <option value="none">none</option>
+                </param>
+                <param name="chunk_size" size="10" type="text" value="100" label="Chunk size for loading genes in batch"/>
+                <param name="fragement_length" size="10" type="text" value="150" label="Expected Fragement Length"/>
+                <param name="quality_requirement" size="10" type="text" value="20" label="Mapping Quality Requirement"/>
+                <param type="select" name="standard_error" label="Boolean tag for plotting standard errors">
+                        <option value="1">On</option>
+                        <option value="0">Off</option>
+                </param>
+                
+                <param name="radius_size" size="10" type="text" value="0" label="The fraction of extreme values to be trimmed on both ends"/>  
+                <param name="flooding_fraction" size="10" type="text" value="0.02" label="Flooding fraction"/>
+                <param type="select" name="smooth_method" label="Moving window width to smooth avg. profiles">
+                        <option value="1">no</option>
+                        <option value="3">slightly</option>
+                        <option value="5">somewhat</option>
+                        <option value="9">quite</option>
+                        <option value="13">super</option>
+                </param>
+                <param name="shaded_area" size="10" type="text" value="0" label="Opacity of shaded area, suggested value:[0, 0.5]"/>
+        <!--        <param name="weighted_coverage" size="30" type="text" value="weighted_coverage" label="By default, do NOT calculate weighted coverage for splined curves using gene length. However, this can be useful, e.g. when comparing enrichment of a histone mark under two conditions. Can be turned on by setting -E to 1."/>
+      -->
+  	</inputs>
+	<outputs>
+                 <data format="pdf" name="out_avg_png" metadata_source="bam_file" />
+                 <data format="pdf" name="out_hm_png" />
+                 <data format="zip" name="out_zip"/>
+                 
+	</outputs>
+<help>
+**NGS PLOT Overview**
+
+ngs.plot_ needs an indexed bam file or a configuration file as an input to plot the peak trends and patterns cross the genomic region or users' interested region. ngs.plot.r will generate multiple files including avgprof file, heatmap file, and a zip file for replotting. 
+
+.. _ngs.plot: http://code.google.com/p/ngsplot/
+
+------
+
+**Input formats**
+
+ngs.plot needs an indexed bam file or a configuration file as an input to plot the peak trends and patterns cross the genomic region or users' interested region. 
+
+------
+
+**Outputs**
+
+ngs.plot generates multiple files including avgprof file, heatmap file, and a zip file for replotting.
+
+------
+
+**ngs.plot parameter list**
+
+This is a list of implemented ngs.plot options::
+
+-G             Genome name, currently supported: mm9, hg19, rn4, sacCer3(ensembl only)   
+-R             Genomic regions to plot: tss, tes, genebody, exon, cgi or *.bed
+-C             Indexed bam file or a configuration file for multiplot
+-E             Gene list to subset regions   
+-T             Image title(default=Noname), will be used in figure legend.
+-F             If you select genebody, exon or cgi, further information can be provided: for genebody: ChIP-seq(default), RNA-seq. RNA-seq is handled differently from ChIP-seq to cope with intronic regions. for exon: canonical(default), variant, promoter, polyA, altAcceptor, altDonor, altBoth. the alt's mean exons with alternative boundaries. for cgi, choose one based on location: ProximalPromoter(default), Promoter1k, Promoter3k, Genebody, Genedesert, OtherIntergenic, Pericentromere
+-D             Gene database: refseq(default), ensembl
+-I             Shall interval be larger than flanking in plot?(0 or 1)   
+-L             Flanking region size (Size in bps. By default, when -R=tss, tes, genebody, -L=2000; when -R=exon, cgi, -L=500; when -R=*.bed, -L=1000)
+-N             Flanking region factor(will override flanking size)   -S   Randomly sample the regions for plot, must be:(0, 1]
+-S             Randomly sample the regions for plot, must be:(0, 1] (default=1, i.e. all regions)
+-GO            Gene order algorithm used in heatmaps: total(default), hc, max, prod, diff, pca and none(according to gene list supplied)  
+-CS            Chunk size for loading genes in batch(default=100)   
+-FL            Fragment length used to calculate physical coverage(default=150)   
+-MQ            Mapping quality cutoff to filter reads(default=20)   
+-SE            Shall standard errors be plotted?(0 or 1)   
+-RB            The fraction of extreme values to be trimmed on both ends (default=0, 0.05 means 5% of extreme values will be trimmed)
+-FC            Flooding fraction:[0, 1), default=0.02   
+-MW            Moving window width to smooth avg. profiles, must be integer:1=no(default); 3=slightly; 5=somewhat; 9=quite; 13=super.   
+-H             Opacity of shaded area, suggested value:[0, 0.5] (default=0, i.e. no shading, just curves)
+</help>
+</tool>
+

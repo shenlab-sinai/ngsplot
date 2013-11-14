@@ -21,8 +21,9 @@ FIScoreIntersect <- function(db.info, v.finfo){
     length(intersect(as.vector(db.info[c("FI.1", "FI.2", "FI.3")]), v.finfo))
 }
 
-SetupPlotCoord <- function(args.tbl, ctg.tbl, default.tbl, dbfile.tbl, progpath, 
-                           genome, reg2plot, lgint, flanksize, samprate) {
+SetupPlotCoord <- function(args.tbl, ctg.tbl, default.tbl, dbfile.tbl, 
+                           progpath, genome, reg2plot, lgint, flanksize, 
+                           samprate, galaxy) {
 # Load genomic coordinates for plot based on the input arguments.
 # Args:
 #   args.tbl: input argument table
@@ -35,6 +36,7 @@ SetupPlotCoord <- function(args.tbl, ctg.tbl, default.tbl, dbfile.tbl, progpath,
 #   lgint: boolean tag for large interval.
 #   flanksize: flanking region size.
 #   samprate: sampling rate
+#   galaxy: boolean tag for galaxy installation.
 
     if(reg2plot!='bed'){
         # Subset using genome-region combination.
@@ -125,7 +127,8 @@ SetupPlotCoord <- function(args.tbl, ctg.tbl, default.tbl, dbfile.tbl, progpath,
     #   bed.file: path of the bed file to be read.
     # Returns: genome coordinates as a dataframe.
 
-        if(length(grep("\\.bed([0-9]+)?$", bed.file, ignore.case=T)) == 0) {
+        if(!galaxy && 
+            length(grep("\\.bed([0-9]+)?$", bed.file, ignore.case=T)) == 0) {
             warning(sprintf("File name: '%s' does not seem to a correct name 
 for bed file.\n", bed.file))
         }

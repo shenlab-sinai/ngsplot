@@ -1,6 +1,10 @@
 Revision history for ngs.plot.
 ==============================
 
+Recent:
+    - Fix some permission and program argument issues that can cause problems 
+      in galaxy installation.
+
 2.08 November 13, 2013
     - Changed the pseudo-count calculation method in bam-pair. The new method 
       seems to give much better results in our tests.

@@ -1,8 +1,22 @@
-This is the README for ngs.plot: An easy-to-use visualization tool for global enrichment of next-generation sequencing data.
+###########################################################
+ngs.plot: Quick mining and visualization of next-generation 
+sequencing data by integrating genomic databases
 
-The command options can be displayed when you type the program name without any argument. 
+Li Shen, li.shen@mssm.edu or shenli.sam@gmail.com
+Icahn School of Medicine at Mount Sinai
+###########################################################
 
-There are some toy examples for you to run through the pipeline under the "example" folder. Please also read "example/README.txt".
+BRIEF:
+------
+The program options can be displayed when you type the program name (such as 
+ngs.plot.r) without any argument. There are some toy examples under the 
+"example" folder. Please also read "example/README.txt". To run those toy 
+examples, you need to download the bam files -  example.bam.tar.gz (~180MB) 
+from ngsplot's website. 
 
-For installation and detailed usage, please refer to our online manual: https://code.google.com/p/ngsplot/
+For detailed instructions, please refer to our online manual: 
+
+https://code.google.com/p/ngsplot/
+
+Enjoy!
 

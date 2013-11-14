@@ -178,7 +178,7 @@ if(cores.number == 0){
 source(file.path(progpath, 'lib', 'genedb.r'))
 plotvar.list <- SetupPlotCoord(args.tbl, ctg.tbl, default.tbl, dbfile.tbl, 
                                progpath, genome, reg2plot, lgint, flanksize, 
-                               samprate)
+                               samprate, galaxy)
 coord.list <- plotvar.list$coord.list  # list of coordinates for unique regions.
 rnaseq.gb <- plotvar.list$rnaseq.gb  # tag for RNA-seq data.
 lgint <- plotvar.list$lgint  # lgint: automatically determined if not specified.
@@ -351,11 +351,11 @@ if(!fi_tag){
 }
 
 # Save plotting data.
-if(galaxy==1){oname1="data"}
+if(galaxy==1) { oname1="data" }
 cat("Saving results...")
-if(galaxy==1){
+if(galaxy==1) {
    dir.create(oname1, showWarnings=F)
-}else{
+} else {
    dir.create(oname, showWarnings=F)
 }
 # Average profiles.

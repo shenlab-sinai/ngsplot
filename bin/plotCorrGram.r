@@ -129,7 +129,7 @@ switch(fun,
         value.list <- lapply(enrichList, getRowMax)
     },
     window={
-        value.list <- lapply(enrichList, getRowWindow, window.borders)
+        value.list <- lapply(enrichList, getRowWindow, window.borders=window.borders)
     }
     )
 

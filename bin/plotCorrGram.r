@@ -135,6 +135,9 @@ switch(fun,
 
 # prepare the matrix to do correlation test
 value.matrix <- t(do.call(mapply, c(cbind, value.list)))
+if(bam.pair == FALSE){
+    value.matrix <- log2(value.matrix + 1)
+}
 colnames(value.matrix) <- ctg.tbl$title
 
 # do correlation test and write to csv files

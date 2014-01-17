@@ -1,5 +1,8 @@
 #!/usr/bin/perl -w
 use strict;
+use File::Basename 'dirname';
+use File::Spec;
+use Cwd 'abs_path';
 
 my $gemome = $ARGV[0];
 my $region = $ARGV[1];
@@ -38,6 +41,7 @@ syswrite(FILE, "$bam_file2\t$bam_file2_gene_list_detail\t$image_title2\n");
 
 close(FILE);
 
-system("/home/galaxy/galaxy-dist/tools/multiplot/multiplot.tss_tes.sh  $gemome $region   multiplot_conf_file.txt   $out_name  $out_avg_name  $out_hm_name  $database  $Flanking_region_size  $Randomly_sample  $GO  $CS $FL  $MQ  $SE  $RB  $FC  $MW  $H");
-
+# Look for multiplot.tss_tes.sh in the same directory as this script
+my $multiplot_tss_tes_sh = File::Spec->catfile(abs_path(dirname(__FILE__)),"multiplot.tss_tes.sh");
+system("$multiplot_tss_tes_sh  $gemome $region   multiplot_conf_file.txt   $out_name  $out_avg_name  $out_hm_name  $database  $Flanking_region_size  $Randomly_sample  $GO  $CS $FL  $MQ  $SE  $RB  $FC  $MW  $H");
 

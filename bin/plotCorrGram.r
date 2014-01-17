@@ -9,18 +9,18 @@
 
 cmd.help <- function(){
     cat("\nVisit http://code.google.com/p/ngsplot for details\n")
-    cat("\nUsage: plotCorrGram.r -I ngsplot_output.zip [Options]\n")
+    cat("\nUsage: plotCorrGram.r -I ngsplot_output.zip -O output_name [Options]\n")
     cat("\n## Mandatory parameters:\n")
     cat("  -I   Result zip file created by ngs.plot.\n")
-    cat("  -O  Output name\n")
+    cat("  -O   Output name\n")
     cat("## Optional parameters:\n")
-    cat("  -F Functions to be used in calculating the values fed to calculate the correlation (default=mean).\n")
-    cat("     mean(default): base on mean of each row.\n")
-    cat("     max: base on max of each row.\n")
-    cat("     window: base on the center region of each row.\n")
-    cat("  -OP Options for -F functions.\n")
-    cat("     [0,0.5): For 'mean', trim value for robust estimation, default is 0.\n")
-    cat("     window_left, window_right: For 'window', borders of the window (total length of the row is 1), default is 0.33,0.66.\n")
+    cat("  -M   Method used to calculate row stat.\n")
+    cat("       mean(default): mean of each row.\n")
+    cat("       max: max of each row.\n")
+    cat("       window: mean on center region.\n")
+    cat("  -P   Options for -M method.\n")
+    cat("       mean: [0,0.5) - trim value for robust estimation, default is 0.\n")
+    cat("       window: [0,0.5),(0.5,1] - window borders, default:0.33,0.66.\n")
     cat("\n")
 }
 
@@ -64,9 +64,9 @@ iname <- args.tbl['-I']  # iname: input zip file name
 oname <- args.tbl['-O']  # oname: output file root name
 
 #### Check for the function used ####
-if('-F' %in% names(args.tbl)){
-    stopifnot(args.tbl['-F'] %in% c('mean', 'max', 'window'))
-    fun <- args.tbl['-F']
+if('-M' %in% names(args.tbl)){
+    stopifnot(args.tbl['-M'] %in% c('mean', 'max', 'window'))
+    fun <- args.tbl['-M']
 }else{
     fun <- 'mean'
 }
@@ -74,13 +74,13 @@ if('-F' %in% names(args.tbl)){
 #### Check for the options ####
 mean.trim <- 0
 window.borders <- c(0.33, 0.66)
-if('-OP' %in% names(args.tbl)){
+if('-P' %in% names(args.tbl)){
     if(fun=='mean'){
-        stopifnot(as.numeric(args.tbl['-OP']) >= 0)
-        mean.trim <- as.numeric(args.tbl['-OP'])
+        stopifnot(as.numeric(args.tbl['-P']) >= 0)
+        mean.trim <- as.numeric(args.tbl['-P'])
     }
     if(fun=='window'){
-        window.pair <- unlist(strsplit(args.tbl['-OP'], ","))
+        window.pair <- unlist(strsplit(args.tbl['-P'], ","))
         if(length(window.pair) != 2 || is.na(as.numeric(window.pair[1])) ||
             is.na(as.numeric(window.pair[2]))) {
                 stop("Window borders must be a pair of numerics separated by ','\n")

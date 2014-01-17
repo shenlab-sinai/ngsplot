@@ -541,7 +541,7 @@ libSizeBam <- function(bam.list) {
     v.lib.size <- vector('integer', length=length(bam.list))
     for(i in 1:length(bam.list)) {
         bfn <- bam.list[i]  # bam file name.
-        cfn <- paste(bfn, '.cnt', sep='')  # count file name.
+        cfn <- paste(basename(bfn), '.cnt', sep='')  # count file name.
         if(file.exists(cfn)) {
             v.lib.size[i] <- as.integer(readLines(cfn, n=1))
         } else {

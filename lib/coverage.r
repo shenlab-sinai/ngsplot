@@ -516,7 +516,7 @@ headerIndexBam <- function(bam.list) {
         map.prog <- try(strsplit(header[[1]]$text$'@PG'[[1]], ':')[[1]][2], 
                         silent=T)
         if(class(map.prog) != "try-error") {
-            v.map.bowtie[i] <- grepl('tophat|bowtie|bedtools', map.prog, 
+            v.map.bowtie[i] <- grepl('tophat|bowtie|bedtools|star', map.prog, 
                                      ignore.case=T)
         } else {
             cat("\n")

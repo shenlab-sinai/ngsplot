@@ -12,7 +12,7 @@
 # library(compiler)
 # enableJIT(3)
 
-ngsplot.version <- '2.08'
+ngsplot.version <- '2.10.1'
 
 # Deal with command line arguments.
 cmd.help <- function(){

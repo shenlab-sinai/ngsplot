@@ -495,6 +495,27 @@ bamFileList <- function(ctg.tbl) {
     list(bbp=bbp, bam.list=unlist(cov.list))
 }
 
+estiMapqStyle <- function(bam.file){
+# Estimate the mapping quality style. Return TRUE if it is SAM standard.
+# Sample 1000 mapped reads from bam file, and if the mapq of reads
+# over half are NA, then return FALSE, because it is quite possible that
+# the aligner using coding style as bowtie, 255 as highest score.
+# Args:
+#   bam.file: bam file to be sampled.
+
+    sbw <- c('pos', 'qwidth', 'mapq', 'strand')
+    sbp <- ScanBamParam(what=sbw, flag=scanBamFlag(
+                        isUnmappedQuery=F, isDuplicate=F))
+    samp <- BamSampler(bam.file, yieldSize=1000)
+    samp.reads <- scanBam(samp, param=sbp)[[1]]
+    samp.len <- length(samp.reads[["mapq"]])
+    mapq.255 <- table(is.na(samp.reads[["mapq"]]))[["TRUE"]]
+    if(mapq.255/samp.len >= 0.5){
+        return(FALSE)
+    }else{
+        return(TRUE)
+    }
+}
 
 headerIndexBam <- function(bam.list) {
 # Read bam header to determine mapping method.
@@ -516,12 +537,34 @@ headerIndexBam <- function(bam.list) {
         map.prog <- try(strsplit(header[[1]]$text$'@PG'[[1]], ':')[[1]][2], 
                         silent=T)
         if(class(map.prog) != "try-error") {
-            v.map.bowtie[i] <- grepl('tophat|bowtie|bedtools|star', map.prog, 
+            v.map.style <- grepl('tophat|bowtie|bedtools|star', map.prog, 
                                      ignore.case=T)
+            if(v.map.style){
+                v.map.bowtie[i] <- TRUE
+                next
+            }
+            v.map.style <- grepl('bwa|casava', map.prog, 
+                                     ignore.case=T)
+            if(v.map.style){
+                v.map.bowtie[i] <- NA
+                next
+            }
+            if(estiMapqStyle(bam.file)){
+                warning(sprintf("Aligner for: %s cannot be determined. Standard SAM format will be used.", bam.file))
+                v.map.bowtie[i] <- NA
+            }else{
+                warning(sprintf("Aligner for: %s cannot be determined. Bowtie-like SAM mapping score will be used. Would you mind to tell us what aligner you are using?", bam.file))
+                v.map.bowtie[i] <- TRUE
+            }
         } else {
             cat("\n")
-            warning(sprintf("Aligner for: %s cannot be determined. Will automatically convert mapping scores of 255.", bam.file))
-            v.map.bowtie[i] <- NA
+            if(estiMapqStyle(bam.file)){
+                warning(sprintf("Aligner for: %s cannot be determined. Standard SAM format will be used.", bam.file))
+                v.map.bowtie[i] <- NA
+            }else{
+                warning(sprintf("Aligner for: %s cannot be determined. Bowtie-like SAM mapping score will be used.", bam.file))
+                v.map.bowtie[i] <- TRUE
+            }
         }
     }
     names(v.map.bowtie) <- bam.list

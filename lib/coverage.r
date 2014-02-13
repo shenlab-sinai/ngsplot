@@ -507,7 +507,9 @@ estiMapqStyle <- function(bam.file){
     samp <- BamSampler(bam.file, yieldSize=1000)
     samp.reads <- scanBam(samp, param=sbp)[[1]]
     samp.len <- length(samp.reads[["mapq"]])
-    mapq.255 <- table(is.na(samp.reads[["mapq"]]))[["TRUE"]]
+    # If no NA in whole "mapq" step, then table(...)[["TRUE"]] will raise
+    # exception.
+    mapq.255 <- samp.len - table(is.na(samp.reads[["mapq"]]))[["FALSE"]]
     if(mapq.255/samp.len >= 0.5){
         return(FALSE)
     }else{

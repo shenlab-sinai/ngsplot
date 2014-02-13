@@ -504,7 +504,7 @@ estiMapqStyle <- function(bam.file){
     sbw <- c('pos', 'qwidth', 'mapq', 'strand')
     sbp <- ScanBamParam(what=sbw, flag=scanBamFlag(
                         isUnmappedQuery=F, isDuplicate=F))
-    samp <- BamSampler(bam.file, yieldSize=1000)
+    samp <- BamSampler(bam.file, yieldSize=500)
     samp.reads <- scanBam(samp, param=sbp)[[1]]
     samp.len <- length(samp.reads[["mapq"]])
     # If no NA in whole "mapq" step, then table(...)[["TRUE"]] will raise

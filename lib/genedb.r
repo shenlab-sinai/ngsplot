@@ -132,7 +132,7 @@ SetupPlotCoord <- function(args.tbl, ctg.tbl, default.tbl, dbfile.tbl,
             warning(sprintf("File name: '%s' does not seem to a correct name 
 for bed file.\n", bed.file))
         }
-        bed.coord <- read.table(bed.file, sep="\t")
+        bed.coord <- read.table(bed.file, sep="\t", comment.char="", quote="")
         if(ncol(bed.coord) <3){
             stop("A bed file must contain at least 3 columns! The format is: 
        chrom, start, end, gname, tid, strand. Columns 4-6 are optional\n")

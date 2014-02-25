@@ -112,10 +112,9 @@ if(ifolder == basename(iname)) {
 }
 load(unz(iname, file.path(ifolder, 'heatmap.RData')))
 
-# getRowSums <- function(x){	
-# 	row.sum.x <- rowSums(x)
-# 	return(row.sum.x)
-# }
+if(length(enrichList) < 2){
+    stop("plotCorrGram is only available for one input file containing multiple samples!\n")
+}
 
 getRowMeans <- function(x, mean.trim=0, na.rm=TRUE){
     row.mean.x <- apply(x, 1, mean, trim=mean.trim, na.rm=na.rm)

@@ -113,7 +113,7 @@ if(ifolder == basename(iname)) {
 load(unz(iname, file.path(ifolder, 'heatmap.RData')))
 
 if(length(enrichList) < 2){
-    stop("plotCorrGram is only available for one input file containing multiple samples!\n")
+    stop("plotCorrGram is only available for one input file containing at least two samples!\n")
 }
 
 getRowMeans <- function(x, mean.trim=0, na.rm=TRUE){

@@ -61,7 +61,11 @@ SetupPlotCoord <- function(args.tbl, ctg.tbl, default.tbl, dbfile.tbl,
 
         anno.db.candidates <- anno.db.candidates[anno.db.candidates$DB == database, ]
 
-        prefix <- file.path(progpath, 'database', genome)
+        if (file.exists(file.path(progpath, 'database', genome, reg2plot))){
+            prefix <- file.path(progpath, 'database', genome, reg2plot)
+        }else{
+            prefix <- file.path(progpath, 'database', genome)
+        }
 
         # Further info to subset genomic regions.
         if('-F' %in% names(args.tbl)){

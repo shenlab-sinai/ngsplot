@@ -65,6 +65,7 @@ def read_gnlist(root_path, mode):
        Returns: (header split vector, hash table of installed genomes, 
                  vector of column widths)
     """
+    from collections import defaultdict
 
     gn_list = root_path + "/database/gn_list.txt"
     try:
@@ -74,13 +75,31 @@ def read_gnlist(root_path, mode):
               format(gn_list)
         sys.exit()
 
+    default_list = root_path + "/database/default.tbl"
+    try:
+        default_f = open(default_list, "r")
+    except IOError:
+        print "Open {0} error: your ngs.plot database may be corrupted.".\
+              format(default_list)
+        sys.exit()
+    default_l = []
+    header = default_f.readline() # skip the header
+    for rec in default_f:
+        r_sp = rec.rstrip().split("\t")
+        default_l.append((r_sp[0], r_sp[2])) # tuple of genome and region, like ("dm3", "genebody")
+    genome_region_dict = defaultdict(list)
+    for genome,region in default_l:
+        genome_region_dict[genome].append(region)
+
     header = db_f.readline()
     h_sp = header.rstrip().split("\t")
+    h_sp.append("InstalledFeatures")
     v_cw = map(len, h_sp)  # column widths initialize to header widths.
 
     g_tbl = {}
     for rec in db_f:
         r_sp = rec.rstrip().split("\t")
+        r_sp.append(",".join(genome_region_dict[r_sp[0]]))
         r_cw = map(len, r_sp)
         v_cw = map(max, v_cw, r_cw)
 

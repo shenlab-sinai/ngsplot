@@ -501,11 +501,14 @@ def remove(root_path, args):
     import sys
 
     yestoall = args.yes
+    sub_ftr = args.ftr
 
     (h_sp, g_tbl, v_cw) = read_gnlist(root_path, "hash")
+    # Remove "InstalledFeatures" from g_tbl
+
     gn = args.gn
 
-    if gn in g_tbl:
+    if gn in g_tbl and sub_ftr is None:
         print "Will remove genome {0} from database.".format(gn),
         do_rm = False
         if yestoall:
@@ -528,11 +531,34 @@ def remove(root_path, args):
             write_gnlist(root_path, g_tbl)
             rm_dbtbl(root_path, gn)
             print "Done"
+    elif gn in g_tbl and sub_ftr is not None:
+        print "Will remove genomic feature {0} of genome {1} from database."\
+            .format(sub_ftr, gn)
+        do_rm = False
+        if yestoall:
+            do_rm = True
+        else:
+            ans = raw_input("Continue?(y/n): ")
+            while True:
+                if ans == 'y' or ans == 'Y' or ans == 'n' or ans == 'N':
+                    break
+                else:
+                    ans = raw_input("The answer must be y/Y or n/N: ")
+            if ans == 'y' or ans == 'Y':
+                do_rm = True
+        if do_rm:
+            folder_to_rm = root_path + "/database/" + gn + "/" + sub_ftr
+            print "Removing genome...",
+            sys.stdout.flush()
+            shutil.rmtree(folder_to_rm)
+            # g_tbl does't need to be updated
+            rm_dbtbl(root_path, gn, sub_ftr)
+            print "Done"
     else:
         print "Cannot find the genome in database. Nothing was done."
 
 
-def rm_dbtbl(root_path, gn):
+def rm_dbtbl(root_path, gn, sub_ftr=None):
     """Remove a genome from database meta tables.
 
        Args:
@@ -543,7 +569,10 @@ def rm_dbtbl(root_path, gn):
 
     import subprocess
 
-    subprocess.call(["remove.db.tables.r", gn])
+    if sub_ftr is None:
+        subprocess.call(["remove.db.tables.r", gn])
+    else:
+        subprocess.call(["remove.db.tables.r", gn, sub_ftr])
 
 def chrnames(root_path, args):
     """List chromosome names for a given genome.
@@ -623,6 +652,9 @@ if __name__ == "__main__":
                                           help="Remove genome from database")
     parser_remove.add_argument("gn", help="Name of genome to be \
                                            removed(e.g. hg18)", type=str)
+    parser_remove.add_argument("--ftr", help="Remove cellline specific features \
+                                            (enhancer, dhs, etc)", type=str,\
+                                            default=None)
     parser_remove.set_defaults(func=remove)
 
     # ngsplotdb.py chromosome names parser.

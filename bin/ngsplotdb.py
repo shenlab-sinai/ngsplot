@@ -504,8 +504,7 @@ def remove(root_path, args):
     sub_ftr = args.ftr
 
     (h_sp, g_tbl, v_cw) = read_gnlist(root_path, "hash")
-    # Remove "InstalledFeatures" from g_tbl
-
+ 
     gn = args.gn
 
     if gn in g_tbl and sub_ftr is None:

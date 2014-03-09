@@ -23,10 +23,6 @@ dbfile.tbl <- read.delim(dbfile.file)
 if(exists("feature.to.rm")){
 	default.tbl <- subset(default.tbl, !(Genome==gname.to.rm & Region==feature.to.rm))
 	dbfile.tbl <- subset(dbfile.tbl, !(Genome==gname.to.rm & Region==feature.to.rm))
-	# default.tbl <- default.tbl[which(!(default.tbl$Genome == gname.to.rm) & 
-	# 	!(default.tbl$Region == feature.to.rm)), ]
-	# dbfile.tbl <- dbfile.tbl[which(!(dbfile.tbl$Genome == gname.to.rm) &
-	# 	!(dbfile.tbl$Region == feature.to.rm)), ]
 }else{
 	default.tbl <- default.tbl[default.tbl$Genome != gname.to.rm, ]
 	dbfile.tbl <- dbfile.tbl[dbfile.tbl$Genome != gname.to.rm, ]	

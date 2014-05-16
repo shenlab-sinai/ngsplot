@@ -681,7 +681,6 @@ covMatrix <- function(chkidx.list, coord, rnaseq.gb, exonmodel, libsize,
 
 
     ########### For debug #############
-    # pts <- m.pts + 2 * f.pts - 2
     # result.matrix <- matrix(0, nrow=nrow(coord), ncol=101)
     # for(c in 1:length(chkidx.list)) {
     #     chk <- chkidx.list[[c]]
@@ -693,10 +692,10 @@ covMatrix <- function(chkidx.list, coord, rnaseq.gb, exonmodel, libsize,
     #     } else {
     #         exonranges.list <- NULL
     #     }
-    #     browser()
     #     result.matrix[i, ] <- doCov(coord[i, ], exonranges.list, ...)
     # }
     # # Floor negative values which are caused by spline.
+    # browser()
     # result.matrix[result.matrix < 0] <- 0
     # result.matrix / libsize * 1e6  # normalize to RPM.
     ########### For debug #############

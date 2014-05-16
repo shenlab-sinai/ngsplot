@@ -70,7 +70,7 @@ cmd.help <- function(){
 ###########################################################################
 #################### Deal with program input arguments ####################
 args <- commandArgs(T)
-# args <- unlist(strsplit('-G mm9 -R tss -C h3k4me3r.C1.mono.bam -O test', ' '))
+# args <- unlist(strsplit('-G hg19 -R tss -C hesc.H3k4me3.Rep1.1M.bam -O test', ' '))
 
 # Program environment variable.
 progpath <- Sys.getenv('NGSPLOT')
@@ -134,7 +134,7 @@ default.tbl <- read.delim(file.path(progpath, 'database', 'default.tbl'))
 dbfile.tbl <- read.delim(file.path(progpath, 'database', 'dbfile.tbl'))
 
 # Setup variables from arguments.
-argvar.list <- setupVars(args.tbl, default.tbl)
+argvar.list <- setupVars(args.tbl, default.tbl, .go.allowed)
 genome <- argvar.list$genome  # genome name, such as mm9, hg19, rn4.
 reg2plot <- argvar.list$reg2plot  # tss, tes, genebody, bed...
 oname <- argvar.list$oname  # output file root name.
@@ -227,8 +227,9 @@ sn.list <- seqnamesBam(bam.list)
 # Calculate library size from bam files for normalization.
 v.lib.size <- libSizeBam(bam.list)
 
+v.low.cutoff <- vector("integer", nrow(ctg.tbl))  # low count cutoffs.
 # Process the config file row by row.
-for(r in 1:nrow(ctg.tbl)) {
+for(r in 1:nrow(ctg.tbl)) {  # r: index of plots/profiles.
 
     reg <- ctg.tbl$glist[r]  # retrieve gene list names.
     # Create coordinate chunk indices.
@@ -242,6 +243,7 @@ for(r in 1:nrow(ctg.tbl)) {
 
     # Obtain bam file basic info.
     libsize <- v.lib.size[bam.files[1]]
+    v.low.cutoff[r] <- 10 / libsize * 1e6  # *********************
     result.pseudo.rpm <- 1e6 / libsize
     sn.inbam <- sn.list[[bam.files[1]]]
     chr.tag <- chrTag(sn.inbam)
@@ -338,7 +340,7 @@ if(!fi_tag){
     layout(lay.mat, heights=reg.hei)
 
     # Do heatmap plotting.
-    go.list <- plotheat(reg.list, uniq.reg, enrichList, go.algo, ctg.tbl$title, 
+    go.list <- plotheat(reg.list, uniq.reg, enrichList, v.low.cutoff, go.algo, ctg.tbl$title, 
                         bam.pair, xticks, rm.zero, flood.frac, 
                         color.scale=color.scale)
     out.dev <- dev.off()
@@ -396,7 +398,7 @@ if(galaxy==1){
    prof.dat <- file.path(oname, 'avgprof.RData')
 }
 save(default.width, default.height, regcovMat, ctg.tbl, bam.pair, xticks, pts, 
-     m.pts, f.pts, pint, shade.alp, confiMat, mw, se, file=prof.dat)
+     m.pts, f.pts, pint, shade.alp, confiMat, mw, se, v.lib.size, file=prof.dat)
 
 # Heatmap R data.
 if(galaxy==1){
@@ -404,8 +406,8 @@ if(galaxy==1){
 }else{
      heat.dat <- file.path(oname, 'heatmap.RData')
 }
-save(reg.list, uniq.reg, ng.list, pts, enrichList, go.algo, ctg.tbl, bam.pair, 
-     xticks, rm.zero, flood.frac, unit.width, rr, go.list, color.scale, 
+save(reg.list, uniq.reg, ng.list, pts, enrichList, v.low.cutoff, go.algo, ctg.tbl, bam.pair, 
+     xticks, rm.zero, flood.frac, unit.width, rr, go.list, color.scale, v.lib.size,
      file=heat.dat)
 cat("Done\n")
 

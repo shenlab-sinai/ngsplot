@@ -92,7 +92,7 @@ if(command == 'prof') {
 }
 # Update or add new variables to the environment.
 existing.vl <- ls()
-repvar.list <- replotVars(args.tbl, existing.vl, bam.pair)
+repvar.list <- replotVars(args.tbl, existing.vl, bam.pair, .go.allowed)
 for(i in 1:length(repvar.list)) {
     vn <- names(repvar.list)[i]
     eval(parse(text=sprintf("%s <- repvar.list$%s", vn, vn)))
@@ -157,7 +157,7 @@ if(command == 'prof') {
     par(mai=heatmap.mar)
     layout(lay.mat, heights=reg.hei)
     # Do heatmap plotting.
-    go.list <- plotheat(reg.list, uniq.reg, enrichList, go.algo, ctg.tbl$title, 
+    go.list <- plotheat(reg.list, uniq.reg, enrichList, v.low.cutoff, go.algo, ctg.tbl$title, 
                         bam.pair, xticks, rm.zero, flood.frac, 
                         hm.color=hm.color, color.scale=color.scale)
     out.dev <- dev.off()

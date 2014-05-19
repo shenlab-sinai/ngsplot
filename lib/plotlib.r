@@ -568,11 +568,14 @@ plotheat <- function(reg.list, uniq.reg, enrichList, v.low.cutoff, go.algo, titl
         if(is.matrix(enrichSelected[[1]]) && nrow(enrichSelected[[1]]) > 1) {
             lowCutoffs <- v.low.cutoff[plist]
             g.order <- OrderGenesHeatmap(enrichSelected, lowCutoffs, go.algo)
+            go.list[[ur]] <- rev(rownames(enrichSelected[[1]][g.order, ]))
             # enrichCombined <- enrichCombined[g.order[[1]], ]
+        } else {
+            g.order <- NULL
+            go.list[[ur]] <- g.order
         }
         # for now, just use the 1st gene order. p.s.: pca will provide more than
         # one orders.
-        go.list[[ur]] <- rev(rownames(enrichSelected[[1]][g.order, ]))
         # names(go.list)[length(go.list)] <- ur
 
         if(!do.plot) {
@@ -587,7 +590,9 @@ plotheat <- function(reg.list, uniq.reg, enrichList, v.low.cutoff, go.algo, titl
             # enrichList[[pj]] <- enrichCombined[, ((j-1)*hm_cols+1) : 
             #                                      (j*hm_cols)]
 
-            enrichList[[pj]] <- enrichList[[pj]][g.order, ]
+            if(!is.null(g.order)) {
+                enrichList[[pj]] <- enrichList[[pj]][g.order, ]
+            }
 
             # If color scale is local, calculate breaks and quantiles here.
             if(color.scale == 'local') {

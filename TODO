@@ -1,3 +1,6 @@
+- May 20, 2014
+* Need to fix: bamFileList returns a bam file list that may not be unique.
+
 - Sep 5, 2013
 * Add sanity check for BED file. (done)
 
@@ -23,7 +26,7 @@
 
 - Mar 7, 2013
 * Color key for heatmaps. (DONE)
-* Add K-means for gene ranking.
+* Add K-means for gene ranking. (DONE)
 * Implement replot as a dynamic visulization program.
 * Add gene symbols/IDs to output. (DONE)
 

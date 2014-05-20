@@ -454,8 +454,8 @@ OrderGenesHeatmap <- function(enrichList, lowCutoffs,
 }
 
 
-plotheat <- function(reg.list, uniq.reg, enrichList, v.low.cutoff, go.algo, title2plot, 
-                     bam.pair, xticks, rm.zero=1, flood.q=.02, do.plot=T,
+plotheat <- function(reg.list, uniq.reg, enrichList, v.low.cutoff, go.algo, 
+                     title2plot, bam.pair, xticks, flood.q=.02, do.plot=T,
                      hm.color="default", color.scale='local') {
 # Plot heatmaps with genes ordered according to some algorithm.
 # Args:
@@ -466,7 +466,6 @@ plotheat <- function(reg.list, uniq.reg, enrichList, v.low.cutoff, go.algo, titl
 #   title2plot: title for each heatmap. Same as the legends in avgprof.
 #   bam.pair: boolean tag for bam-pair.
 #   xticks: info for X-axis ticks.
-#   rm.zero: tag for removing all zero profiles.
 #   flood.q: flooding percentage.
 #   do.plot: boolean tag for plotting heatmaps.
 #   hm.color: string for heatmap colors.
@@ -551,12 +550,6 @@ plotheat <- function(reg.list, uniq.reg, enrichList, v.low.cutoff, go.algo, titl
         # enrichCombined <- do.call('cbind', enrichList[plist])
         enrichSelected <- enrichList[plist]
 
-        # Remove profiles that are all zero. They may correspond to unmappable
-        # genes.
-        # if(rm.zero) {
-        #     enrichCombined <- enrichCombined[rowSums(enrichCombined) != 0, ]
-        # }
-
         # If color scale is region, calculate breaks and quantile here.
         if(color.scale == 'region') {
             flood.pts <- quantile(c(enrichSelected, recursive=T), 
@@ -569,14 +562,10 @@ plotheat <- function(reg.list, uniq.reg, enrichList, v.low.cutoff, go.algo, titl
             lowCutoffs <- v.low.cutoff[plist]
             g.order <- OrderGenesHeatmap(enrichSelected, lowCutoffs, go.algo)
             go.list[[ur]] <- rev(rownames(enrichSelected[[1]][g.order, ]))
-            # enrichCombined <- enrichCombined[g.order[[1]], ]
         } else {
             g.order <- NULL
             go.list[[ur]] <- g.order
         }
-        # for now, just use the 1st gene order. p.s.: pca will provide more than
-        # one orders.
-        # names(go.list)[length(go.list)] <- ur
 
         if(!do.plot) {
             next
@@ -584,12 +573,6 @@ plotheat <- function(reg.list, uniq.reg, enrichList, v.low.cutoff, go.algo, titl
   
         # Go through each sample and do plot.
         for(pj in plist) {
-            # pj <- plist[j]  # index in the original config.
-
-            # Split combined profiles back into individual heatmaps.
-            # enrichList[[pj]] <- enrichCombined[, ((j-1)*hm_cols+1) : 
-            #                                      (j*hm_cols)]
-
             if(!is.null(g.order)) {
                 enrichList[[pj]] <- enrichList[[pj]][g.order, ]
             }

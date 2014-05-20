@@ -60,7 +60,8 @@ if(command == 'prof') {
     updated.vl <- PlotVars(args.tbl, ls(), prof.misc)
 } else if(command == 'heatmap') {
     load(unz(iname, file.path(ifolder, 'heatmap.RData')))
-    updated.vl <- PlotVars(args.tbl, ls())
+    updated.vl <- PlotVars(args.tbl, ls(), low.count=low.count, 
+                           go.paras=go.paras)
     CheckHMColorConfig(hm.color, bam.pair)
 } else {
     # pass.
@@ -92,15 +93,15 @@ with(updated.vl, {
         save(plot.width, plot.height, shade.alp, mw, se, prof.misc, 
              file=out.dat)
     } else if(command == 'heatmap') {
-        # Setup multi-core doMC.
-        if(!suppressMessages(require(doMC, warn.conflicts=F))) {
-            install.packages('doMC')
-            if(!suppressMessages(require(doMC, warn.conflicts=F))) {
-                stop('Loading package doMC failed!')
-            }
-        }
-        # Register doMC with CPU number.
-        registerDoMC(1)
+        # # Setup multi-core doMC.
+        # if(!suppressMessages(require(doMC, warn.conflicts=F))) {
+        #     install.packages('doMC')
+        #     if(!suppressMessages(require(doMC, warn.conflicts=F))) {
+        #         stop('Loading package doMC failed!')
+        #     }
+        # }
+        # # Register doMC with CPU number.
+        # registerDoMC(1)
 
         # Setup heatmap device.
         hd <- SetupHeatmapDevice(reg.list, uniq.reg, ng.list, pts, 
@@ -110,20 +111,20 @@ with(updated.vl, {
         hm.height <- hd$hm.height  # hm.height: image height.
         lay.mat <- hd$lay.mat  # lay.mat: matrix for heatmap layout.
         heatmap.mar <- hd$heatmap.mar  # heatmap.mar: heatmap margins.
-        # Do plot.
         out.hm <- paste(oname, '.pdf', sep='')
         pdf(out.hm, width=hm.width, height=hm.height, pointsize=font.size)
         par(mai=heatmap.mar)
         layout(lay.mat, heights=reg.hei)
         # Do heatmap plotting.
+        v.low.cutoff <- low.count.ratio * v.low.cutoff
         go.list <- plotheat(reg.list, uniq.reg, enrichList, v.low.cutoff, go.algo, 
-                            ctg.tbl$title, bam.pair, xticks, flood.frac, 
+                            go.paras, ctg.tbl$title, bam.pair, xticks, flood.frac, 
                             do.plot=T, hm.color=hm.color, color.scale=color.scale)
         out.dev <- dev.off()
         # Save replot data.
         out.dat <- paste(oname, '.RData', sep='')
         save(v.low.cutoff, flood.frac, hm.color, go.algo, rr, go.list, 
-             color.scale, 
+             color.scale, go.paras, low.count, 
              file=out.dat)
     } else {
         # Pass.

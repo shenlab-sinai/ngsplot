@@ -352,98 +352,41 @@ RankNormalizeMatrix <- function(mat, low.cutoff) {
 
 OrderGenesHeatmap <- function(enrichList, lowCutoffs,
                               method=c('total', 'max', 'prod', 'diff', 'hc', 
-                                       'pca', 'none', 'hc2', 'km')) {
-# Order genes in combined heatmap data.
+                                       'none', 'km'),
+                              go.paras=list(knc=5, max.iter=20, nrs=30)) {
+# Order genes with a list of heatmap data.
 # Args: 
-#   n: number of plots(such as histone marks) in the combined data.
-#   enrichCombined: combined heatmap data.
+#   enrichList: heatmap data in a list.
+#   lowCutoffs: low count cutoff for normalized count data.
 #   method: algorithm used to order genes.
-# Return: list of vectors of gene orders. In case of PCA, it may return more 
-#   than one vectors of gene orders. Otherwise, the list length is 1.
+#   go.paras: gene ordering parameters.
+# Returns: a vector of gene orders. 
 
-    # npts <- ncol(enrichCombined) / n  # number of data points for each profile.
-    
     rankList <- mapply(RankNormalizeMatrix, 
                        mat=enrichList, low.cutoff=lowCutoffs, SIMPLIFY=F)
     np <- length(enrichList)
 
-    if(method == 'hc') {  # hierarchical clustering
+    if(method == 'hc') {
         rankCombined <- do.call('cbind', rankList)
-        # Filter genes with zero sd.
-        g.sd <- apply(rankCombined, 1, sd)
-        g.nz <- which(g.sd > 0)
-        g.ze <- which(g.sd == 0)
-        rankCombined <- rankCombined[g.nz, ]
-        # Clustering and order genes.
-        hc <- hclust(as.dist(1-cor(t(rankCombined))), method='complete')
-        # Notes: do NOT forget hc is applied to non-zero sd genes only.
-        # The original gene indices must be recovered before return values.
-        c(g.nz[hc$order], g.ze)
-    } else if(method == 'hc2') {
-        # Filter genes with zero sd.
-        # g.sd <- apply(enrichCombined, 1, sd)
-        # g.nz <- which(g.sd > 0)
-        # g.ze <- which(g.sd == 0)
-        # enrichCombined <- enrichCombined[g.nz, ]
-
-        rankCombined <- do.call('cbind', rankList)
-
         # Clustering and order genes.
         hc <- hclust(dist(rankCombined, method='euclidean'), 
                      method='complete')
-        # Notes: do NOT forget hc is applied to non-zero sd genes only.
-        # The original gene indices must be recovered before return values.
-        # list(hc2=c(g.nz[hc$order], g.ze))
         hc$order
-
     } else if(method == 'km') {
         rankCombined <- do.call('cbind', rankList)
-        km <- kmeans(rankCombined, centers=10, iter.max=20, nstart=10)
+        km <- kmeans(rankCombined, centers=go.paras$knc, 
+                     iter.max=go.paras$max.iter, nstart=go.paras$nrs)
         order(km$cluster)
-
     } else if(method == 'total' || method == 'diff' && np == 1) {  
-        # overall enrichment of the 1st profile.
         order(rowSums(rankList[[1]]))
     } else if(method == 'max') {  # peak enrichment value of the 1st profile.
         order(apply(rankList[[1]], 1, max))
     } else if(method == 'prod') {  # product of all profiles.
         rs.mat <- sapply(rankList, rowSums)
         g.prod <- apply(rs.mat, 1, prod)
-        # g.prod <- foreach(r=iter(enrichCombined, by='row'), .combine='c', 
-        #                     .multicombine=T, .maxcombine=1000) %dopar% {
-        #     foreach(i=icount(n),  # go through each profile.
-        #             .combine='prod', .multicombine=T) %do% {
-        #         col.sta <- (i - 1) * npts + 1
-        #         col.end <- i * npts
-        #         sum(r[col.sta:col.end], na.rm=T)
-        #     }
-        # }
         order(g.prod)
     } else if(method == 'diff' && np > 1) {  # difference between 2 profiles.
         order(rowSums(rankList[[1]]) - rowSums(rankList[[2]]))
-    } else if(method == 'pca') {  # principal component analysis.
-        # # Reduce the data to a small number of bins per profile.
-        # nbin <- 10
-        # enrich.reduced <- foreach(i=icount(n), .combine='cbind', 
-        #                         .multicombine=T) %do% {
-        #     # Go through each profile.
-        #     col.sta <- (i - 1) * npts + 1
-        #     col.end <- i * npts
-        #     # Column breaks represent bin boundaries.
-        #     col.breaks <- seq(col.sta, col.end, length.out=nbin + 1)
-        #     foreach(j=icount(nbin), .combine='cbind', .multicombine=T) %dopar% {
-        #         # Go through each bin.
-        #         rowSums(enrichCombined[, col.breaks[j]:col.breaks[j + 1]])
-        #     }
-        # }
-        # # Pull out all pc's that equal at least 10% variance of the 1st pc.
-        # enrich.pca <- prcomp(enrich.reduced, center=F, scale=F, tol=sqrt(.1))
-        # # Order genes according to each pc.
-        # pc.order <- foreach(i=icount(ncol(enrich.pca$x))) %dopar% {
-        #     order(enrich.pca$x[, i])
-        # }
-        # names(pc.order) <- paste('pc', 1:ncol(enrich.pca$x), sep='')
-        # pc.order
     } else if(method == 'none') {  # according to the order of input gene list.
         # Because the image function draws from bottom to top, the rows are 
         # reversed to give a more natural look.
@@ -455,21 +398,23 @@ OrderGenesHeatmap <- function(enrichList, lowCutoffs,
 
 
 plotheat <- function(reg.list, uniq.reg, enrichList, v.low.cutoff, go.algo, 
-                     title2plot, bam.pair, xticks, flood.q=.02, do.plot=T,
-                     hm.color="default", color.scale='local') {
+                     go.paras, title2plot, bam.pair, xticks, flood.q=.02, 
+                     do.plot=T, hm.color="default", color.scale='local') {
 # Plot heatmaps with genes ordered according to some algorithm.
 # Args:
 #   reg.list: factor vector of regions as in configuration.
 #   uniq.reg: character vector of unique regions.
 #   enrichList: list of heatmap data.
+#   v.low.cutoff: low count cutoff for normalized count data.
 #   go.algo: gene order algorithm.
+#   go.paras: gene ordering parameters.
 #   title2plot: title for each heatmap. Same as the legends in avgprof.
 #   bam.pair: boolean tag for bam-pair.
 #   xticks: info for X-axis ticks.
 #   flood.q: flooding percentage.
 #   do.plot: boolean tag for plotting heatmaps.
 #   hm.color: string for heatmap colors.
-#   scale: string for the method to adjust color scale.
+#   color.scale: string for the method to adjust color scale.
 # Returns: ordered gene names for each unique region as a list.
 
     # Setup basic parameters.
@@ -560,7 +505,8 @@ plotheat <- function(reg.list, uniq.reg, enrichList, v.low.cutoff, go.algo,
         # Order genes.
         if(is.matrix(enrichSelected[[1]]) && nrow(enrichSelected[[1]]) > 1) {
             lowCutoffs <- v.low.cutoff[plist]
-            g.order <- OrderGenesHeatmap(enrichSelected, lowCutoffs, go.algo)
+            g.order <- OrderGenesHeatmap(enrichSelected, lowCutoffs, go.algo, 
+                                         go.paras)
             go.list[[ur]] <- rev(rownames(enrichSelected[[1]][g.order, ]))
         } else {
             g.order <- NULL

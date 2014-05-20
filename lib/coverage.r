@@ -548,19 +548,24 @@ headerIndexBam <- function(bam.list) {
                 next
             }
             if(estiMapqStyle(bam.file)){
-                warning(sprintf("Aligner for: %s cannot be determined. Style of standard SAM mapping score will be used.", bam.file))
+                warning(sprintf("Aligner for: %s cannot be determined. Style of 
+standard SAM mapping score will be used.", bam.file))
                 v.map.bowtie[i] <- FALSE
             }else{
-                warning(sprintf("Aligner for: %s cannot be determined. Style of Bowtie-like SAM mapping score will be used. Would you mind to tell us what aligner you are using?", bam.file))
+                warning(sprintf("Aligner for: %s cannot be determined. Style of 
+Bowtie-like SAM mapping score will be used. Would you mind to tell us what 
+aligner you are using?", bam.file))
                 v.map.bowtie[i] <- TRUE
             }
         } else {
             cat("\n")
             if(estiMapqStyle(bam.file)){
-                warning(sprintf("Aligner for: %s cannot be determined. Style of standard SAM mapping score will be used.", bam.file))
+                warning(sprintf("Aligner for: %s cannot be determined. Style of 
+standard SAM mapping score will be used.", bam.file))
                 v.map.bowtie[i] <- FALSE
             }else{
-                warning(sprintf("Aligner for: %s cannot be determined. Style of Bowtie-like SAM mapping score will be used.", bam.file))
+                warning(sprintf("Aligner for: %s cannot be determined. Style of 
+Bowtie-like SAM mapping score will be used.", bam.file))
                 v.map.bowtie[i] <- TRUE
             }
         }

@@ -214,12 +214,13 @@ CoverageVars <- function(args.tbl, reg2plot) {
 }
 
 PlotVars <- function(args.tbl, existing.vl=vector('character'), 
-                     prof.misc=list()) {
+                     prof.misc=list(), low.count=NULL, go.paras=list()) {
 # Setup replot variables.
 # Args:
 #   args.tbl: argument table.
 #   existing.vl: existing variable name character list.
 #   prof.misc: misc. avg prof variable list.
+#   go.paras: gene ordering parameters.
 # Returns: list of updated variables.
 
     ## Plotting-related parameters:
@@ -311,8 +312,7 @@ PlotVars <- function(args.tbl, existing.vl=vector('character'),
     ### Heatmap parameters:
     #### Gene order algorithm ####
     if('-GO' %in% names(args.tbl)){ 
-        go.allowed <- c('total', 'max', 'prod', 'diff', 'hc', 'pca', 'none', 
-                        'km')
+        go.allowed <- c('total', 'max', 'prod', 'diff', 'hc', 'none', 'km')
         stopifnot(args.tbl['-GO'] %in% go.allowed)
         updated.vl$go.algo <- args.tbl['-GO']
     } else if(!'go.algo' %in% existing.vl){
@@ -358,14 +358,51 @@ or a pair of numerics separated by ','\n")
         updated.vl$hm.color <- "default"
     }
 
+    #### Low count cutoff for rank-based normalization ####
+    if('-LOW' %in% names(args.tbl)) {
+        stopifnot(as.integer(args.tbl['-LOW']) >= 0)
+        updated.vl$low.count <- as.integer(args.tbl['-LOW'])
+    } else if(!'low.count' %in% existing.vl) {
+        updated.vl$low.count <- 10
+    } else {  # ensure low.count is not empty.
+        updated.vl$low.count <- low.count
+    }
+    if(!is.null(low.count)) {
+        updated.vl$low.count.ratio <- updated.vl$low.count / low.count
+    }
+
+    #### Misc. options for heatmap. ####
+    updated.vl$go.paras <- go.paras
+    if('-KNC' %in% names(args.tbl)) {
+        stopifnot(as.integer(args.tbl['-KNC']) > 0)
+        updated.vl$go.paras$knc <- as.integer(args.tbl['-KNC'])
+    } else if(!'knc' %in% names(go.paras)) {
+        updated.vl$go.paras$knc <- 5
+    }
+    if('-MIT' %in% names(args.tbl)) {
+        stopifnot(as.integer(args.tbl['-MIT']) > 0)
+        updated.vl$go.paras$max.iter <- as.integer(args.tbl['-MIT'])
+    } else if(!'max.iter' %in% names(go.paras)) {
+        updated.vl$go.paras$max.iter <- 20
+    }
+    if('-NRS' %in% names(args.tbl)) {
+        stopifnot(as.integer(args.tbl['-NRS']) > 0)
+        updated.vl$go.paras$nrs <- as.integer(args.tbl['-NRS'])
+    } else if(!'nrs' %in% names(go.paras)) {
+        updated.vl$go.paras$nrs <- 30
+    }
+
+
     updated.vl
 }
 
 CheckHMColorConfig <- function(hm.color, bam.pair) {
-    v.colors <- unlist(strsplit(hm.color, ":"))
-    if(bam.pair && length(v.colors) != 2 || 
-       !bam.pair && length(v.colors) != 1) {
-        stop("Heatmap color specifications must correspond to bam-pair!\n")
+    if(hm.color != 'default') {
+        v.colors <- unlist(strsplit(hm.color, ":"))
+        if(bam.pair && length(v.colors) != 2 || 
+           !bam.pair && length(v.colors) != 1) {
+            stop("Heatmap color specifications must correspond to bam-pair!\n")
+        }
     }
 }
 
@@ -388,7 +425,11 @@ EchoPlotArgs <- function() {
     cat("    -LWD Line width(default=3).\n")
     cat("### Heatmap parameters:\n")
     cat("    -GO  Gene order algorithm used in heatmaps: total(default), hc, max,\n")
-    cat("           prod, diff, pca and none(according to gene list supplied)\n")
+    cat("           prod, diff, km and none(according to gene list supplied)\n")
+    cat("    -LOW Low count cutoff(default=10) in rank-based normalization\n")
+    cat("    -KNC K-means number of clusters(default=5)\n")
+    cat("    -MIT Maximum number of iterations(default=20) for K-means\n")
+    cat("    -NRS Number of random starts(default=30) in K-means\n")
     cat("    -RR  Reduce ratio(default=30). The parameter controls the heatmap height\n")
     cat("           The smaller the value, the taller the heatmap\n")
     cat("    -SC  Color scale used to map values to colors in a heatmap.\n")

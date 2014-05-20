@@ -183,7 +183,7 @@ for(r in 1:nrow(ctg.tbl)) {  # r: index of plots/profiles.
 
     # Obtain bam file basic info.
     libsize <- v.lib.size[bam.files[1]]
-    v.low.cutoff[r] <- 10 / libsize * 1e6  # *********************
+    v.low.cutoff[r] <- low.count / libsize * 1e6
     result.pseudo.rpm <- 1e6 / libsize
     sn.inbam <- sn.list[[bam.files[1]]]
     chr.tag <- chrTag(sn.inbam)
@@ -278,13 +278,13 @@ if(!fi_tag){
 
     # Do heatmap plotting.
     go.list <- plotheat(reg.list, uniq.reg, enrichList, v.low.cutoff, go.algo, 
-                        ctg.tbl$title, bam.pair, xticks, flood.frac, 
+                        go.paras, ctg.tbl$title, bam.pair, xticks, flood.frac, 
                         do.plot=T, hm.color=hm.color, color.scale=color.scale)
     out.dev <- dev.off()
     cat("Done\n")
 } else {
     go.list <- plotheat(reg.list, uniq.reg, enrichList, v.low.cutoff, go.algo, 
-                        ctg.tbl$title, bam.pair, xticks, flood.frac, 
+                        go.paras, ctg.tbl$title, bam.pair, xticks, flood.frac, 
                         do.plot=F, hm.color=hm.color, color.scale=color.scale)
 }
 
@@ -346,7 +346,7 @@ if(galaxy==1) {
 }
 save(reg.list, uniq.reg, ng.list, pts, enrichList, v.low.cutoff, go.algo, 
      ctg.tbl, bam.pair, xticks, flood.frac, hm.color, unit.width, rr, 
-     go.list, color.scale, v.lib.size, font.size,
+     go.list, color.scale, v.lib.size, font.size, go.paras, low.count,
      file=heat.dat)
 cat("Done\n")
 

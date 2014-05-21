@@ -224,8 +224,8 @@ genXticks <- function(reg2plot, pint, lgint, pts, flanksize, flankfactor,
 
 plotmat <- function(regcovMat, title2plot, plot.colors, bam.pair, xticks, 
                     pts, m.pts, f.pts, pint, shade.alp=0, confiMat=NULL, mw=1, 
-                    misc.options=list(legend=T, box=T, vline=T, xylab=T, 
-                                      line.wd=3)) {
+                    misc.options=list(yscale='auto', legend=T, box=T, vline=T, 
+                                      xylab=T, line.wd=3)) {
 # Plot avg. profiles and standard errors around them.
 # Args:
 #   regcovMat: matrix for avg. profiles.
@@ -240,7 +240,7 @@ plotmat <- function(regcovMat, title2plot, plot.colors, bam.pair, xticks,
 #   shade.alp: shading area alpha
 #   confiMat: matrix for standard errors.
 #   mw: moving window size for smoothing function.
-#   misc.options: list of misc. options - legend, box around plot, 
+#   misc.options: list of misc. options - y-axis scale, legend, box around plot, 
 #       verticle lines, X- and Y-axis labels, line width.
 
     # Smooth avg. profiles if specified.
@@ -268,7 +268,12 @@ plotmat <- function(regcovMat, title2plot, plot.colors, bam.pair, xticks,
     ytext <- ifelse(bam.pair, "log2(Fold change vs. control)", 
                               "Read count Per Million mapped reads")
     xrange <- 0:pts
-    matplot(xrange, regcovMat, xaxt='n', type="l", col=col2use, 
+    y.lim <- NULL
+    if(length(misc.options$yscale) == 2) {
+        y.lim <- misc.options$yscale
+    }
+    matplot(xrange, regcovMat, 
+            xaxt='n', type="l", col=col2use, ylim=y.lim,
             lty="solid", lwd=misc.options$line.wd, frame.plot=F, ann=F)
     if(misc.options$xylab) {
         title(xlab="Genomic Region (5' -> 3')", ylab=ytext)

@@ -15,8 +15,8 @@ ngsplot.version <- '2.10.1'
 # Program environment variable.
 progpath <- Sys.getenv('NGSPLOT')
 if(progpath == "") {
-    stop("Set environment variable NGSPLOT before run the program. \
-          See README for details.\n")
+    stop("Set environment variable NGSPLOT before run the program. See README 
+for details.\n")
 }
 
 source(file.path(progpath, 'lib', 'parse.args.r'))

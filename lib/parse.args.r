@@ -234,6 +234,7 @@ PlotVars <- function(args.tbl, existing.vl=vector('character'),
         updated.vl$font.size <- 12
     }
 
+    ### Avg. profiles parameters:
     #### Plot width. ####
     if('-WD' %in% names(args.tbl)) {
         stopifnot(as.integer(args.tbl['-WD']) > 0)
@@ -250,7 +251,6 @@ PlotVars <- function(args.tbl, existing.vl=vector('character'),
         updated.vl$plot.height <- 7
     }
 
-    ### Avg. profiles parameters:
     #### Shall standard errors be plotted around average profiles? ####
     if('-SE' %in% names(args.tbl)) { 
         stopifnot(as.integer(args.tbl['-SE']) >= 0)
@@ -278,6 +278,25 @@ PlotVars <- function(args.tbl, existing.vl=vector('character'),
 
     #### Misc. options for avg. profiles. ####
     updated.vl$prof.misc <- prof.misc
+    if('-YAS' %in% names(args.tbl)) {
+        ystr <- args.tbl['-YAS']
+        if(ystr != 'auto') {
+            yp <- unlist(strsplit(ystr, ','))
+            if(length(yp) == 2) {
+                y.min <- as.numeric(yp[1])
+                y.max <- as.numeric(yp[2])
+                stopifnot(y.min < y.max)
+            } else {
+                stop("-YAS must be 'auto' or a pair of numerics separated 
+by ','\n")
+            }
+            updated.vl$prof.misc$yscale <- c(y.min, y.max)
+        } else {
+            updated.vl$prof.misc$yscale <- 'auto'
+        }
+    } else if(!'yscale' %in% names(prof.misc)) {
+        updated.vl$prof.misc$yscale <- 'auto'
+    }
     if('-LEG' %in% names(args.tbl)) {
         stopifnot(as.integer(args.tbl['-LEG']) >= 0)
         updated.vl$prof.misc$legend <- as.integer(args.tbl['-LEG'])
@@ -409,20 +428,21 @@ CheckHMColorConfig <- function(hm.color, bam.pair) {
 EchoPlotArgs <- function() {
     cat("## Plotting-related parameters:\n")
     cat("### Misc. parameters:\n")
-    cat("    -FS Font size(default=12).\n")
+    cat("    -FS Font size(default=12)\n")
     cat("### Avg. profiles parameters:\n")
-    cat("    -WD Image width(default=8).\n")
-    cat("    -HG Image height(default=7).\n")
+    cat("    -WD Image width(default=8)\n")
+    cat("    -HG Image height(default=7)\n")
     cat("    -SE  Shall standard errors be plotted?(0 or 1)\n")
     cat("    -MW  Moving window width to smooth avg. profiles, must be integer\n")
     cat("           1=no(default); 3=slightly; 5=somewhat; 9=quite; 13=super.\n")
     cat("    -H   Opacity of shaded area, suggested value:[0, 0.5]\n")
     cat("           default=0, i.e. no shading, just lines\n")
-    cat("    -LEG Draw legend? 1(default) or 0.\n")
-    cat("    -BOX Draw box around plot? 1(default) or 0.\n")
-    cat("    -VLN Draw vertical lines? 1(default) or 0.\n")
-    cat("    -XYL Draw X- and Y-axis labels? 1(default) or 0.\n")
-    cat("    -LWD Line width(default=3).\n")
+    cat("    -YAS Y-axis scale: auto(default) or min_val,max_val(custom scale)\n")
+    cat("    -LEG Draw legend? 1(default) or 0\n")
+    cat("    -BOX Draw box around plot? 1(default) or 0\n")
+    cat("    -VLN Draw vertical lines? 1(default) or 0\n")
+    cat("    -XYL Draw X- and Y-axis labels? 1(default) or 0\n")
+    cat("    -LWD Line width(default=3)\n")
     cat("### Heatmap parameters:\n")
     cat("    -GO  Gene order algorithm used in heatmaps: total(default), hc, max,\n")
     cat("           prod, diff, km and none(according to gene list supplied)\n")

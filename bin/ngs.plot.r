@@ -47,7 +47,7 @@ cmd.help <- function(){
 ###########################################################################
 #################### Deal with program input arguments ####################
 args <- commandArgs(T)
-# args <- unlist(strsplit('-G hg19 -R tss -C hesc.H3k4me3.Rep1.sort.bam -O test1', ' '))
+# args <- unlist(strsplit('-G hg19 -R genebody -F rnaseq -C hesc.RNAseq.1M.bam -O rnaseq_pos -SS pos', ' '))
 
 # Input argument parser.
 args.tbl <- parseArgs(args, c('-G', '-C', '-R', '-O'))
@@ -196,7 +196,8 @@ for(r in 1:nrow(ctg.tbl)) {  # r: index of plots/profiles.
                                exonmodel, libsize, TRUE, chr.tag, pint, 
                                reg2plot, flanksize, flankfactor, m.pts, f.pts, 
                                bufsize, cov.algo, bam.files[1], sn.inbam, 
-                               fraglens[1], map.qual, is.bowtie)
+                               fraglens[1], map.qual, is.bowtie, 
+                               strand.spec=strand.spec)
     if(bam.pair) {  # calculate background.
         fraglen2 <- ifelse(length(fraglens) > 1, fraglens[2], fraglens[1])
         libsize <- v.lib.size[bam.files[2]]
@@ -211,7 +212,8 @@ for(r in 1:nrow(ctg.tbl)) {  # r: index of plots/profiles.
                                 exonmodel, libsize, TRUE, chr.tag, pint, 
                                 reg2plot, flanksize, flankfactor, m.pts, f.pts, 
                                 bufsize, cov.algo, bam.files[2], sn.inbam, 
-                                fraglen2, map.qual, is.bowtie)
+                                fraglen2, map.qual, is.bowtie, 
+                                strand.spec=strand.spec)
         # browser()
         result.matrix <- log2((result.matrix + result.pseudo.rpm) / 
                               (bkg.matrix + bkg.pseudo.rpm))

@@ -241,7 +241,8 @@ genZeroList <- function(llen, v.vlen) {
 }
 
 covBam <- function(granges, bam.file, sn.inbam, fraglen, map.qual=20, 
-                   bowtie=F, extr.only=F) {
+                   bowtie=F, extr.only=F, 
+                   strand.spec=c('both', 'pos', 'neg')) {
 # Extract coverage vectors from bam file for a list of genes.
 # Args:
 #   granges: list of GRanges objects representing genomic coordinates 
@@ -255,8 +256,10 @@ covBam <- function(granges, bam.file, sn.inbam, fraglen, map.qual=20,
 #   map.qual: mapping quality to filter reads.
 #   bowtie: boolean to indicate whether the aligner was Bowtie-like or not.
 #   extr.only: boolean for doing extraction only.
+#   strand.spec: string desc. for strand-specific coverage calculation.
 # Return: list of coverage vectors, each vector represents a gene.
 
+    strand.spec <- match.arg(strand.spec)
     # browser()
     g.start <- start(ranges(granges))  # vector of gene start sites.
     g.end <- end(ranges(granges))  # vector of gene end sites.
@@ -314,6 +317,18 @@ covBam <- function(granges, bam.file, sn.inbam, fraglen, map.qual=20,
         srg.strand <- srg.strand[q.mask]
         srg.qwidth <- srg.qwidth[q.mask]
 
+        # Subset by strand info.
+        if(strand.spec != 'both') {
+            if(strand.spec == 'pos') {
+                s.mask <- which(srg.strand == '+')
+            } else {
+                s.mask <- which(srg.strand == '-')
+            }
+            srg.pos <- srg.pos[s.mask]
+            srg.strand <- srg.strand[s.mask]
+            srg.qwidth <- srg.qwidth[s.mask]
+        }
+
         if(length(srg.pos) > 0) {
             # Adjust negative read positions for physical coverage.
             neg.idx <- srg.strand == '-'
@@ -336,7 +351,7 @@ covBam <- function(granges, bam.file, sn.inbam, fraglen, map.qual=20,
 
 
 covBamExons <- function(granges.list, bam.file, sn.inbam, fraglen, map.qual=20, 
-                        bowtie=F) {
+                        bowtie=F, strand.spec=c('both', 'pos', 'neg')) {
 # Extract coverage vectors from bam file for a list of transcripts of multiple
 # exons.
 # Args:
@@ -350,6 +365,7 @@ covBamExons <- function(granges.list, bam.file, sn.inbam, fraglen, map.qual=20,
 #   bowtie: boolean to indicate whether the aligner was Bowtie-like or not.
 # Return: list of coverage vectors, each vector represents a transcript.
 
+    strand.spec <- match.arg(strand.spec)
     # Obtain start and end sites for each gene.
     v.start <- vector('integer', length=length(granges.list))
     v.end <- vector('integer', length=length(granges.list))
@@ -434,6 +450,16 @@ covBamExons <- function(granges.list, bam.file, sn.inbam, fraglen, map.qual=20,
         # Filter short reads by mapping quality.
         sr.pooled <- sr.pooled[!is.na(srg.mapq) & srg.mapq >= map.qual, ]
 
+        # Subset by strand info.
+        if(strand.spec != 'both') {
+            if(strand.spec == 'pos') {
+                s.mask <- sr.pooled$strand == '+'
+            } else {
+                s.mask <- sr.pooled$strand == '-'
+            }
+            sr.pooled <- sr.pooled[s.mask, ]
+        }
+
         # Calculate coverage.
         if(nrow(sr.pooled) > 0) {
             # Adjust negative read positions for physical coverage.
@@ -463,8 +489,10 @@ covBamExons <- function(granges.list, bam.file, sn.inbam, fraglen, map.qual=20,
             covg <- coverage(IRanges(start=sr.pooled$pos, width=fraglen), 
                              width=dna.len[i], method='sort')
             
+            # browser()
             # Concatenate all exon coverages.
-            covg.allgenes[[i]] <- seqselect(covg, gr)
+            # covg.allgenes[[i]] <- seqselect(covg, gr)
+            covg.allgenes[[i]] <- covg[gr]
         } else {
             covg.allgenes[[i]] <- Rle(0, rna.len[i])
         }
@@ -700,7 +728,7 @@ covMatrix <- function(chkidx.list, coord, rnaseq.gb, exonmodel, libsize,
     #     result.matrix[i, ] <- doCov(coord[i, ], exonranges.list, ...)
     # }
     # # Floor negative values which are caused by spline.
-    # browser()
+    # # browser()
     # result.matrix[result.matrix < 0] <- 0
     # result.matrix / libsize * 1e6  # normalize to RPM.
     ########### For debug #############

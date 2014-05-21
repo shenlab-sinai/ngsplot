@@ -194,6 +194,15 @@ CoverageVars <- function(args.tbl, reg2plot) {
     }
     vl$bufsize <- vl$fraglen  # buffer added to both ends of the coverage vec.
 
+    #### Strand-specific coverage ####
+    if('-SS' %in% names(args.tbl)) {
+        spec.allowed <- c('both', 'pos', 'neg')
+        stopifnot(args.tbl['-SS'] %in% spec.allowed)
+        vl$strand.spec <- args.tbl['-SS']
+    } else {
+        vl$strand.spec <- 'both'
+    }
+
     #### Shall interval size be larger than flanking size? ####
     if('-IN' %in% names(args.tbl)) {
         stopifnot(as.integer(args.tbl['-IN']) >= 0)
@@ -480,6 +489,7 @@ EchoCoverageArgs <- function() {
     cat("  -CS  Chunk size for loading genes in batch(default=100)\n")
     cat("  -MQ  Mapping quality cutoff to filter reads(default=20)\n")
     cat("  -FL  Fragment length used to calculate physical coverage(default=150)\n")
+    cat("  -SS  Strand-specific coverage calculation: both(default), pos, neg\n")
     cat("  -IN  Shall interval be larger than flanking in plot?(0 or 1, default=automatic)\n")
     cat("  -FI  Forbid image output if set to 1(default=0)\n")
 }

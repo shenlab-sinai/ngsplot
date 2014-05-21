@@ -104,7 +104,7 @@ with(updated.vl, {
         # registerDoMC(1)
 
         # Setup heatmap device.
-        hd <- SetupHeatmapDevice(reg.list, uniq.reg, ng.list, pts, 
+        hd <- SetupHeatmapDevice(reg.list, uniq.reg, ng.list, pts, font.size,
                                  reduce.ratio=rr)
         reg.hei <- hd$reg.hei  # list of image heights for unique regions.
         hm.width <- hd$hm.width  # hm.width: image width.

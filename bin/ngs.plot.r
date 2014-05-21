@@ -260,7 +260,8 @@ if(!fi_tag){
 
     #### Heatmap. ####
     # Setup output device.
-    hd <- SetupHeatmapDevice(reg.list, uniq.reg, ng.list, pts, unit.width, rr)
+    hd <- SetupHeatmapDevice(reg.list, uniq.reg, ng.list, pts, font.size, 
+                             unit.width, rr)
     reg.hei <- hd$reg.hei  # list of image heights for unique regions.
     hm.width <- hd$hm.width  # image width.
     hm.height <- hd$hm.height # image height.

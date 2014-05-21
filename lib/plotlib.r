@@ -7,7 +7,7 @@
 # Last updated: May 21, 2013
 #
 
-SetupHeatmapDevice <- function(reg.list, uniq.reg, ng.list, pts, 
+SetupHeatmapDevice <- function(reg.list, uniq.reg, ng.list, pts, font.size=12,
                                unit.width=4, reduce.ratio=30) {
 # Configure parameters for heatmap output device. The output is used by 
 # external procedures to setup pdf device ready for heatmap plotting.
@@ -16,6 +16,7 @@ SetupHeatmapDevice <- function(reg.list, uniq.reg, ng.list, pts,
 #   uniq.reg: unique region list.
 #   ng.list: number of genes per heatmap in the order as config file.
 #   pts: data points (number of columns of heatmaps).
+#   font.size: font size.
 #   unit.width: image width per heatmap.
 #   reduce.ratio: how compressed are genes in comparison to data points? This 
 #                 controls image height.
@@ -29,11 +30,20 @@ SetupHeatmapDevice <- function(reg.list, uniq.reg, ng.list, pts,
                     ng.list[ri]
                 })
 
+    # Adjustment ratio.
+    origin.fs <- 12  # default font size.
+    fs.adj.ratio <- font.size / origin.fs
+    # Margin size (in lines) adjusted by ratio.
+    m.bot <- fs.adj.ratio * 2
+    m.lef <- fs.adj.ratio * 1.5
+    m.top <- fs.adj.ratio * 2
+    m.rig <- fs.adj.ratio * 1.5 
+    key.in <- fs.adj.ratio * 1.0  # colorkey in inches.
+    m.lef.diff <- (fs.adj.ratio - 1) * 1.5
+    m.rig.diff <- (fs.adj.ratio - 1) * 1.5
     # Setup image size.
-    hm.width <- unit.width * max(reg.np)
+    hm.width <- (unit.width + m.lef.diff + m.rig.diff) * max(reg.np)
     ipl <- .2 # inches per line. Obtained from par->'mai', 'mar'.
-    m.bot <- 2; m.lef <- 1.5; m.top <- 2; m.rig <- 1.5 # margin size in lines.
-    key.in <- 1.0  # colorkey in inches.
     # Convert #gene to image height.
     reg.hei <- sapply(reg.ng, function(r) {
                     c(key.in,  # colorkey + margin.

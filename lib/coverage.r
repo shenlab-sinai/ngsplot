@@ -91,7 +91,7 @@ extrCov3Sec <- function(v.chrom, v.start, v.end, v.fls, v.strand, m.pts, f.pts,
                              end=v.end + v.fls + bufsize))
     # interflank.cov <- covBam(bam.file, sn.inbam, interflank.gr, fraglen, 
     #                          map.qual, bowtie)
-    interflank.cov <- covBam(interflank.gr, ...)
+    interflank.cov <- covBam(interflank.gr, v.strand, ...)
 
     # Trim buffers from coverage vectors.
     interflank.cov <- lapply(interflank.cov, function(v) {
@@ -151,7 +151,7 @@ extrCovExons <- function(v.chrom, exonranges.list, v.fls, v.strand,
         exonflank.list[[i]] <- GRanges(seqnames=v.chrom[i], ranges=r.mod)
     }
 
-    exonflank.cov <- covBamExons(exonflank.list, ...)
+    exonflank.cov <- covBamExons(exonflank.list, v.strand, ...)
 
     # Trim buffers from coverage vectors.
     exonflank.cov <- lapply(exonflank.cov, function(v) {
@@ -182,7 +182,7 @@ extrCovMidp <- function(v.chrom, v.midp, flanksize, v.strand, pts, bufsize,
                        end=v.midp + flanksize + bufsize))
     # cov.list <- covBam(bam.file, sn.inbam, granges, fraglen, map.qual, bowtie)
     # browser()
-    cov.list <- covBam(granges, ...)
+    cov.list <- covBam(granges, v.strand, ...)
 
     # Trim buffers from coverage vectors.
     cov.list <- lapply(cov.list, function(v) {
@@ -240,9 +240,9 @@ genZeroList <- function(llen, v.vlen) {
     res
 }
 
-covBam <- function(granges, bam.file, sn.inbam, fraglen, map.qual=20, 
-                   bowtie=F, extr.only=F, 
-                   strand.spec=c('both', 'pos', 'neg')) {
+covBam <- function(granges, v.strand, bam.file, sn.inbam, fraglen, 
+                   map.qual=20, bowtie=F, extr.only=F, 
+                   strand.spec=c('both', 'same', 'opposite')) {
 # Extract coverage vectors from bam file for a list of genes.
 # Args:
 #   granges: list of GRanges objects representing genomic coordinates 
@@ -250,6 +250,7 @@ covBam <- function(granges, bam.file, sn.inbam, fraglen, map.qual=20,
 #            object has multiple ranges representing exons and flanking 
 #            regions. In the case of ChIP-seq, each GRanges object has one
 #            range representing left boundary to right boundary.
+#   v.strand: vector of strand info.
 #   bam.file: character string refers to the path of a bam file.
 #   sn.inbam: vector of chromosome names in the bam file.
 #   fraglen: fragment length.
@@ -311,18 +312,19 @@ covBam <- function(granges, bam.file, sn.inbam, fraglen, map.qual=20,
         }
 
         # Subset by mapping quality.
-        q.mask <- which(!is.na(srg.mapq) & srg.mapq >= map.qual)
+        q.mask <- which(srg.mapq >= map.qual)
         # q.mask <- which(srg.mapq >= map.qual)
         srg.pos <- srg.pos[q.mask]
         srg.strand <- srg.strand[q.mask]
         srg.qwidth <- srg.qwidth[q.mask]
 
         # Subset by strand info.
+        # browser()
         if(strand.spec != 'both') {
-            if(strand.spec == 'pos') {
-                s.mask <- which(srg.strand == '+')
+            if(strand.spec == 'same') {
+                s.mask <- which(srg.strand == as.character(v.strand[i]))
             } else {
-                s.mask <- which(srg.strand == '-')
+                s.mask <- which(srg.strand != as.character(v.strand[i]))
             }
             srg.pos <- srg.pos[s.mask]
             srg.strand <- srg.strand[s.mask]
@@ -350,19 +352,22 @@ covBam <- function(granges, bam.file, sn.inbam, fraglen, map.qual=20,
 }
 
 
-covBamExons <- function(granges.list, bam.file, sn.inbam, fraglen, map.qual=20, 
-                        bowtie=F, strand.spec=c('both', 'pos', 'neg')) {
+covBamExons <- function(granges.list, v.strand, bam.file, sn.inbam, fraglen, 
+                        map.qual=20, bowtie=F, 
+                        strand.spec=c('both', 'same', 'opposite')) {
 # Extract coverage vectors from bam file for a list of transcripts of multiple
 # exons.
 # Args:
 #   granges.list: list of GRanges objects representing genomic coordinates 
 #                 to extract coverge from. Each GRanges object has multiple
 #                 ranges representing exons and flanking regions. 
+#   v.strand: vector of strand info.
 #   bam.file: character string refers to the path of a bam file.
 #   sn.inbam: vector of chromosome names in the bam file.
 #   fraglen: fragment length.
 #   map.qual: mapping quality to filter reads.
 #   bowtie: boolean to indicate whether the aligner was Bowtie-like or not.
+#   strand.spec: string desc. for strand-specific coverage calculation.
 # Return: list of coverage vectors, each vector represents a transcript.
 
     strand.spec <- match.arg(strand.spec)
@@ -448,14 +453,14 @@ covBamExons <- function(granges.list, bam.file, sn.inbam, fraglen, map.qual=20,
         }
 
         # Filter short reads by mapping quality.
-        sr.pooled <- sr.pooled[!is.na(srg.mapq) & srg.mapq >= map.qual, ]
+        sr.pooled <- sr.pooled[which(srg.mapq >= map.qual), ]
 
         # Subset by strand info.
         if(strand.spec != 'both') {
-            if(strand.spec == 'pos') {
-                s.mask <- sr.pooled$strand == '+'
+            if(strand.spec == 'same') {
+                s.mask <- which(sr.pooled$strand == as.character(v.strand[i]))
             } else {
-                s.mask <- sr.pooled$strand == '-'
+                s.mask <- which(sr.pooled$strand != as.character(v.strand[i]))
             }
             sr.pooled <- sr.pooled[s.mask, ]
         }

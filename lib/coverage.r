@@ -523,7 +523,7 @@ bamFileList <- function(ctg.tbl) {
         stop("No mix of bam and bam-pair allowed in configuration.\n")
     }
 
-    list(bbp=bbp, bam.list=unlist(cov.list))
+    list(bbp=bbp, bam.list=unique(unlist(cov.list)))
 }
 
 estiMapqStyle <- function(bam.file){

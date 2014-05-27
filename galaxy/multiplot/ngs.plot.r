@@ -227,7 +227,7 @@ for(r in 1:nrow(ctg.tbl)) {
     if(class(chr.tag) == 'character') {
         stop(sprintf("Read %s error: %s", bam.files[1], chr.tag))
     }
-    result.matrix <- covMatrix(bam.files[1], libsize, sn.inbam, chr.tag, 
+    result.matrix <- covMatrix(debug, bam.files[1], libsize, sn.inbam, chr.tag, 
                                coord.list[[reg]], chkidx.list, rnaseq.gb, 
                                exonmodel, reg2plot, pint, flanksize, 
                                flankfactor, bufsize, fraglen, map.qual, m.pts, 
@@ -241,7 +241,7 @@ for(r in 1:nrow(ctg.tbl)) {
         if(class(chr.tag) == 'character') {
             stop(sprintf("Read %s error: %s", bam.files[2], chr.tag))
         }
-        bkg.matrix <- covMatrix(bam.files[2], libsize, sn.inbam, chr.tag, 
+        bkg.matrix <- covMatrix(debug, bam.files[2], libsize, sn.inbam, chr.tag, 
                                 coord.list[[reg]], chkidx.list, rnaseq.gb, 
                                 exonmodel, reg2plot, pint, flanksize, 
                                 flankfactor, bufsize, fraglen, map.qual, m.pts, 

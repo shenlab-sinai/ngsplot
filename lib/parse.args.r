@@ -106,6 +106,14 @@ CoverageVars <- function(args.tbl, reg2plot) {
 
     vl <- list()  # vl: configured variable list
 
+    #### Switch for debug ####
+    if('-Debug' %in% names(args.tbl)) {
+       stopifnot(as.integer(args.tbl['-Debug']) >= 0)
+       vl$debug <- as.integer(args.tbl['-Debug'])
+    } else {
+       vl$debug <- as.integer(0)
+    }
+
     #### Switch for Galaxy usage ####
     if('-Galaxy' %in% names(args.tbl)) {
        stopifnot(as.integer(args.tbl['-Galaxy']) >= 0)

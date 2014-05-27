@@ -47,7 +47,7 @@ cmd.help <- function(){
 ###########################################################################
 #################### Deal with program input arguments ####################
 args <- commandArgs(T)
-# args <- unlist(strsplit('-G hg19 -R genebody -C hesc.RNAseq.1M.bam -O rna_same -SS same -F rnaseq', ' '))
+# args <- unlist(strsplit('-G hg19 -R genebody -F rnaseq -C hesc.RNAseq.bam -O rna_paired -S 0.2', ' '))
 
 # Input argument parser.
 args.tbl <- parseArgs(args, c('-G', '-C', '-R', '-O'))
@@ -192,12 +192,14 @@ for(r in 1:nrow(ctg.tbl)) {  # r: index of plots/profiles.
         stop(sprintf("Read %s error: %s", bam.files[1], chr.tag))
     }
     # browser()
-    result.matrix <- covMatrix(chkidx.list, coord.list[[reg]], rnaseq.gb, 
+    # Rprof(append=T)
+    result.matrix <- covMatrix(debug, chkidx.list, coord.list[[reg]], rnaseq.gb, 
                                exonmodel, libsize, TRUE, chr.tag, pint, 
                                reg2plot, flanksize, flankfactor, m.pts, f.pts, 
                                bufsize, cov.algo, bam.files[1], sn.inbam, 
                                fraglens[1], map.qual, is.bowtie, 
                                strand.spec=strand.spec)
+    # Rprof(NULL)
     if(bam.pair) {  # calculate background.
         fraglen2 <- ifelse(length(fraglens) > 1, fraglens[2], fraglens[1])
         libsize <- v.lib.size[bam.files[2]]
@@ -208,7 +210,7 @@ for(r in 1:nrow(ctg.tbl)) {  # r: index of plots/profiles.
         if(class(chr.tag) == 'character') {
             stop(sprintf("Read %s error: %s", bam.files[2], chr.tag))
         }
-        bkg.matrix <- covMatrix(chkidx.list, coord.list[[reg]], rnaseq.gb, 
+        bkg.matrix <- covMatrix(debug, chkidx.list, coord.list[[reg]], rnaseq.gb, 
                                 exonmodel, libsize, TRUE, chr.tag, pint, 
                                 reg2plot, flanksize, flankfactor, m.pts, f.pts, 
                                 bufsize, cov.algo, bam.files[2], sn.inbam, 

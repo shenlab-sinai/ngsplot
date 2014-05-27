@@ -398,7 +398,8 @@ covBamExons <- function(granges.list, v.strand, bam.file, sn.inbam, fraglen,
 
     # Flatten the GRanges list for scanBam to process in batch.
     granges.combined <- do.call('c', granges.list[inbam.mask])
-    sbw <- c('pos', 'qwidth', 'mapq', 'strand')  # scanBamWhat.
+    sbw <- c('pos', 'qwidth', 'mapq', 'strand', 'rname', 
+             'mrnm', 'mpos', 'isize')  # scanBamWhat.
     sbp <- ScanBamParam(what=sbw, which=granges.combined, flag=scanBamFlag(
                         isUnmappedQuery=F, isNotPassingQualityControls=F, 
                         isDuplicate=F))
@@ -442,6 +443,8 @@ covBamExons <- function(granges.list, v.strand, bam.file, sn.inbam, fraglen,
             next
         }
         scan.counter <- scan.counter + 1
+
+        # SLOW !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
         # Pool short reads from the same transcript.
         sr.pooled <- do.call('rbind', sr.in.ranges[v.brk.left[scan.counter]:
                                                    v.brk.right[scan.counter]])
@@ -465,15 +468,33 @@ covBamExons <- function(granges.list, v.strand, bam.file, sn.inbam, fraglen,
             sr.pooled <- sr.pooled[s.mask, ]
         }
 
+        # If paired, filter reads that are not properly paired.
+        paired <- !all(with(sr.pooled, is.na(isize) | isize == 0))
+        if(paired) {
+            p.mask <- which(
+                with(sr.pooled, rname == mrnm & xor(strand == '+', isize < 0)))
+            sr.pooled <- sr.pooled[p.mask, ]
+        }
+
         # Calculate coverage.
         if(nrow(sr.pooled) > 0) {
-            # Adjust negative read positions for physical coverage.
-            neg.idx <- sr.pooled$strand == '-'
-            sr.pooled[neg.idx, ]$pos <- sr.pooled[neg.idx, ]$pos - fraglen + 
-                                        sr.pooled[neg.idx, ]$qwidth
-            
+            if(paired) {
+                cov.pos <- with(sr.pooled, ifelse(isize < 0, mpos, pos))
+                cov.wd <- abs(sr.pooled$isize)
+            } else {
+                # Adjust negative read positions for physical coverage.
+                neg.idx <- sr.pooled$strand == '-'
+                cov.pos <- with(sr.pooled, 
+                                ifelse(neg.idx, pos - fraglen + qwidth, pos))
+                cov.wd <- fraglen
+            }
+
             # Shift reads by subtracting start positions.
-            sr.pooled$pos <- sr.pooled$pos - v.start[i] + 1
+            cov.pos <- cov.pos - v.start[i] + 1
+            
+            # Calculate physical coverage on the whole genebody.
+            covg <- coverage(IRanges(start=cov.pos, width=cov.wd), 
+                             width=dna.len[i], method='sort')
             
             # Shift ranges by subtracting start positions.
             # BE careful with negative start positions! Need to adjust end
@@ -489,10 +510,6 @@ covBamExons <- function(granges.list, v.strand, bam.file, sn.inbam, fraglen,
                 end(gr) <- end(gr) - v.start[i] + 1
                 start(gr) <- start(gr) - v.start[i] + 1
             }
-            
-            # Calculate physical coverage on the whole genebody.
-            covg <- coverage(IRanges(start=sr.pooled$pos, width=fraglen), 
-                             width=dna.len[i], method='sort')
             
             # browser()
             # Concatenate all exon coverages.
@@ -684,10 +701,11 @@ chunkIndex <- function(tot.gene, gcs) {
     chkidx.list
 }
 
-covMatrix <- function(chkidx.list, coord, rnaseq.gb, exonmodel, libsize, 
+covMatrix <- function(debug, chkidx.list, coord, rnaseq.gb, exonmodel, libsize, 
                       spit.dot=T, ...) {
 # Function to generate a coverage matrix for all genes.
 # Args:
+#   debug: boolean tag for debugging.
 #   chkidx.list: list of (start, end) indices for each chunk.
 #   coord: dataframe of gene coordinates.
 #   rnaseq.gb: boolean for RNA-seq genebody plot.
@@ -696,47 +714,51 @@ covMatrix <- function(chkidx.list, coord, rnaseq.gb, exonmodel, libsize,
 #   spit.dot: boolean to control sptting '.' to consoles.
 # Return: normalized coverage matrix for all genes, each row represents a gene.
 
-    
-    # Extract coverage and combine into a matrix.
-    result.matrix <- foreach(chk=chkidx.list, .combine='rbind', 
-                             .multicombine=T) %dopar% {
-        if(spit.dot) {
+
+    if(!debug) {
+        # Extract coverage and combine into a matrix.
+        result.matrix <- foreach(chk=chkidx.list, .combine='rbind', 
+                                 .multicombine=T) %dopar% {
+            if(spit.dot) {
+                cat(".")
+            }
+            i <- chk[1]:chk[2]  # chunk: start -> end
+            # If RNA-seq, retrieve exon ranges.
+            if(rnaseq.gb) {
+                exonranges.list <- unlist(exonmodel[coord[i, ]$tid])
+            } else {
+                exonranges.list <- NULL
+            }
+            doCov(coord[i, ], exonranges.list, ...)
+        }
+
+        # Floor negative values which are caused by spline.
+        result.matrix[result.matrix < 0] <- 0
+        result.matrix / libsize * 1e6  # normalize to RPM.
+
+    } else {
+        for(c in 1:length(chkidx.list)) {
+            chk <- chkidx.list[[c]]
+            i <- chk[1]:chk[2]  # chunk: start -> end
             cat(".")
+            # If RNA-seq, retrieve exon ranges.
+            if(rnaseq.gb) {
+                exonranges.list <- unlist(exonmodel[coord[i, ]$tid])
+            } else {
+                exonranges.list <- NULL
+            }
+            cov <- doCov(coord[i, ], exonranges.list, ...)
+            if(c == 1) {
+                result.matrix <- matrix(0, nrow=nrow(coord), ncol=ncol(cov))
+            }
+            result.matrix[i, ] <- cov
         }
-        i <- chk[1]:chk[2]  # chunk: start -> end
-        # If RNA-seq, retrieve exon ranges.
-        if(rnaseq.gb) {
-            exonranges.list <- unlist(exonmodel[coord[i, ]$tid])
-        } else {
-            exonranges.list <- NULL
-        }
-        doCov(coord[i, ], exonranges.list, ...)
+        # Floor negative values which are caused by spline.
+        # browser()
+        result.matrix[result.matrix < 0] <- 0
+        result.matrix / libsize * 1e6  # normalize to RPM.
+
     }
-
-    # Floor negative values which are caused by spline.
-    result.matrix[result.matrix < 0] <- 0
-    result.matrix / libsize * 1e6  # normalize to RPM.
-
-
-    ########### For debug #############
-    # result.matrix <- matrix(0, nrow=nrow(coord), ncol=101)
-    # for(c in 1:length(chkidx.list)) {
-    #     chk <- chkidx.list[[c]]
-    #     i <- chk[1]:chk[2]  # chunk: start -> end
-    #     cat(".")
-    #     # If RNA-seq, retrieve exon ranges.
-    #     if(rnaseq.gb) {
-    #         exonranges.list <- unlist(exonmodel[coord[i, ]$tid])
-    #     } else {
-    #         exonranges.list <- NULL
-    #     }
-    #     result.matrix[i, ] <- doCov(coord[i, ], exonranges.list, ...)
-    # }
-    # # Floor negative values which are caused by spline.
-    # # browser()
-    # result.matrix[result.matrix < 0] <- 0
-    # result.matrix / libsize * 1e6  # normalize to RPM.
-    ########### For debug #############
 }
 
 

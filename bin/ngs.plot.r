@@ -47,7 +47,7 @@ cmd.help <- function(){
 ###########################################################################
 #################### Deal with program input arguments ####################
 args <- commandArgs(T)
-# args <- unlist(strsplit('-G hg19 -R genebody -F rnaseq -C hesc.RNAseq.bam -O rna_paired -S 0.2', ' '))
+# args <- unlist(strsplit('-G hg19 -R genebody -F rnaseq -C hesc.RNAseq.bam -O rna_paired -S 0.05 -Debug 1', ' '))
 
 # Input argument parser.
 args.tbl <- parseArgs(args, c('-G', '-C', '-R', '-O'))
@@ -192,7 +192,7 @@ for(r in 1:nrow(ctg.tbl)) {  # r: index of plots/profiles.
         stop(sprintf("Read %s error: %s", bam.files[1], chr.tag))
     }
     # browser()
-    # Rprof(append=T)
+    # Rprof("Rprof3.out", append=T)
     result.matrix <- covMatrix(debug, chkidx.list, coord.list[[reg]], rnaseq.gb, 
                                exonmodel, libsize, TRUE, chr.tag, pint, 
                                reg2plot, flanksize, flankfactor, m.pts, f.pts, 

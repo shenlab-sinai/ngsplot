@@ -418,7 +418,9 @@ covBamExons <- function(granges.list, v.strand, bam.file, sn.inbam, fraglen,
                     ]
 
     # Convert each list to data.fram for easy combine and retrieval.
-    sr.in.ranges <- lapply(sr.in.ranges, as.data.frame)
+    # browser()
+    # This is SLOW!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    # sr.in.ranges <- lapply(sr.in.ranges, as.data.frame)
 
     # Create a list of breaks for merging short reads.
     v.nranges <- sapply(granges.list[inbam.mask], length)
@@ -446,78 +448,91 @@ covBamExons <- function(granges.list, v.strand, bam.file, sn.inbam, fraglen,
 
         # SLOW !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
         # Pool short reads from the same transcript.
-        sr.pooled <- do.call('rbind', sr.in.ranges[v.brk.left[scan.counter]:
-                                                   v.brk.right[scan.counter]])
-
-        # Special handling for bowtie mapping.
-        srg.mapq <- sr.pooled$mapq
-        if(bowtie) {
-            srg.mapq[is.na(srg.mapq)] <- 254
-        }
-
-        # Filter short reads by mapping quality.
-        sr.pooled <- sr.pooled[which(srg.mapq >= map.qual), ]
-
-        # Subset by strand info.
-        if(strand.spec != 'both') {
-            if(strand.spec == 'same') {
-                s.mask <- which(sr.pooled$strand == as.character(v.strand[i]))
-            } else {
-                s.mask <- which(sr.pooled$strand != as.character(v.strand[i]))
+        # sr.pooled <- do.call('rbind', sr.in.ranges[v.brk.left[scan.counter]:
+        #                                            v.brk.right[scan.counter]])
+        br <- v.brk.left[scan.counter]:v.brk.right[scan.counter]
+        cov.list <- lapply(sr.in.ranges[br], function(sr.pooled) {
+            # Special handling for bowtie mapping.
+            srg.mapq <- sr.pooled$mapq
+            if(bowtie) {
+                srg.mapq[is.na(srg.mapq)] <- 254
             }
-            sr.pooled <- sr.pooled[s.mask, ]
-        }
 
-        # If paired, filter reads that are not properly paired.
-        paired <- !all(with(sr.pooled, is.na(isize) | isize == 0))
-        if(paired) {
-            p.mask <- which(
-                with(sr.pooled, rname == mrnm & xor(strand == '+', isize < 0)))
-            sr.pooled <- sr.pooled[p.mask, ]
-        }
+            # Filter short reads by mapping quality.
+            all.mask <- srg.mapq >= map.qual
+            # sr.pooled <- sr.pooled[which(srg.mapq >= map.qual), ]
 
-        # Calculate coverage.
-        if(nrow(sr.pooled) > 0) {
+            # Subset by strand info.
+            if(strand.spec != 'both') {
+                if(strand.spec == 'same') {
+                    s.mask <- sr.pooled$strand == as.character(v.strand[i])
+                } else {
+                    s.mask <- sr.pooled$strand != as.character(v.strand[i])
+                }
+                all.mask <- all.mask & s.mask
+                # sr.pooled <- sr.pooled[s.mask, ]
+            }
+
+            # If paired, filter reads that are not properly paired.
+            paired <- !all(with(sr.pooled, is.na(isize) | isize == 0))
             if(paired) {
-                cov.pos <- with(sr.pooled, ifelse(isize < 0, mpos, pos))
-                cov.wd <- abs(sr.pooled$isize)
-            } else {
-                # Adjust negative read positions for physical coverage.
-                neg.idx <- sr.pooled$strand == '-'
-                cov.pos <- with(sr.pooled, 
-                                ifelse(neg.idx, pos - fraglen + qwidth, pos))
-                cov.wd <- fraglen
+                p.mask <- with(sr.pooled, 
+                               rname == mrnm & xor(strand == '+', isize < 0))
+                all.mask <- all.mask & p.mask
+                # sr.pooled <- sr.pooled[p.mask, ]
             }
 
-            # Shift reads by subtracting start positions.
-            cov.pos <- cov.pos - v.start[i] + 1
-            
-            # Calculate physical coverage on the whole genebody.
-            covg <- coverage(IRanges(start=cov.pos, width=cov.wd), 
-                             width=dna.len[i], method='sort')
-            
-            # Shift ranges by subtracting start positions.
-            # BE careful with negative start positions! Need to adjust end
-            # positions first(or the GRanges lib will emit errors if 
-            # start > end). 
-            # Negative start positions happen when flanking region exceeds 
-            # the chromosomal start.
-            gr <- ranges(granges.list[[i]])
-            if(v.start[i] > 0) {
-                start(gr) <- start(gr) - v.start[i] + 1
-                end(gr) <- end(gr) - v.start[i] + 1
+            all.mask <- which(all.mask)
+            sr.pooled <- lapply(sr.pooled, `[`, all.mask)
+
+            # Calculate coverage.
+            if(length(sr.pooled$pos) > 0) {
+                if(paired) {
+                    cov.pos <- with(sr.pooled, ifelse(isize < 0, mpos, pos))
+                    cov.wd <- abs(sr.pooled$isize)
+                } else {
+                    # Adjust negative read positions for physical coverage.
+                    neg.idx <- sr.pooled$strand == '-'
+                    cov.pos <- with(sr.pooled, 
+                                    ifelse(neg.idx, 
+                                           pos - fraglen + qwidth, pos))
+                    cov.wd <- fraglen
+                }
+
+                # Shift reads by subtracting start positions.
+                cov.pos <- cov.pos - v.start[i] + 1
+                
+                # Calculate physical coverage on the whole genebody.
+                covg <- coverage(IRanges(start=cov.pos, width=cov.wd), 
+                                 width=dna.len[i], method='sort')
             } else {
-                end(gr) <- end(gr) - v.start[i] + 1
-                start(gr) <- start(gr) - v.start[i] + 1
+                Rle(0, dna.len[i])
             }
-            
-            # browser()
-            # Concatenate all exon coverages.
-            # covg.allgenes[[i]] <- seqselect(covg, gr)
-            covg.allgenes[[i]] <- covg[gr]
-        } else {
-            covg.allgenes[[i]] <- Rle(0, rna.len[i])
+        })
+
+        fin.cov <- Rle(0, dna.len[i])
+        for(cov in cov.list) {
+            fin.cov <- fin.cov + cov
         }
+        # Shift ranges by subtracting start positions.
+        # BE careful with negative start positions! Need to adjust end
+        # positions first(or the GRanges lib will emit errors if 
+        # start > end). 
+        # Negative start positions happen when flanking region exceeds 
+        # the chromosomal start.
+        gr <- ranges(granges.list[[i]])
+        if(v.start[i] > 0) {
+            start(gr) <- start(gr) - v.start[i] + 1
+            end(gr) <- end(gr) - v.start[i] + 1
+        } else {
+            end(gr) <- end(gr) - v.start[i] + 1
+            start(gr) <- start(gr) - v.start[i] + 1
+        }
+                
+        # Concatenate all exon coverages.
+        # covg.allgenes[[i]] <- seqselect(covg, gr)
+        covg.allgenes[[i]] <- fin.cov[gr]
+
     }
     covg.allgenes
 }

@@ -1,5 +1,6 @@
 - May 20, 2014
-* Need to fix: bamFileList returns a bam file list that may not be unique.
+* Need to fix: bamFileList returns a bam file list that may not be unique. 
+  (done)
 
 - Sep 5, 2013
 * Add sanity check for BED file. (done)

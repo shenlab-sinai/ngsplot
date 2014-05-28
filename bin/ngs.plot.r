@@ -47,7 +47,7 @@ cmd.help <- function(){
 ###########################################################################
 #################### Deal with program input arguments ####################
 args <- commandArgs(T)
-# args <- unlist(strsplit('-G hg19 -R genebody -F rnaseq -C hesc.RNAseq.1M.bam -O rna_paired_1M_new_refac -Debug 1', ' '))
+# args <- unlist(strsplit('-G hg19 -R tss -C hesc.H3k4me3.Rep1.sort.bam -O tmp2 -Debug 1', ' '))
 
 # Input argument parser.
 args.tbl <- parseArgs(args, c('-G', '-C', '-R', '-O'))

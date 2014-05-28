@@ -447,7 +447,7 @@ covBamExons <- function(granges.dat, v.strand, bam.file, sn.inbam, fraglen,
         }
 
         # If paired, filter reads that are not properly paired.
-        paired <- !all(with(srg, is.na(isize) | isize == 0))
+        paired <- all(with(srg, is.na(isize) | isize != 0))
         # paired <- F
         if(paired) {
             p.mask <- with(srg, rname == mrnm & xor(strand == '+', isize < 0))

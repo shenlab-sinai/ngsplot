@@ -192,7 +192,7 @@ for(r in 1:nrow(ctg.tbl)) {  # r: index of plots/profiles.
         stop(sprintf("Read %s error: %s", bam.files[1], chr.tag))
     }
     # browser()
-    # Rprof("Rprof4.out", append=T)
+    # Rprof("Rprof_covBamExons2.out", append=T)
     result.matrix <- covMatrix(debug, chkidx.list, coord.list[[reg]], rnaseq.gb, 
                                exonmodel, libsize, TRUE, chr.tag, pint, 
                                reg2plot, flanksize, flankfactor, m.pts, f.pts, 

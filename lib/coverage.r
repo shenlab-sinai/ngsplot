@@ -384,12 +384,6 @@ covBamExons <- function(granges.dat, v.strand, bam.file, sn.inbam, fraglen,
         repr.lens <- v.end - v.start + 1
         granges.dat <- vector('list', length(granges.dna)) # set null tags.
     }
-    # browser()
-    # This holds the same data as granges.dna but created as a list for looping.
-    grdna.list <- mapply(GRanges, seqnames=v.seqnames, 
-                         ranges=IRanges(start=v.start, end=v.end), 
-                         SIMPLIFY=F)
-
 
     # Filter transcripts whose chromosomes do not match bam file.
     inbam.mask <- as.character(seqnames(granges.dna)) %in% sn.inbam
@@ -400,7 +394,6 @@ covBamExons <- function(granges.dat, v.strand, bam.file, sn.inbam, fraglen,
     # scanBamWhat: the info that need to be extracted from a bam file.
     sbw <- c('pos', 'qwidth', 'mapq', 'strand', 'rname', 
              'mrnm', 'mpos', 'isize')
-    # sbw <- c('pos', 'qwidth', 'mapq', 'strand')
     sbp <- ScanBamParam(what=sbw, which=granges.dna[inbam.mask], 
                         flag=scanBamFlag(isUnmappedQuery=F, 
                                          isNotPassingQualityControls=F, 
@@ -418,11 +411,12 @@ covBamExons <- function(granges.dat, v.strand, bam.file, sn.inbam, fraglen,
     sr.in.ranges <- sr.in.ranges[scanBamRevOrder(
                                  as.data.frame(granges.dna[inbam.mask]), sbp)]
 
-    CalcReadsCov <- function(srg, gr.dna, gr.rna, repr.len, strand) {
+    CalcReadsCov <- function(srg, start, end, gr.rna, repr.len, strand) {
     # Calculate short read coverage for each gene/region.
     # Args:
     #   srg: extracted short reads in gene.
-    #   gr.dna: GRanges object (single range) representing DNA sequence.
+    #   start: start position of the DNA sequence.
+    #   end: end position of the DNA sequence.
     #   gr.rna: GRanges object (multiple ranges) representing exon sequences.
     #           This can be NULL indicating the input ranges are DNAs.
     #   repr.len: DNA or mRNA sequence length.
@@ -448,7 +442,6 @@ covBamExons <- function(granges.dat, v.strand, bam.file, sn.inbam, fraglen,
 
         # If paired, filter reads that are not properly paired.
         paired <- all(with(srg, is.na(isize) | isize != 0))
-        # paired <- F
         if(paired) {
             p.mask <- with(srg, rname == mrnm & xor(strand == '+', isize < 0))
             all.mask <- all.mask & p.mask
@@ -468,19 +461,13 @@ covBamExons <- function(granges.dat, v.strand, bam.file, sn.inbam, fraglen,
                                             pos - fraglen + qwidth, pos))
                 cov.wd <- fraglen
             }
-
-            # Extract some common data.
-            start <- start(gr.dna)
-            end <- end(gr.dna)
-            dna.len <- end - start + 1
-
             # Shift reads by subtracting start positions.
             cov.pos <- cov.pos - start + 1
-            
             # Calculate physical coverage on the whole genebody.
             covg <- coverage(IRanges(start=cov.pos, width=cov.wd), 
-                             width=dna.len, method='sort')
-            if(!is.null(gr.rna)) {
+                             width=end - start + 1, method='sort')
+
+            if(!is.null(gr.rna)) {  # RNA-seq.
                 # Shift exonic ranges by subtracting start positions.
                 # BE careful with negative start positions! Need to adjust end
                 # positions first(or the GRanges lib will emit errors if 
@@ -496,7 +483,7 @@ covBamExons <- function(granges.dat, v.strand, bam.file, sn.inbam, fraglen,
                 }
                 # Concatenate all exon coverages.
                 covg[ranges(gr.rna)]
-            } else {
+            } else {  # ChIP-seq.
                 covg
             }
         } else {
@@ -504,9 +491,9 @@ covBamExons <- function(granges.dat, v.strand, bam.file, sn.inbam, fraglen,
         }
     }
 
-    covg.allgenes <- mapply(CalcReadsCov, srg=sr.in.ranges, gr.dna=grdna.list, 
-                            gr.rna=granges.dat, repr.len=repr.lens, 
-                            strand=v.strand, SIMPLIFY=F)
+    covg.allgenes <- mapply(CalcReadsCov, srg=sr.in.ranges, 
+                            start=v.start, end=v.end, gr.rna=granges.dat, 
+                            repr.len=repr.lens, strand=v.strand, SIMPLIFY=F)
 }
 
 bamFileList <- function(ctg.tbl) {

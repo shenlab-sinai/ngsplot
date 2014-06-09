@@ -89,9 +89,7 @@ extrCov3Sec <- function(v.chrom, v.start, v.end, v.fls, v.strand, m.pts, f.pts,
     interflank.gr <- GRanges(seqnames=v.chrom, ranges=IRanges(
                              start=v.start - v.fls - bufsize, 
                              end=v.end + v.fls + bufsize))
-    # interflank.cov <- covBam(bam.file, sn.inbam, interflank.gr, fraglen, 
-    #                          map.qual, bowtie)
-    interflank.cov <- covBam(interflank.gr, ...)
+    interflank.cov <- covBamExons(interflank.gr, v.strand, ...)
 
     # Trim buffers from coverage vectors.
     interflank.cov <- lapply(interflank.cov, function(v) {
@@ -151,7 +149,7 @@ extrCovExons <- function(v.chrom, exonranges.list, v.fls, v.strand,
         exonflank.list[[i]] <- GRanges(seqnames=v.chrom[i], ranges=r.mod)
     }
 
-    exonflank.cov <- covBamExons(exonflank.list, ...)
+    exonflank.cov <- covBamExons(exonflank.list, v.strand, ...)
 
     # Trim buffers from coverage vectors.
     exonflank.cov <- lapply(exonflank.cov, function(v) {
@@ -180,9 +178,7 @@ extrCovMidp <- function(v.chrom, v.midp, flanksize, v.strand, pts, bufsize,
     granges <- GRanges(seqnames=v.chrom, ranges=IRanges(
                        start=v.midp - flanksize - bufsize, 
                        end=v.midp + flanksize + bufsize))
-    # cov.list <- covBam(bam.file, sn.inbam, granges, fraglen, map.qual, bowtie)
-    # browser()
-    cov.list <- covBam(granges, ...)
+    cov.list <- covBamExons(granges, v.strand, ...)
 
     # Trim buffers from coverage vectors.
     cov.list <- lapply(cov.list, function(v) {
@@ -191,11 +187,9 @@ extrCovMidp <- function(v.chrom, v.midp, flanksize, v.strand, pts, bufsize,
 
     # Interpolate and reverse coverage vectors and assemble into a matrix.
     cov.mat <- matrix(nrow=length(cov.list), ncol=pts)
-    # cov.mat <- matrix(nrow=length(cov.list), ncol=length(cov.list[[1]]))
     for(i in 1:length(cov.list)) {
         if(is.null(cov.list[[i]])) {
             cov.mat[i, ] <- vector('integer', length=pts)
-            # cov.mat[i, ] <- vector('integer', length=length(cov.list[[1]]))
         } else {
             if(algo == "spline") {
                 cov.mat[i, ] <- spline(1:length(cov.list[[i]]), cov.list[[i]], 
@@ -205,13 +199,11 @@ extrCovMidp <- function(v.chrom, v.midp, flanksize, v.strand, pts, bufsize,
             } else {
                 # pass.
             }
-            # cov.mat[i, ] <- cov.list[[i]]
             if(v.strand[i] == '-') {
                 cov.mat[i, ] <- rev(cov.mat[i, ])
             }
         }
     }
-    # browser()
     cov.mat
 }
 
@@ -240,238 +232,156 @@ genZeroList <- function(llen, v.vlen) {
     res
 }
 
-covBam <- function(granges, bam.file, sn.inbam, fraglen, map.qual=20, 
-                   bowtie=F, extr.only=F) {
-# Extract coverage vectors from bam file for a list of genes.
-# Args:
-#   granges: list of GRanges objects representing genomic coordinates 
-#            to extract coverge from. In the case of RNA-seq, each GRanges
-#            object has multiple ranges representing exons and flanking 
-#            regions. In the case of ChIP-seq, each GRanges object has one
-#            range representing left boundary to right boundary.
-#   bam.file: character string refers to the path of a bam file.
-#   sn.inbam: vector of chromosome names in the bam file.
-#   fraglen: fragment length.
-#   map.qual: mapping quality to filter reads.
-#   bowtie: boolean to indicate whether the aligner was Bowtie-like or not.
-#   extr.only: boolean for doing extraction only.
-# Return: list of coverage vectors, each vector represents a gene.
-
-    # browser()
-    g.start <- start(ranges(granges))  # vector of gene start sites.
-    g.end <- end(ranges(granges))  # vector of gene end sites.
-    gb.len <- g.end - g.start + 1
-        
-    # Filter gene ranges based on available chromosomes in bam file.
-    # It seems scanBam will terminate if it querys a chromosome that does not
-    # exist in bam file.
-    inbam.mask <- as.vector(seqnames(granges)) %in% sn.inbam
-    if(!any(inbam.mask)) {  # none matches.
-        return(genZeroList(length(granges), gb.len))
-    }
-
-    # Scan bam file to retrieve short reads.
-    sbw <- c('pos', 'qwidth', 'mapq', 'strand')  # scanBamWhat.
-    sbp <- ScanBamParam(what=sbw, which=granges[inbam.mask], flag=scanBamFlag(
-                        isUnmappedQuery=F, isNotPassingQualityControls=F, 
-                        isDuplicate=F))
-    sr.in.ranges <- tryCatch(scanBam(bam.file, param=sbp), error=function(e) e)
-    if(class(sr.in.ranges)[1] == 'simpleError') {
-        # This is not supposed to happen after those unmatched seqnames are
-        # removed. I keep it for safety.
-        return(genZeroList(length(granges), gb.len))
-    }
-
-    # Restore original order.
-    sr.in.ranges <- sr.in.ranges[scanBamRevOrder(
-                                 as.data.frame(granges[inbam.mask]), sbp)]
-
-    # Calculate coverage for each gene range.
-    scan.counter <- 0
-    covg.allgenes <- vector('list', length(granges))  # coverage list to return.
-    for(i in 1:length(granges)) {
-        if(!inbam.mask[i] || extr.only) {
-            covg.allgenes[[i]] <- Rle(0, gb.len[i])
-            next
-        }
-        scan.counter <- scan.counter + 1
-        # Retrieve short reads info as vectors.
-        srg.pos <- sr.in.ranges[[scan.counter]]$pos
-        srg.mapq <- sr.in.ranges[[scan.counter]]$mapq
-        srg.strand <- sr.in.ranges[[scan.counter]]$strand
-        srg.qwidth <- sr.in.ranges[[scan.counter]]$qwidth
-
-        # Special handling for bowtie mapping.
-        # browser()
-        if(is.na(bowtie) && length(srg.mapq) > 0 && 
-           mean(is.na(srg.mapq)) > .8 || !is.na(bowtie) && bowtie) {
-            srg.mapq[is.na(srg.mapq)] <- 254
-        }
-
-        # Subset by mapping quality.
-        q.mask <- which(!is.na(srg.mapq) & srg.mapq >= map.qual)
-        # q.mask <- which(srg.mapq >= map.qual)
-        srg.pos <- srg.pos[q.mask]
-        srg.strand <- srg.strand[q.mask]
-        srg.qwidth <- srg.qwidth[q.mask]
-
-        if(length(srg.pos) > 0) {
-            # Adjust negative read positions for physical coverage.
-            neg.idx <- srg.strand == '-'
-            srg.pos[neg.idx] <- srg.pos[neg.idx] - fraglen + 
-                                srg.qwidth[neg.idx]
-            
-            # Shift reads by subtracting start positions.
-            srg.pos <- srg.pos - g.start[i] + 1
-            
-            # Calculate physical coverage on the whole genebody.
-            covg.allgenes[[i]] <- coverage(IRanges(start=srg.pos, 
-                                                   width=fraglen), 
-                                           width=gb.len[i], method='sort')
-        } else {
-            covg.allgenes[[i]] <- Rle(0, gb.len[i])
-        }
-    }
-    covg.allgenes
-}
-
-
-covBamExons <- function(granges.list, bam.file, sn.inbam, fraglen, map.qual=20, 
-                        bowtie=F) {
+covBamExons <- function(granges.dat, v.strand, bam.file, sn.inbam, fraglen, 
+                        map.qual=20, bowtie=F, 
+                        strand.spec=c('both', 'same', 'opposite')) {
 # Extract coverage vectors from bam file for a list of transcripts of multiple
 # exons.
 # Args:
-#   granges.list: list of GRanges objects representing genomic coordinates 
-#                 to extract coverge from. Each GRanges object has multiple
-#                 ranges representing exons and flanking regions. 
+#   granges.dat: a GRanges object representing a set of genomic ranges or a 
+#                list of GRanges objects each representing a set of exonic 
+#                ranges. 
+#   v.strand: vector of strand info.
 #   bam.file: character string refers to the path of a bam file.
 #   sn.inbam: vector of chromosome names in the bam file.
 #   fraglen: fragment length.
 #   map.qual: mapping quality to filter reads.
 #   bowtie: boolean to indicate whether the aligner was Bowtie-like or not.
+#   strand.spec: string desc. for strand-specific coverage calculation.
 # Return: list of coverage vectors, each vector represents a transcript.
 
-    # Obtain start and end sites for each gene.
-    v.start <- vector('integer', length=length(granges.list))
-    v.end <- vector('integer', length=length(granges.list))
-    for(i in 1:length(granges.list)) {
-        gr <- granges.list[[i]]
-        v.start[i] <- start(ranges(gr))[1]
-        v.end[i] <- tail(end(ranges(gr)), n=1)
-    }
-    dna.len <- v.end - v.start + 1
+    strand.spec <- match.arg(strand.spec)
 
-    # Obtain mRNA(including flanking) length for each gene.
-    rna.len <- sapply(granges.list, function(g) {
-            gr <- ranges(g)
-            sum(end(gr) - start(gr) + 1)
+    if(class(granges.dat) == 'list') {
+        # Construct a GRanges object representing DNA sequences.
+        v.seqnames <- sapply(granges.dat, 
+                             function(x) as.character(seqnames(x)[1]))
+        v.start <- sapply(granges.dat, function(x) start(ranges(x))[1])
+        v.end <- sapply(granges.dat, function(x) tail(end(ranges(x)), n=1))
+        granges.dna <- GRanges(seqnames=v.seqnames, 
+                               ranges=IRanges(start=v.start, end=v.end))
+        # Obtain mRNA(including flanking) length for each gene.
+        repr.lens <- sapply(granges.dat, function(g) {
+            sum(end(g) - start(g) + 1)
         })
+    } else {
+        v.seqnames <- as.character(seqnames(granges.dat))
+        v.start <- start(granges.dat)
+        v.end <- end(granges.dat)
+        granges.dna <- granges.dat
+        repr.lens <- v.end - v.start + 1
+        granges.dat <- vector('list', length(granges.dna)) # set null tags.
+    }
 
     # Filter transcripts whose chromosomes do not match bam file.
-    trans.sn <- sapply(granges.list, function(t) {
-            as.character(seqnames(t)[1])
-        })
-    inbam.mask <- trans.sn %in% sn.inbam
+    inbam.mask <- as.character(seqnames(granges.dna)) %in% sn.inbam
     if(!any(inbam.mask)) {  # none matches.
-        return(genZeroList(length(granges.list), rna.len))
+        return(genZeroList(length(granges.dna), repr.lens))
     }
 
-    # Flatten the GRanges list for scanBam to process in batch.
-    granges.combined <- do.call('c', granges.list[inbam.mask])
-    sbw <- c('pos', 'qwidth', 'mapq', 'strand')  # scanBamWhat.
-    sbp <- ScanBamParam(what=sbw, which=granges.combined, flag=scanBamFlag(
-                        isUnmappedQuery=F, isNotPassingQualityControls=F, 
-                        isDuplicate=F))
+    # scanBamWhat: the info that need to be extracted from a bam file.
+    sbw <- c('pos', 'qwidth', 'mapq', 'strand', 'rname', 
+             'mrnm', 'mpos', 'isize')
+    sbp <- ScanBamParam(what=sbw, which=granges.dna[inbam.mask], 
+                        flag=scanBamFlag(isUnmappedQuery=F, 
+                                         isNotPassingQualityControls=F, 
+                                         isDuplicate=F))
 
     # Scan bam file to retrieve short reads.
     sr.in.ranges <- tryCatch(scanBam(bam.file, param=sbp), error=function(e) e)
     if(class(sr.in.ranges)[1] == 'simpleError') {
         # This is not supposed to happen after those unmatched seqnames are
         # removed. I keep it for safty.
-        return(genZeroList(length(granges.list), rna.len))
+        return(genZeroList(length(granges.dna), repr.lens))
     }
 
     # Restore the original order.
-    sr.in.ranges <- sr.in.ranges[
-                        scanBamRevOrder(as.data.frame(granges.combined), sbp)
-                    ]
+    sr.in.ranges <- sr.in.ranges[scanBamRevOrder(
+                                 as.data.frame(granges.dna[inbam.mask]), sbp)]
 
-    # Convert each list to data.fram for easy combine and retrieval.
-    sr.in.ranges <- lapply(sr.in.ranges, as.data.frame)
-
-    # Create a list of breaks for merging short reads.
-    v.nranges <- sapply(granges.list[inbam.mask], length)
-    brk.left <- 1
-    brk.right <- -1
-    v.brk.left <- vector('integer', length=length(granges.list[inbam.mask]))
-    v.brk.right <- vector('integer', length=length(granges.list[inbam.mask]))
-    for(i in 1:length(v.nranges)) {
-        brk.right <- brk.left + v.nranges[i] - 1
-        v.brk.left[i] <- brk.left
-        v.brk.right[i] <- brk.right
-        brk.left <- brk.right + 1
-    }
-
-    # Pool short reads that belong to the same transcript and 
-    # calculate coverage.
-    scan.counter <- 0
-    covg.allgenes <- vector('list', length=length(granges.list))
-    for(i in 1:length(granges.list)) {
-        if(!inbam.mask[i]) {
-            covg.allgenes[[i]] <- Rle(0, rna.len[i])
-            next
-        }
-        scan.counter <- scan.counter + 1
-        # Pool short reads from the same transcript.
-        sr.pooled <- do.call('rbind', sr.in.ranges[v.brk.left[scan.counter]:
-                                                   v.brk.right[scan.counter]])
+    CalcReadsCov <- function(srg, start, end, gr.rna, repr.len, strand) {
+    # Calculate short read coverage for each gene/region.
+    # Args:
+    #   srg: extracted short reads in gene.
+    #   start: start position of the DNA sequence.
+    #   end: end position of the DNA sequence.
+    #   gr.rna: GRanges object (multiple ranges) representing exon sequences.
+    #           This can be NULL indicating the input ranges are DNAs.
+    #   repr.len: DNA or mRNA sequence length.
+    #   strand: transcript strand (+/-).
+    # Returns: a coverage vector for the gene.
 
         # Special handling for bowtie mapping.
-        srg.mapq <- sr.pooled$mapq
-        if(is.na(bowtie) && length(srg.mapq) > 0 && 
-           mean(is.na(srg.mapq)) > .8 || !is.na(bowtie) && bowtie) {
-            srg.mapq[is.na(srg.mapq)] <- 254
+        if(bowtie) {
+            with(srg, mapq[is.na(mapq)] <- 254)
+        }
+        # Filter short reads by mapping quality.
+        all.mask <- srg$mapq >= map.qual
+
+        # Subset by strand info.
+        if(strand.spec != 'both') {
+            if(strand.spec == 'same') {
+                s.mask <- srg$strand == as.character(strand)
+            } else {
+                s.mask <- srg$strand != as.character(strand)
+            }
+            all.mask <- all.mask & s.mask
         }
 
-        # Filter short reads by mapping quality.
-        sr.pooled <- sr.pooled[!is.na(srg.mapq) & srg.mapq >= map.qual, ]
+        # If paired, filter reads that are not properly paired.
+        paired <- all(with(srg, is.na(isize) | isize != 0))
+        if(paired) {
+            p.mask <- with(srg, rname == mrnm & xor(strand == '+', isize < 0))
+            all.mask <- all.mask & p.mask
+        }
+
+        # Apply all the filters on short reads.
+        srg <- lapply(srg, `[`, which(all.mask))
 
         # Calculate coverage.
-        if(nrow(sr.pooled) > 0) {
-            # Adjust negative read positions for physical coverage.
-            neg.idx <- sr.pooled$strand == '-'
-            sr.pooled[neg.idx, ]$pos <- sr.pooled[neg.idx, ]$pos - fraglen + 
-                                        sr.pooled[neg.idx, ]$qwidth
-            
-            # Shift reads by subtracting start positions.
-            sr.pooled$pos <- sr.pooled$pos - v.start[i] + 1
-            
-            # Shift ranges by subtracting start positions.
-            # BE careful with negative start positions! Need to adjust end
-            # positions first(or the GRanges lib will emit errors if 
-            # start > end). 
-            # Negative start positions happen when flanking region exceeds 
-            # the chromosomal start.
-            gr <- ranges(granges.list[[i]])
-            if(v.start[i] > 0) {
-                start(gr) <- start(gr) - v.start[i] + 1
-                end(gr) <- end(gr) - v.start[i] + 1
+        if(length(srg[[1]]) > 0) {
+            if(paired) {
+                cov.pos <- with(srg, ifelse(isize < 0, mpos, pos))
+                cov.wd <- abs(srg$isize)
             } else {
-                end(gr) <- end(gr) - v.start[i] + 1
-                start(gr) <- start(gr) - v.start[i] + 1
+                # Adjust negative read positions for physical coverage.
+                cov.pos <- with(srg, ifelse(strand == '-', 
+                                            pos - fraglen + qwidth, pos))
+                cov.wd <- fraglen
             }
-            
+            # Shift reads by subtracting start positions.
+            cov.pos <- cov.pos - start + 1
             # Calculate physical coverage on the whole genebody.
-            covg <- coverage(IRanges(start=sr.pooled$pos, width=fraglen), 
-                             width=dna.len[i], method='sort')
-            
-            # Concatenate all exon coverages.
-            covg.allgenes[[i]] <- seqselect(covg, gr)
+            covg <- coverage(IRanges(start=cov.pos, width=cov.wd), 
+                             width=end - start + 1, method='sort')
+
+            if(!is.null(gr.rna)) {  # RNA-seq.
+                # Shift exonic ranges by subtracting start positions.
+                # BE careful with negative start positions! Need to adjust end
+                # positions first(or the GRanges lib will emit errors if 
+                # start > end). 
+                # Negative start positions happen when flanking region exceeds 
+                # the chromosomal start.
+                if(start > 0) {
+                    start(gr.rna) <- start(gr.rna) - start + 1
+                    end(gr.rna) <- end(gr.rna) - start + 1
+                } else {
+                    end(gr.rna) <- end(gr.rna) - start + 1
+                    start(gr.rna) <- start(gr.rna) - start + 1
+                }
+                # Concatenate all exon coverages.
+                covg[ranges(gr.rna)]
+            } else {  # ChIP-seq.
+                covg
+            }
         } else {
-            covg.allgenes[[i]] <- Rle(0, rna.len[i])
+            Rle(0, repr.len)
         }
     }
-    covg.allgenes
+
+    covg.allgenes <- mapply(CalcReadsCov, srg=sr.in.ranges, 
+                            start=v.start, end=v.end, gr.rna=granges.dat, 
+                            repr.len=repr.lens, strand=v.strand, SIMPLIFY=F)
 }
 
 bamFileList <- function(ctg.tbl) {
@@ -492,9 +402,30 @@ bamFileList <- function(ctg.tbl) {
         stop("No mix of bam and bam-pair allowed in configuration.\n")
     }
 
-    list(bbp=bbp, bam.list=unlist(cov.list))
+    list(bbp=bbp, bam.list=unique(unlist(cov.list)))
 }
 
+estiMapqStyle <- function(bam.file){
+# Estimate the mapping quality style. Return TRUE if it is SAM standard.
+# Sample 1000 mapped reads from bam file, and if the mapq of reads
+# over half are NA, then return FALSE, because it is quite possible that
+# the aligner using coding style as bowtie, 255 as highest score.
+# Args:
+#   bam.file: bam file to be sampled.
+
+    sbw <- c('pos', 'qwidth', 'mapq', 'strand')
+    sbp <- ScanBamParam(what=sbw, flag=scanBamFlag(
+                        isUnmappedQuery=F, isDuplicate=F))
+    samp <- BamSampler(bam.file, yieldSize=500)
+    samp.reads <- scanBam(samp, param=sbp)[[1]]
+    samp.len <- length(samp.reads[["mapq"]])
+    mapq.255 <- sum(is.na(samp.reads[["mapq"]]))
+    if(mapq.255/samp.len >= 0.5){
+        return(FALSE)
+    }else{
+        return(TRUE)
+    }
+}
 
 headerIndexBam <- function(bam.list) {
 # Read bam header to determine mapping method.
@@ -516,12 +447,39 @@ headerIndexBam <- function(bam.list) {
         map.prog <- try(strsplit(header[[1]]$text$'@PG'[[1]], ':')[[1]][2], 
                         silent=T)
         if(class(map.prog) != "try-error") {
-            v.map.bowtie[i] <- grepl('tophat|bowtie|bedtools|star', map.prog, 
+            map.style <- grepl('tophat|bowtie|bedtools|star', map.prog, 
                                      ignore.case=T)
+            if(map.style){
+                v.map.bowtie[i] <- TRUE
+                next
+            }
+            map.style <- grepl('bwa|casava', map.prog, 
+                                     ignore.case=T)
+            if(map.style){
+                v.map.bowtie[i] <- FALSE
+                next
+            }
+            if(estiMapqStyle(bam.file)){
+                warning(sprintf("Aligner for: %s cannot be determined. Style of 
+standard SAM mapping score will be used.", bam.file))
+                v.map.bowtie[i] <- FALSE
+            }else{
+                warning(sprintf("Aligner for: %s cannot be determined. Style of 
+Bowtie-like SAM mapping score will be used. Would you mind to tell us what 
+aligner you are using?", bam.file))
+                v.map.bowtie[i] <- TRUE
+            }
         } else {
             cat("\n")
-            warning(sprintf("Aligner for: %s cannot be determined. Will automatically convert mapping scores of 255.", bam.file))
-            v.map.bowtie[i] <- NA
+            if(estiMapqStyle(bam.file)){
+                warning(sprintf("Aligner for: %s cannot be determined. Style of 
+standard SAM mapping score will be used.", bam.file))
+                v.map.bowtie[i] <- FALSE
+            }else{
+                warning(sprintf("Aligner for: %s cannot be determined. Style of 
+Bowtie-like SAM mapping score will be used.", bam.file))
+                v.map.bowtie[i] <- TRUE
+            }
         }
     }
     names(v.map.bowtie) <- bam.list
@@ -605,10 +563,11 @@ chunkIndex <- function(tot.gene, gcs) {
     chkidx.list
 }
 
-covMatrix <- function(chkidx.list, coord, rnaseq.gb, exonmodel, libsize, 
+covMatrix <- function(debug, chkidx.list, coord, rnaseq.gb, exonmodel, libsize, 
                       spit.dot=T, ...) {
 # Function to generate a coverage matrix for all genes.
 # Args:
+#   debug: boolean tag for debugging.
 #   chkidx.list: list of (start, end) indices for each chunk.
 #   coord: dataframe of gene coordinates.
 #   rnaseq.gb: boolean for RNA-seq genebody plot.
@@ -617,48 +576,51 @@ covMatrix <- function(chkidx.list, coord, rnaseq.gb, exonmodel, libsize,
 #   spit.dot: boolean to control sptting '.' to consoles.
 # Return: normalized coverage matrix for all genes, each row represents a gene.
 
-    
-    # Extract coverage and combine into a matrix.
-    result.matrix <- foreach(chk=chkidx.list, .combine='rbind', 
-                             .multicombine=T) %dopar% {
-        if(spit.dot) {
+
+    if(!debug) {
+        # Extract coverage and combine into a matrix.
+        result.matrix <- foreach(chk=chkidx.list, .combine='rbind', 
+                                 .multicombine=T) %dopar% {
+            if(spit.dot) {
+                cat(".")
+            }
+            i <- chk[1]:chk[2]  # chunk: start -> end
+            # If RNA-seq, retrieve exon ranges.
+            if(rnaseq.gb) {
+                exonranges.list <- unlist(exonmodel[coord[i, ]$tid])
+            } else {
+                exonranges.list <- NULL
+            }
+            doCov(coord[i, ], exonranges.list, ...)
+        }
+
+        # Floor negative values which are caused by spline.
+        result.matrix[result.matrix < 0] <- 0
+        result.matrix / libsize * 1e6  # normalize to RPM.
+
+    } else {
+        for(c in 1:length(chkidx.list)) {
+            chk <- chkidx.list[[c]]
+            i <- chk[1]:chk[2]  # chunk: start -> end
             cat(".")
+            # If RNA-seq, retrieve exon ranges.
+            if(rnaseq.gb) {
+                exonranges.list <- unlist(exonmodel[coord[i, ]$tid])
+            } else {
+                exonranges.list <- NULL
+            }
+            cov <- doCov(coord[i, ], exonranges.list, ...)
+            if(c == 1) {
+                result.matrix <- matrix(0, nrow=nrow(coord), ncol=ncol(cov))
+            }
+            result.matrix[i, ] <- cov
         }
-        i <- chk[1]:chk[2]  # chunk: start -> end
-        # If RNA-seq, retrieve exon ranges.
-        if(rnaseq.gb) {
-            exonranges.list <- unlist(exonmodel[coord[i, ]$tid])
-        } else {
-            exonranges.list <- NULL
-        }
-        doCov(coord[i, ], exonranges.list, ...)
+        # Floor negative values which are caused by spline.
+        # browser()
+        result.matrix[result.matrix < 0] <- 0
+        result.matrix / libsize * 1e6  # normalize to RPM.
+
     }
-
-    # Floor negative values which are caused by spline.
-    result.matrix[result.matrix < 0] <- 0
-    result.matrix / libsize * 1e6  # normalize to RPM.
-
-
-    ########### For debug #############
-    # pts <- m.pts + 2 * f.pts - 2
-    # result.matrix <- matrix(0, nrow=nrow(coord), ncol=101)
-    # for(c in 1:length(chkidx.list)) {
-    #     chk <- chkidx.list[[c]]
-    #     i <- chk[1]:chk[2]  # chunk: start -> end
-    #     cat(".")
-    #     # If RNA-seq, retrieve exon ranges.
-    #     if(rnaseq.gb) {
-    #         exonranges.list <- unlist(exonmodel[coord[i, ]$tid])
-    #     } else {
-    #         exonranges.list <- NULL
-    #     }
-    #     browser()
-    #     result.matrix[i, ] <- doCov(coord[i, ], exonranges.list, ...)
-    # }
-    # # Floor negative values which are caused by spline.
-    # result.matrix[result.matrix < 0] <- 0
-    # result.matrix / libsize * 1e6  # normalize to RPM.
-    ########### For debug #############
 }
 
 

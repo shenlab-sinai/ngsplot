@@ -21,6 +21,10 @@ cmd.help <- function(){
     cat("  -P   Options for -M method.\n")
     cat("       mean: [0,0.5) - trim value for robust estimation, default is 0.\n")
     cat("       window: [0,0.5),(0.5,1] - window borders, default:0.33,0.66.\n")
+    cat("  -D   Options for distance calculation in hierarchical cluster.\n")
+    cat("       This must be one of 'euclidean'(default), 'maximum', 'manhattan', 'canberra', 'binary' or 'minkowski'.\n")
+    cat("  -H   Options for agglomeration method in hierarchical cluster.\n")
+    cat("       This must be one of 'ward'(default), 'single', 'complete', 'average', 'mcquitty', 'median' or 'centroid'.")
     cat("\n")
 }
 
@@ -88,6 +92,18 @@ if('-P' %in% names(args.tbl)){
         window.borders <- c(as.numeric(window.pair[1]), as.numeric(window.pair[2]))
     }
 }
+if('-D' %in% names(args.tbl)){
+    stopifnot(args.tbl['-D'] %in% c('euclidean', 'maximum', 'manhattan', 'canberra', 'binary', 'minkowski'))
+    dist.meth <- args.tbl['-D']
+}else{
+    dist.meth <- 'euclidean'
+}
+if('-H' %in% names(args.tbl)){
+    stopifnot(args.tbl['-H'] %in% c('ward', 'single', 'complete', 'average', 'mcquitty', 'median', 'centroid'))
+    hclust.meth <- args.tbl['-H']
+}else{
+    hclust.meth <- 'ward'
+}
 
 # Load plotting parameters and data.
 ifolder <- sub('.zip$', '', basename(iname))
@@ -96,10 +112,9 @@ if(ifolder == basename(iname)) {
 }
 load(unz(iname, file.path(ifolder, 'heatmap.RData')))
 
-# getRowSums <- function(x){	
-# 	row.sum.x <- rowSums(x)
-# 	return(row.sum.x)
-# }
+if(length(enrichList) < 2){
+    stop("plotCorrGram is only available for one input file containing at least two samples!\n")
+}
 
 getRowMeans <- function(x, mean.trim=0, na.rm=TRUE){
     row.mean.x <- apply(x, 1, mean, trim=mean.trim, na.rm=na.rm)
@@ -152,4 +167,13 @@ write.csv(spearman$p, file=paste(oname, "_spearman_pvalue.csv", sep=''))
 # plot corrgram
 pdf(file=paste(oname, ".pdf", sep=''))
 corrgram(value.matrix, upper.panel=panel.pie, lower.panel=panel.ellipse)
+
+value.pca <- prcomp(t(value.matrix))
+plot(value.pca$x[,1], value.pca$x[,2], col="red", pch=18, xlab="PC1", ylab="PC2")
+text(value.pca$x[,1], value.pca$x[,2], labels=colnames(value.matrix))
+
+value.dist <- dist(t(value.matrix), method=dist.meth)
+value.hclust <- hclust(value.dist, method=hclust.meth)
+plot(value.hclust)
+
 dev.off()

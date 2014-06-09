@@ -3,7 +3,12 @@
 # default.tbl and dbfile.tbl.
 
 args <- commandArgs(T)
-gname.to.rm <- args[1]
+if(length(args)>1){
+	gname.to.rm <- args[1]
+	feature.to.rm <- args[2]
+}else{
+	gname.to.rm <- args[1]
+}
 
 # Save to text output.
 progpath <- Sys.getenv('NGSPLOT')
@@ -15,8 +20,14 @@ dbfile.file <- file.path(progpath, 'database', 'dbfile.tbl')
 default.tbl <- read.delim(default.file)
 dbfile.tbl <- read.delim(dbfile.file)
 
-default.tbl <- default.tbl[default.tbl$Genome != gname.to.rm, ]
-dbfile.tbl <- dbfile.tbl[dbfile.tbl$Genome != gname.to.rm, ]
+if(exists("feature.to.rm")){
+	default.tbl <- subset(default.tbl, !(Genome==gname.to.rm & Region==feature.to.rm))
+	dbfile.tbl <- subset(dbfile.tbl, !(Genome==gname.to.rm & Region==feature.to.rm))
+}else{
+	default.tbl <- default.tbl[default.tbl$Genome != gname.to.rm, ]
+	dbfile.tbl <- dbfile.tbl[dbfile.tbl$Genome != gname.to.rm, ]	
+}
+
 
 write.table(default.tbl, file=default.file, row.names=F, sep="\t", quote=F)
 write.table(dbfile.tbl, file=dbfile.file, row.names=F, sep="\t", quote=F)

@@ -69,11 +69,11 @@ for line in in_f:
         fi_3 = "protein_coding"
     elif (region == "enhancer") and (genome == "hg19"):
         fi_1 = "H1hesc"
-        fi_2 = "NA"
+        fi_2 = "genebody"
         fi_3 = "protein_coding"
     elif (region == "enhancer") and (genome == "mm9"):
         fi_1 = "mESC"
-        fi_2 = "NA"
+        fi_2 = "genebody"
         fi_3 = "protein_coding"
     out_f.write("\t".join([genome, defaultDB, region, fi_1, fi_2, fi_3, \
                 pointLabDict[region], str(flankDict[region])]) + "\n")

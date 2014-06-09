@@ -1,9 +1,33 @@
 Revision history for ngs.plot.
 ==============================
 
-Recent:
+2.41 June 9, 2014
+  Major changes:
+    - Add rank-based normalization as a preprocessing step in clustering.
+    - Add K-means clustering.
+    - Add support for strand-specific sequencing data.
+    - Add support for paired-end sequencing data.
+    - Enhance the speed of RNA-seq coverage calculation by two folds.
+    - Allow enhancers and DHSs as additional features in a genomic database.
+    - Add a script to generate corrgrams between samples.
+  Minor changes:
+    - Remove PCA as a clustering method.
     - Fix some permission and program argument issues that can cause problems 
       in galaxy installation.
+    - Fix a problem that custom bed files cannot be read in Galaxy.
+    - Explicitly create count files in current working directory, regardless 
+      of bam file locations.
+    - Galaxy portability fix: remove hardcoded path from 'system' call.
+    - Fix STAR aligner 255 quality score issue.
+    - Add a function to automatically infer quality score style when the short 
+      read aligner cannot be determined. 
+    - Fix an issue of exception caused by quote or comment symbol in bed file.
+    - Remove the "remove zero profiles" function (which only causes confusion).
+    - Fix single gene plotting error, i.e. deal with the boundary cases where
+      the heatmap data contains only single gene.
+    - Add support for custom Y-axis scale.
+    - Adjust margin size in a heatmap according to font size.
+    - Adjust heatmap heights according to the actual number of regions to plot.
 
 2.08 November 13, 2013
     - Changed the pseudo-count calculation method in bam-pair. The new method 

@@ -65,6 +65,7 @@ def read_gnlist(root_path, mode):
        Returns: (header split vector, hash table of installed genomes, 
                  vector of column widths)
     """
+    from collections import defaultdict
 
     gn_list = root_path + "/database/gn_list.txt"
     try:
@@ -74,13 +75,31 @@ def read_gnlist(root_path, mode):
               format(gn_list)
         sys.exit()
 
+    default_list = root_path + "/database/default.tbl"
+    try:
+        default_f = open(default_list, "r")
+    except IOError:
+        print "Open {0} error: your ngs.plot database may be corrupted.".\
+              format(default_list)
+        sys.exit()
+    default_l = []
+    header = default_f.readline() # skip the header
+    for rec in default_f:
+        r_sp = rec.rstrip().split("\t")
+        default_l.append((r_sp[0], r_sp[2])) # tuple of genome and region, like ("dm3", "genebody")
+    genome_region_dict = defaultdict(list)
+    for genome,region in default_l:
+        genome_region_dict[genome].append(region)
+
     header = db_f.readline()
     h_sp = header.rstrip().split("\t")
+    h_sp.append("InstalledFeatures")
     v_cw = map(len, h_sp)  # column widths initialize to header widths.
 
     g_tbl = {}
     for rec in db_f:
         r_sp = rec.rstrip().split("\t")
+        r_sp.append(",".join(genome_region_dict[r_sp[0]]))
         r_cw = map(len, r_sp)
         v_cw = map(max, v_cw, r_cw)
 
@@ -175,6 +194,34 @@ def listgn(root_path, args):
     for k in sorted(g_tbl.viewkeys(), key=str.lower):
         print "".join(map(lambda x, y: x.ljust(y), g_tbl[k], v_cw))
 
+def isExAnno(pkg_files):
+    """If the package is an extension package based on cell lines for ngs.plot, 
+       like enhancer or dhs.
+
+       Args:
+         pkg_files: list of files in the package.
+       Returns:
+         isEx: Bool, if the package is an extension package.
+         feature: string, feature name contained in the extension package. None
+                  if not an extension package.
+         RDcount: number of RData tables in the package.
+    """
+
+    import os.path
+
+    exclusive_files = [".chrnames.refseq", ".chrnames.ensembl", ".metainfo"]
+    isEx = False
+    RDcount = 0
+    feature = None
+    for file_name in pkg_files:
+        if os.path.basename(file_name) in exclusive_files:
+            continue
+        if (not file_name.endswith("RData")) and (file_name.count("/")) > 0:
+            isEx = True
+            feature = file_name.split("/")[1]
+        elif file_name.endswith("RData"):
+            RDcount += 1
+    return (isEx, feature, RDcount)
 
 def install(root_path, args):
     """Interactive session for installing genome from package file.
@@ -206,7 +253,12 @@ def install(root_path, args):
     pkg_files = pkg_f.getnames()
     g_folder = pkg_files[0]
     # Minus folder name and .metainfo file name.
-    print "contains " + str(len(pkg_files) - 2) + " tables."
+    (isEx, feature, RDcount) = isExAnno(pkg_files)
+    if isEx:
+        print feature + " extension package, ",
+        print "contains " + str(RDcount + 2) + " tables."
+    else:
+        print "contains " + str(RDcount + 2) + " tables."
     # .metainfo file:
     # "ID"<TAB>mm10
     # "Assembly"<TAB>GRCm38
@@ -238,6 +290,38 @@ def install(root_path, args):
     if gn_inst in g_tbl:
         installed_ens = float(g_tbl[gn_inst]["EnsVer"])
         installed_np = float(g_tbl[gn_inst]["NPVer"])
+
+        # For extension package.
+        # Only the same version with basic package could be installed.
+        if isEx:
+            if ens_ver == installed_ens and np_ver == installed_np:
+                print "Will upgrade the genome {0} with {1} annotation:".format(gn_inst, \
+                    feature),
+                print "Ensembl: {0}; ngs.plot: {1}.".\
+                    format(installed_ens, np_ver)
+                if yestoall:
+                    install_pkg(root_path, pkg_file, gn_inst)
+                    update_gnlist(root_path, g_tbl, gn_inst, assembly, \
+                        species, ens_ver, np_ver)
+                else:
+                    ans = raw_input("Continue?(y/n): ")
+                    while True:
+                        if(ans == "y" or ans == "Y" or ans == "n" or ans == "N"):
+                            break
+                        else:
+                            ans = raw_input("Answer must be y/Y or n/N: ")
+                    if(ans == "y" or ans == "Y"):
+                        install_pkg(root_path, pkg_file, gn_inst)
+                        update_gnlist(root_path, g_tbl, gn_inst, assembly, \
+                            species, ens_ver, np_ver)
+                return
+            else:
+                print "This is an extension package of " + feature + \
+                    ", ENS version " + str(ens_ver) + ", NPVer" + str(np_ver) + \
+                    ", please install the same version basic genome annotation first!"
+                return
+
+        # For basic package.
         # Install a newer version.
         if ens_ver > installed_ens or \
            ens_ver == installed_ens and np_ver > installed_np:
@@ -280,6 +364,7 @@ def install(root_path, args):
                     install_pkg(root_path, pkg_file, gn_inst, gn_inst)
                     update_gnlist(root_path, g_tbl, gn_inst, assembly, \
                                   species, ens_ver, np_ver)
+    # Totally new installation, only basic package could be installed.
     else:
         print "Will install new genome {0}:".format(gn_inst),
         print "Ensembl=> v{0}; ngs.plot=> v{1}.".format(ens_ver, np_ver),
@@ -364,6 +449,8 @@ def add_dbtbl(root_path, gn):
     # Obtain a list of .RData file names to extract info from.
     all_rdata = root_path + '/database/{0}/{1}*.RData'.format(gn, gn)
     all_set = set(map(os.path.basename, glob.glob(all_rdata)))
+    all_rdata = root_path + '/database/{0}/*/{1}*.RData'.format(gn, gn)
+    all_set = all_set | set(map(os.path.basename, glob.glob(all_rdata)))
     exm_rdata = root_path + '/database/{0}/{1}*exonmodel*.RData'.format(gn, gn)
     exm_set = set(map(os.path.basename, glob.glob(exm_rdata)))
     nex_list = sorted(list(all_set - exm_set))
@@ -414,11 +501,13 @@ def remove(root_path, args):
     import sys
 
     yestoall = args.yes
+    sub_ftr = args.ftr
 
     (h_sp, g_tbl, v_cw) = read_gnlist(root_path, "hash")
+ 
     gn = args.gn
 
-    if gn in g_tbl:
+    if gn in g_tbl and sub_ftr is None:
         print "Will remove genome {0} from database.".format(gn),
         do_rm = False
         if yestoall:
@@ -441,11 +530,34 @@ def remove(root_path, args):
             write_gnlist(root_path, g_tbl)
             rm_dbtbl(root_path, gn)
             print "Done"
+    elif gn in g_tbl and sub_ftr is not None:
+        print "Will remove genomic feature {0} of genome {1} from database."\
+            .format(sub_ftr, gn)
+        do_rm = False
+        if yestoall:
+            do_rm = True
+        else:
+            ans = raw_input("Continue?(y/n): ")
+            while True:
+                if ans == 'y' or ans == 'Y' or ans == 'n' or ans == 'N':
+                    break
+                else:
+                    ans = raw_input("The answer must be y/Y or n/N: ")
+            if ans == 'y' or ans == 'Y':
+                do_rm = True
+        if do_rm:
+            folder_to_rm = root_path + "/database/" + gn + "/" + sub_ftr
+            print "Removing genome...",
+            sys.stdout.flush()
+            shutil.rmtree(folder_to_rm)
+            # g_tbl does't need to be updated
+            rm_dbtbl(root_path, gn, sub_ftr)
+            print "Done"
     else:
         print "Cannot find the genome in database. Nothing was done."
 
 
-def rm_dbtbl(root_path, gn):
+def rm_dbtbl(root_path, gn, sub_ftr=None):
     """Remove a genome from database meta tables.
 
        Args:
@@ -456,7 +568,10 @@ def rm_dbtbl(root_path, gn):
 
     import subprocess
 
-    subprocess.call(["remove.db.tables.r", gn])
+    if sub_ftr is None:
+        subprocess.call(["remove.db.tables.r", gn])
+    else:
+        subprocess.call(["remove.db.tables.r", gn, sub_ftr])
 
 def chrnames(root_path, args):
     """List chromosome names for a given genome.
@@ -536,6 +651,9 @@ if __name__ == "__main__":
                                           help="Remove genome from database")
     parser_remove.add_argument("gn", help="Name of genome to be \
                                            removed(e.g. hg18)", type=str)
+    parser_remove.add_argument("--ftr", help="Remove cellline specific features \
+                                            (enhancer, dhs, etc)", type=str,\
+                                            default=None)
     parser_remove.set_defaults(func=remove)
 
     # ngsplotdb.py chromosome names parser.

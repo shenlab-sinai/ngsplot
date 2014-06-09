@@ -6,7 +6,7 @@ BINCUFF=bin/alter2bed.pl bin/combine_diff.pl bin/coordinat.pl \
 # ngs.plot R executable R scripts.
 BINNGSP=bin/ngs.plot.r bin/replot.r bin/ngsplotdb.py \
 		bin/install.db.tables.r bin/remove.db.tables.r \
-		bin/setTableDefaults.py
+		bin/setTableDefaults.py bin/plotCorrGram.r
 
 # ngs.plot R libs.
 LIB=lib/parse.args.r lib/plotlib.r lib/coverage.r lib/genedb.r

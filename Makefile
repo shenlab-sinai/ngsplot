@@ -21,7 +21,7 @@ OTHERS=database example README Changes galaxy
 DISTFOLDER=ngsplot
 
 # ngs.plot current version
-CURVER := $(shell grep 'ngsplot.version' bin/ngs.plot.r |grep -oE '[0-9]\.[0-9]+')
+CURVER := $(shell grep 'ngsplot.version' bin/ngs.plot.r |grep -oE '[0-9]\.[0-9]+(\.[0-9]+)?')
 
 # example bam files.
 BAM=example.bam

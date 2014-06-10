@@ -232,7 +232,7 @@ genXticks <- function(reg2plot, pint, lgint, pts, flanksize, flankfactor,
     list(pos=tick.pos, lab=tick.lab)
 }
 
-plotmat <- function(regcovMat, title2plot, plot.colors, bam.pair, xticks, 
+plotmat <- function(regcovMat, title2plot, plot.colors, bam.pair, subtr, xticks, 
                     pts, m.pts, f.pts, pint, shade.alp=0, confiMat=NULL, mw=1, 
                     misc.options=list(yscale='auto', legend=T, box=T, vline=T, 
                                       xylab=T, line.wd=3)) {
@@ -242,6 +242,7 @@ plotmat <- function(regcovMat, title2plot, plot.colors, bam.pair, xticks,
 #   title2plot: profile names, will be shown in figure legend.
 #   plot.colors: vector of color specifications for all curves.
 #   bam.pair: boolean for bam-pair data.
+#   subtr: boolean for using subtraction.
 #   xticks: X-axis ticks.
 #   pts: data points
 #   m.pts: middle part data points
@@ -275,8 +276,15 @@ plotmat <- function(regcovMat, title2plot, plot.colors, bam.pair, xticks,
     col2use <- col2alpha(col2use, 0.8)
 
     # Plot profiles.
-    ytext <- ifelse(bam.pair, "log2(Fold change vs. control)", 
-                              "Read count Per Million mapped reads")
+    if(bam.pair && subtr) {
+        ytext <- "RPM(target) - RPM(control)"
+    } else if(bam.pair) {
+        ytext <- "log2(Fold change vs. control)"
+    } else {
+        ytext <- "Read count Per Million mapped reads(RPM)"
+
+    }
+    
     xrange <- 0:pts
     y.lim <- NULL
     if(length(misc.options$yscale) == 2) {

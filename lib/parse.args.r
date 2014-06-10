@@ -227,6 +227,22 @@ CoverageVars <- function(args.tbl, reg2plot) {
         vl$fi_tag <- as.integer(0)
     }
 
+    #### Pseudo count. ####
+    if('-PC' %in% names(args.tbl)){ 
+        stopifnot(as.numeric(args.tbl['-PC']) >= 0)
+        vl$pcnt <- as.numeric(args.tbl['-PC'])
+    }else{
+        vl$pcnt <- as.integer(1)
+    }
+
+    #### Boolean for using subtraction. ####
+    if('-SU' %in% names(args.tbl)){ 
+        stopifnot(as.integer(args.tbl['-SU']) >= 0)
+        vl$subtr <- as.integer(args.tbl['-SU'])
+    }else{
+        vl$subtr <- as.integer(0)
+    }
+
     vl
 }
 
@@ -500,6 +516,8 @@ EchoCoverageArgs <- function() {
     cat("  -SS  Strand-specific coverage calculation: both(default), same, opposite\n")
     cat("  -IN  Shall interval be larger than flanking in plot?(0 or 1, default=automatic)\n")
     cat("  -FI  Forbid image output if set to 1(default=0)\n")
+    cat("  -PC  Pseudo count(default=1). If set 0, no pseudo count is used.\n")
+    cat("  -SU  In bam-pair mode, use subtraction instead of log2-ratio(default=0)\n")
 }
 ############### End arguments configuration #####################
 #################################################################

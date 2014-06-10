@@ -184,7 +184,7 @@ for(r in 1:nrow(ctg.tbl)) {  # r: index of plots/profiles.
     # Obtain bam file basic info.
     libsize <- v.lib.size[bam.files[1]]
     v.low.cutoff[r] <- low.count / libsize * 1e6
-    result.pseudo.rpm <- 1e6 / libsize
+    result.pseudo.rpm <- pcnt*1e6 / libsize
     sn.inbam <- sn.list[[bam.files[1]]]
     chr.tag <- chrTag(sn.inbam)
     is.bowtie <- v.map.bowtie[bam.files[1]]
@@ -203,7 +203,7 @@ for(r in 1:nrow(ctg.tbl)) {  # r: index of plots/profiles.
     if(bam.pair) {  # calculate background.
         fraglen2 <- ifelse(length(fraglens) > 1, fraglens[2], fraglens[1])
         libsize <- v.lib.size[bam.files[2]]
-        bkg.pseudo.rpm <- 1e6 / libsize
+        bkg.pseudo.rpm <- pcnt*1e6 / libsize
         sn.inbam <- sn.list[[bam.files[2]]]
         chr.tag <- chrTag(sn.inbam)
         is.bowtie <- v.map.bowtie[bam.files[2]]
@@ -217,8 +217,12 @@ for(r in 1:nrow(ctg.tbl)) {  # r: index of plots/profiles.
                                 fraglen2, map.qual, is.bowtie, 
                                 strand.spec=strand.spec)
         # browser()
-        result.matrix <- log2((result.matrix + result.pseudo.rpm) / 
-                              (bkg.matrix + bkg.pseudo.rpm))
+        if(subtr) {
+            result.matrix <- result.matrix - bkg.matrix
+        } else {
+            result.matrix <- log2((result.matrix + result.pseudo.rpm) / 
+                                  (bkg.matrix + bkg.pseudo.rpm))
+        }
     }
 
     # Calculate SEM if needed. Shut off SEM in single gene case.
@@ -258,8 +262,8 @@ if(!fi_tag){
         out.plot <- paste(oname, '.avgprof.pdf', sep='')
     }
     pdf(out.plot, width=plot.width, height=plot.height, pointsize=font.size)
-    plotmat(regcovMat, ctg.tbl$title, ctg.tbl$color, bam.pair, xticks, pts, 
-            m.pts, f.pts, pint, shade.alp, confiMat, mw, prof.misc)
+    plotmat(regcovMat, ctg.tbl$title, ctg.tbl$color, bam.pair, subtr, xticks, 
+            pts, m.pts, f.pts, pint, shade.alp, confiMat, mw, prof.misc)
     out.dev <- dev.off()
 
     #### Heatmap. ####

@@ -68,10 +68,6 @@ CheckRegionAllowed(reg2plot, default.tbl)
 # Setup variables from arguments.
 cov.args <- CoverageVars(args.tbl, reg2plot)
 attach(cov.args)
-if(galaxy) {  # tag for Galaxy use.
-    avgname <- argvar.list$avgname
-    heatmapname <- argvar.list$heatmapname
-}
 plot.args <- PlotVars(args.tbl)
 attach(plot.args)
 

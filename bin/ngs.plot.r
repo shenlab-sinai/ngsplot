@@ -11,7 +11,7 @@
 # library(compiler)
 # enableJIT(3)
 
-ngsplot.version <- '2.41.1'
+ngsplot.version <- '2.41.2'
 # Program environment variable.
 progpath <- Sys.getenv('NGSPLOT')
 if(progpath == "") {
@@ -68,10 +68,6 @@ CheckRegionAllowed(reg2plot, default.tbl)
 # Setup variables from arguments.
 cov.args <- CoverageVars(args.tbl, reg2plot)
 attach(cov.args)
-if(galaxy) {  # tag for Galaxy use.
-    avgname <- argvar.list$avgname
-    heatmapname <- argvar.list$heatmapname
-}
 plot.args <- PlotVars(args.tbl)
 attach(plot.args)
 

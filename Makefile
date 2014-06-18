@@ -6,7 +6,7 @@ BINCUFF=bin/alter2bed.pl bin/combine_diff.pl bin/coordinat.pl \
 # ngs.plot R executable R scripts.
 BINNGSP=bin/ngs.plot.r bin/replot.r bin/ngsplotdb.py \
 		bin/install.db.tables.r bin/remove.db.tables.r \
-		bin/setTableDefaults.py
+		bin/setTableDefaults.py bin/plotCorrGram.r
 
 # ngs.plot R libs.
 LIB=lib/parse.args.r lib/plotlib.r lib/coverage.r lib/genedb.r
@@ -21,7 +21,7 @@ OTHERS=database example README Changes galaxy
 DISTFOLDER=ngsplot
 
 # ngs.plot current version
-CURVER := $(shell grep 'ngsplot.version' bin/ngs.plot.r |grep -oE '[0-9]\.[0-9]+')
+CURVER := $(shell grep 'ngsplot.version' bin/ngs.plot.r |grep -oE '[0-9]\.[0-9]+(\.[0-9]+)?')
 
 # example bam files.
 BAM=example.bam
@@ -38,6 +38,7 @@ ngsplot-$(CURVER).tar.gz: $(BINCUFF) $(BINNGSP) $(LIB) $(OTHERS)
 	cp -rL $(LIB) ${DISTFOLDER}/lib
 	cp -rL $(OTHERS) ${DISTFOLDER}
 	find ${DISTFOLDER}/ -name '.svn'|xargs -I% rm -r %
+	find ${DISTFOLDER}/ -name '.git'|xargs -I% rm -r %
 	# Remove comments and blank lines from *.r files.
 	# for r in ${ALLR}; do \
 	# 	sed '2,+10000 s/^\s*#.*//' ${DISTFOLDER}/$$r|sed '/^$$/ c\' > tmp; \

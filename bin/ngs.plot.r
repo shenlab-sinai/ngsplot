@@ -11,7 +11,7 @@
 # library(compiler)
 # enableJIT(3)
 
-ngsplot.version <- '2.41.2'
+ngsplot.version <- '2.41.3'
 # Program environment variable.
 progpath <- Sys.getenv('NGSPLOT')
 if(progpath == "") {
@@ -47,7 +47,7 @@ cmd.help <- function(){
 ###########################################################################
 #################### Deal with program input arguments ####################
 args <- commandArgs(T)
-# args <- unlist(strsplit('-G hg19 -R tss -C hesc.H3k4me3.Rep1.sort.bam -O tmp2 -Debug 1', ' '))
+# args <- unlist(strsplit('-G mm9 -R tss -C WT_IN_SORTED.bam -O WT_IN -Debug 1', ' '))
 
 # Input argument parser.
 args.tbl <- parseArgs(args, c('-G', '-C', '-R', '-O'))
@@ -165,6 +165,7 @@ v.lib.size <- libSizeBam(bam.list)
 
 v.low.cutoff <- vector("integer", nrow(ctg.tbl))  # low count cutoffs.
 # Process the config file row by row.
+# browser()
 for(r in 1:nrow(ctg.tbl)) {  # r: index of plots/profiles.
 
     reg <- ctg.tbl$glist[r]  # retrieve gene list names.

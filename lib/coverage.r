@@ -311,9 +311,10 @@ covBamExons <- function(granges.dat, v.strand, bam.file, sn.inbam, fraglen,
     #   strand: transcript strand (+/-).
     # Returns: a coverage vector for the gene.
 
+        # browser()
         # Special handling for bowtie mapping.
         if(bowtie) {
-            with(srg, mapq[is.na(mapq)] <- 254)
+            srg <- within(srg, mapq[is.na(mapq)] <- 254)  # within!
         }
         # Filter short reads by mapping quality.
         all.mask <- srg$mapq >= map.qual

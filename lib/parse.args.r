@@ -435,7 +435,7 @@ or a pair of numerics separated by ','\n")
 CheckHMColorConfig <- function(hm.color, bam.pair) {
     if(hm.color != 'default') {
         v.colors <- unlist(strsplit(hm.color, ":"))
-        if(bam.pair && length(v.colors) != 2 || 
+        if(bam.pair && length(v.colors) != 2 && length(v.colors) != 3 || 
            !bam.pair && length(v.colors) != 1) {
             stop("Heatmap color specifications must correspond to bam-pair!\n")
         }
@@ -475,8 +475,9 @@ EchoPlotArgs <- function() {
     cat("           global: base on all heatmaps together\n")
     cat("           min_val,max_val: custom scale using a pair of numerics\n")
     cat("    -FC  Flooding fraction:[0, 1), default=0.02\n")
-    cat("    -CO  Color for heatmap. For bam-pair, use color-pair(neg_color:pos_color).\n")
+    cat("    -CO  Color for heatmap. For bam-pair, use color-tri(neg_color:[neu_color]:pos_color).\n")
     cat("           Hint: must use R colors, such as darkgreen, yellow and blue2.\n")
+    cat("                 The neutral color is optional(default=black).\n")
 
 }
 

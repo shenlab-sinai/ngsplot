@@ -436,9 +436,17 @@ plotheat <- function(reg.list, uniq.reg, enrichList, v.low.cutoff, go.algo,
     ncolor <- 256
     if(bam.pair) {
         if(hm.color != "default") {
-            two.colors <- unlist(strsplit(hm.color, ':'))
-            enrich.palette <- colorRampPalette(c(two.colors[1], 'black', 
-                                                 two.colors[2]), 
+            tri.colors <- unlist(strsplit(hm.color, ':'))
+            neg.color <- tri.colors[1]
+            if(length(tri.colors) == 2) {
+                neu.color <- 'black'
+                pos.color <- tri.colors[2]
+            } else {
+                neu.color <- tri.colors[2]
+                pos.color <- tri.colors[3]
+            }
+            enrich.palette <- colorRampPalette(c(neg.color, neu.color, 
+                                                 pos.color), 
                                                bias=.6, interpolate='spline')
         } else {
             enrich.palette <- colorRampPalette(c('blue', 'black', 'yellow'), 

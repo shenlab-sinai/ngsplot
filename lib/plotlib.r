@@ -414,7 +414,8 @@ OrderGenesHeatmap <- function(enrichList, lowCutoffs,
 
 plotheat <- function(reg.list, uniq.reg, enrichList, v.low.cutoff, go.algo, 
                      go.paras, title2plot, bam.pair, xticks, flood.q=.02, 
-                     do.plot=T, hm.color="default", color.scale='local') {
+                     do.plot=T, hm.color="default", color.distr=.6, 
+                     color.scale='local') {
 # Plot heatmaps with genes ordered according to some algorithm.
 # Args:
 #   reg.list: factor vector of regions as in configuration.
@@ -429,6 +430,7 @@ plotheat <- function(reg.list, uniq.reg, enrichList, v.low.cutoff, go.algo,
 #   flood.q: flooding percentage.
 #   do.plot: boolean tag for plotting heatmaps.
 #   hm.color: string for heatmap colors.
+#   color.distr: positive number for color distribution.
 #   color.scale: string for the method to adjust color scale.
 # Returns: ordered gene names for each unique region as a list.
 
@@ -447,10 +449,12 @@ plotheat <- function(reg.list, uniq.reg, enrichList, v.low.cutoff, go.algo,
             }
             enrich.palette <- colorRampPalette(c(neg.color, neu.color, 
                                                  pos.color), 
-                                               bias=.6, interpolate='spline')
+                                               bias=color.distr, 
+                                               interpolate='spline')
         } else {
             enrich.palette <- colorRampPalette(c('blue', 'black', 'yellow'), 
-                                               bias=.6, interpolate='spline')
+                                               bias=color.distr, 
+                                               interpolate='spline')
         }
     } else {
         if(hm.color != "default") {

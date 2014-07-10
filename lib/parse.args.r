@@ -394,6 +394,14 @@ or a pair of numerics separated by ','\n")
         updated.vl$hm.color <- "default"
     }
 
+    #### Color distribution. ####
+    if('-CD' %in% names(args.tbl)) {
+        stopifnot(as.numeric(args.tbl['-CD']) > 0)
+        updated.vl$color.distr <- as.numeric(args.tbl['-CD'])
+    } else if(!'color.distr' %in% existing.vl) {
+        updated.vl$color.distr <- .6
+    }
+
     #### Low count cutoff for rank-based normalization ####
     if('-LOW' %in% names(args.tbl)) {
         stopifnot(as.integer(args.tbl['-LOW']) >= 0)
@@ -478,6 +486,10 @@ EchoPlotArgs <- function() {
     cat("    -CO  Color for heatmap. For bam-pair, use color-tri(neg_color:[neu_color]:pos_color).\n")
     cat("           Hint: must use R colors, such as darkgreen, yellow and blue2.\n")
     cat("                 The neutral color is optional(default=black).\n")
+    cat("    -CD  Color distribution for heatmap(default=0.6). Must be a positive number.\n")
+    cat("           Hint: lower values give more widely spaced colors at the negative end.\n")
+    cat("                 In other words, they shift the neutral color to positive values.\n")
+    cat("                 If set to 1, the neutral color represents 0(i.e. no bias).\n")
 
 }
 

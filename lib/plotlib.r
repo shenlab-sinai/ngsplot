@@ -441,7 +441,7 @@ plotheat <- function(reg.list, uniq.reg, enrichList, v.low.cutoff, go.algo,
                                                  two.colors[2]), 
                                                bias=.6, interpolate='spline')
         } else {
-            enrich.palette <- colorRampPalette(c('green', 'black', 'red'), 
+            enrich.palette <- colorRampPalette(c('blue', 'black', 'yellow'), 
                                                bias=.6, interpolate='spline')
         }
     } else {

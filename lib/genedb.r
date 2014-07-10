@@ -102,7 +102,7 @@ SetupPlotCoord <- function(args.tbl, ctg.tbl, default.tbl, dbfile.tbl,
 
         if (!file.exists(f.load)){
             stop("The requested database file does not exist. You may have a 
-       corrupted database. Consider reinstalling the genome.\n")
+corrupted database. Consider reinstalling the genome.\n")
             # cat("\nDownloading database:\n")
             # download.file(anno.db.candidates$"URL"[1], destfile=f.load, 
             #               method="curl")

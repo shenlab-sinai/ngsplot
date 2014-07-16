@@ -104,6 +104,14 @@ if('-H' %in% names(args.tbl)){
 }else{
     hclust.meth <- 'ward'
 }
+# If R.version <= 3.0.3, use 'ward', else 'ward.D2' used
+if(hclust.meth=='ward'){
+    if(as.numeric(R.version$major)>3){
+        hclust.meth <- 'ward.D2'
+    }else if(as.numeric(R.version$major)==3 & (as.numeric(R.version$minor>0.3))){
+        hclust.meth <- 'ward.D2'
+    }
+}
 
 # Load plotting parameters and data.
 ifolder <- sub('.zip$', '', basename(iname))

@@ -37,54 +37,57 @@ ConfigTbl <- function(args.tbl, fraglen) {
 
     covfile <- args.tbl['-C']
 
-    if(length(grep('.txt$', covfile, ignore.case=T)) > 0) {  # config file.
-        ctg.tbl <- read.table(covfile, sep="\t", colClasses='character', 
-                              comment.char='#')
-        if(ncol(ctg.tbl) < 3) {
-            stop("Configuration file must contain at least 3 columns! 
-Insufficient information provided.\n")
-        }
-        colnames(ctg.tbl)[1:3] <- c('cov', 'glist', 'title')
-        if(ncol(ctg.tbl) >= 4) {
-            colnames(ctg.tbl)[4] <- 'fraglen'
-            fraglen.sp <- strsplit(ctg.tbl$fraglen, ":")
-            if(!all(sapply(fraglen.sp, function(x) {
-                        length(x) == 1 || length(x) == 2}))) {
-                stop("Fragment length format must be X or X:Y; X and Y are 
-integers.\n")
+    suppressWarnings(
+        ctg.tbl <- tryCatch(
+            read.table(covfile, colClasses='character', comment.char='#'), 
+            error=function(e) {
+                if('-E' %in% names(args.tbl)) {
+                    glist <- args.tbl['-E']
+                } else {
+                    glist <- '-1'
+                }
+                if('-T' %in% names(args.tbl)) {
+                    title <- args.tbl['-T']
+                } else {
+                    title <- 'Noname'
+                }
+                data.frame(cov=covfile, glist=glist, title=title, 
+                           fraglen=as.character(fraglen), 
+                           color=NA, stringsAsFactors=F)
             }
-            if(!all(as.integer(unlist(fraglen.sp)) > 0)) {
-                stop("Fragment length must be positive integers! Check your 
-configuration file.\n")
-            }
-        } else {
-            ctg.tbl <- data.frame(ctg.tbl, fraglen=as.character(fraglen),
-                                  stringsAsFactors=F)
-        }
-        if(ncol(ctg.tbl) >= 5) {
-            colnames(ctg.tbl)[5] <- 'color'
-            # Validate color specifications.
-            col.validated <- col2rgb(ctg.tbl$color)
-        } else {
-            ctg.tbl <- data.frame(ctg.tbl, color=NA)
-        }
-        ctg.tbl
+        )
+    )
 
-    } else {  # a single bam file.
-        if('-E' %in% names(args.tbl)) {
-            glist <- args.tbl['-E']
-        } else {
-            glist <- '-1'
-        }
-        if('-T' %in% names(args.tbl)) {
-            title <- args.tbl['-T']
-        } else {
-            title <- 'Noname'
-        }
-        data.frame(cov=covfile, glist=glist, title=title, 
-                   fraglen=as.character(fraglen), color=NA, 
-                   stringsAsFactors=F)
+    # Read a config file.
+    if(ncol(ctg.tbl) < 3) {
+        stop("Configuration file must contain at least 3 columns! 
+Insufficient information provided.\n")
     }
+    colnames(ctg.tbl)[1:3] <- c('cov', 'glist', 'title')
+    if(ncol(ctg.tbl) >= 4) {
+        colnames(ctg.tbl)[4] <- 'fraglen'
+        fraglen.sp <- strsplit(ctg.tbl$fraglen, ":")
+        if(!all(sapply(fraglen.sp, function(x) {
+                    length(x) == 1 || length(x) == 2}))) {
+            stop("Fragment length format must be X or X:Y; X and Y are 
+integers.\n")
+        }
+        if(!all(as.integer(unlist(fraglen.sp)) > 0)) {
+            stop("Fragment length must be positive integers! Check your 
+configuration file.\n")
+        }
+    } else {
+        ctg.tbl <- data.frame(ctg.tbl, fraglen=as.character(fraglen),
+                              stringsAsFactors=F)
+    }
+    if(ncol(ctg.tbl) >= 5) {
+        colnames(ctg.tbl)[5] <- 'color'
+        # Validate color specifications.
+        col.validated <- col2rgb(ctg.tbl$color)
+    } else {
+        ctg.tbl <- data.frame(ctg.tbl, color=NA)
+    }
+    ctg.tbl
 }
 
 CheckRegionAllowed <- function(reg2plot, anno.tbl) {

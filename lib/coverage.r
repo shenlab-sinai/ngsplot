@@ -210,9 +210,17 @@ extrCovMidp <- function(v.chrom, v.midp, flanksize, v.strand, pts, bufsize,
 scanBamRevOrder <- function(org.gr, sbp) {
 # ScanBamParam re-arranges the input genomic ranges. Use range info to 
 # construct a string vector to find the order to reverse it.
-    org.grnames <- paste(org.gr$seqnames, org.gr$start, org.gr$end, sep=':')
+    org.grnames <- with(org.gr, paste(seqnames, start, end, sep=':'))
     sbw.gr <- as.data.frame(bamWhich(sbp))  # scan-bam-ed
-    sbw.grnames <- paste(sbw.gr$space, sbw.gr$start, sbw.gr$end, sep=':')
+    if('space' %in% names(sbw.gr)) {
+        sbw.grnames <- with(sbw.gr, paste(space, start, end, sep=':'))
+    } else if('group_name' %in% names(sbw.gr)) {
+        sbw.grnames <- with(sbw.gr, paste(group_name, start, end, sep=':'))
+    } else {
+        stop("Cannot locate chromosome names in extracted short reads. Report 
+this problem using issue tracking or discussion forum.\n")
+    }
+    
     match(org.grnames, sbw.grnames)
 }
 

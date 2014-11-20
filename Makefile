@@ -34,9 +34,9 @@ bam: example.bam.tar.gz
 ngsplot-$(CURVER).tar.gz: $(BINCUFF) $(BINNGSP) $(LIB) $(OTHERS)
 	rm -rf ${DISTFOLDER}
 	mkdir -p ${DISTFOLDER}/bin ${DISTFOLDER}/lib
-	cp -rL $(BINCUFF) $(BINNGSP) ${DISTFOLDER}/bin
-	cp -rL $(LIB) ${DISTFOLDER}/lib
-	cp -rL $(OTHERS) ${DISTFOLDER}
+	cp -RL $(BINCUFF) $(BINNGSP) ${DISTFOLDER}/bin
+	cp -RL $(LIB) ${DISTFOLDER}/lib
+	cp -RL $(OTHERS) ${DISTFOLDER}
 	find ${DISTFOLDER}/ -name '.svn'|xargs -I% rm -r %
 	find ${DISTFOLDER}/ -name '.git'|xargs -I% rm -r %
 	# Remove comments and blank lines from *.r files.

@@ -119,12 +119,13 @@ with(updated.vl, {
         v.low.cutoff <- low.count.ratio * v.low.cutoff
         go.list <- plotheat(reg.list, uniq.reg, enrichList, v.low.cutoff, go.algo, 
                             go.paras, ctg.tbl$title, bam.pair, xticks, flood.frac, 
-                            do.plot=T, hm.color=hm.color, color.scale=color.scale)
+                            do.plot=T, hm.color=hm.color, color.distr=color.distr, 
+                            color.scale=color.scale)
         out.dev <- dev.off()
         # Save replot data.
         out.dat <- paste(oname, '.RData', sep='')
         save(v.low.cutoff, flood.frac, hm.color, go.algo, rr, go.list, 
-             color.scale, go.paras, low.count, 
+             color.scale, go.paras, low.count, color.distr, 
              file=out.dat)
     } else {
         # Pass.

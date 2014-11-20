@@ -11,7 +11,7 @@
 # library(compiler)
 # enableJIT(3)
 
-ngsplot.version <- '2.41.4'
+ngsplot.version <- '2.47'
 # Program environment variable.
 progpath <- Sys.getenv('NGSPLOT')
 if(progpath == "") {
@@ -281,13 +281,15 @@ if(!fi_tag){
     # Do heatmap plotting.
     go.list <- plotheat(reg.list, uniq.reg, enrichList, v.low.cutoff, go.algo, 
                         go.paras, ctg.tbl$title, bam.pair, xticks, flood.frac, 
-                        do.plot=T, hm.color=hm.color, color.scale=color.scale)
+                        do.plot=T, hm.color=hm.color, color.distr=color.distr, 
+                        color.scale=color.scale)
     out.dev <- dev.off()
     cat("Done\n")
 } else {
     go.list <- plotheat(reg.list, uniq.reg, enrichList, v.low.cutoff, go.algo, 
                         go.paras, ctg.tbl$title, bam.pair, xticks, flood.frac, 
-                        do.plot=F, hm.color=hm.color, color.scale=color.scale)
+                        do.plot=F, hm.color=hm.color, color.distr=color.distr, 
+                        color.scale=color.scale)
 }
 
 # Save plotting data.
@@ -349,6 +351,7 @@ if(galaxy==1) {
 save(reg.list, uniq.reg, ng.list, pts, enrichList, v.low.cutoff, go.algo, 
      ctg.tbl, bam.pair, xticks, flood.frac, hm.color, unit.width, rr, 
      go.list, color.scale, v.lib.size, font.size, go.paras, low.count,
+     color.distr, 
      file=heat.dat)
 cat("Done\n")
 

@@ -414,7 +414,8 @@ OrderGenesHeatmap <- function(enrichList, lowCutoffs,
 
 plotheat <- function(reg.list, uniq.reg, enrichList, v.low.cutoff, go.algo, 
                      go.paras, title2plot, bam.pair, xticks, flood.q=.02, 
-                     do.plot=T, hm.color="default", color.scale='local') {
+                     do.plot=T, hm.color="default", color.distr=.6, 
+                     color.scale='local') {
 # Plot heatmaps with genes ordered according to some algorithm.
 # Args:
 #   reg.list: factor vector of regions as in configuration.
@@ -429,6 +430,7 @@ plotheat <- function(reg.list, uniq.reg, enrichList, v.low.cutoff, go.algo,
 #   flood.q: flooding percentage.
 #   do.plot: boolean tag for plotting heatmaps.
 #   hm.color: string for heatmap colors.
+#   color.distr: positive number for color distribution.
 #   color.scale: string for the method to adjust color scale.
 # Returns: ordered gene names for each unique region as a list.
 
@@ -436,13 +438,23 @@ plotheat <- function(reg.list, uniq.reg, enrichList, v.low.cutoff, go.algo,
     ncolor <- 256
     if(bam.pair) {
         if(hm.color != "default") {
-            two.colors <- unlist(strsplit(hm.color, ':'))
-            enrich.palette <- colorRampPalette(c(two.colors[1], 'black', 
-                                                 two.colors[2]), 
-                                               bias=.6, interpolate='spline')
+            tri.colors <- unlist(strsplit(hm.color, ':'))
+            neg.color <- tri.colors[1]
+            if(length(tri.colors) == 2) {
+                neu.color <- 'black'
+                pos.color <- tri.colors[2]
+            } else {
+                neu.color <- tri.colors[2]
+                pos.color <- tri.colors[3]
+            }
+            enrich.palette <- colorRampPalette(c(neg.color, neu.color, 
+                                                 pos.color), 
+                                               bias=color.distr, 
+                                               interpolate='spline')
         } else {
-            enrich.palette <- colorRampPalette(c('green', 'black', 'red'), 
-                                               bias=.6, interpolate='spline')
+            enrich.palette <- colorRampPalette(c('blue', 'black', 'yellow'), 
+                                               bias=color.distr, 
+                                               interpolate='spline')
         }
     } else {
         if(hm.color != "default") {

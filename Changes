@@ -1,6 +1,14 @@
 Revision history for ngs.plot.
 ==============================
 
+2.47 November 20, 2014
+    - Change default bam-pair colors to blue:yellow.
+    - Change bam-pair color from pair to tri.
+    - Add a parameter to control color distribution.
+    - Correct an error about "-N".
+    - Update plotCorrGram.r to fit the update of 'hclust'.
+    - Automatically determine if input is config or bam.
+
 2.41 June 9, 2014
   Major changes:
     - Add rank-based normalization as a preprocessing step in clustering.

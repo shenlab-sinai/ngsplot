@@ -37,54 +37,57 @@ ConfigTbl <- function(args.tbl, fraglen) {
 
     covfile <- args.tbl['-C']
 
-    if(length(grep('.txt$', covfile, ignore.case=T)) > 0) {  # config file.
-        ctg.tbl <- read.table(covfile, sep="\t", colClasses='character', 
-                              comment.char='#')
-        if(ncol(ctg.tbl) < 3) {
-            stop("Configuration file must contain at least 3 columns! 
-Insufficient information provided.\n")
-        }
-        colnames(ctg.tbl)[1:3] <- c('cov', 'glist', 'title')
-        if(ncol(ctg.tbl) >= 4) {
-            colnames(ctg.tbl)[4] <- 'fraglen'
-            fraglen.sp <- strsplit(ctg.tbl$fraglen, ":")
-            if(!all(sapply(fraglen.sp, function(x) {
-                        length(x) == 1 || length(x) == 2}))) {
-                stop("Fragment length format must be X or X:Y; X and Y are 
-integers.\n")
+    suppressWarnings(
+        ctg.tbl <- tryCatch(
+            read.table(covfile, colClasses='character', comment.char='#'), 
+            error=function(e) {
+                if('-E' %in% names(args.tbl)) {
+                    glist <- args.tbl['-E']
+                } else {
+                    glist <- '-1'
+                }
+                if('-T' %in% names(args.tbl)) {
+                    title <- args.tbl['-T']
+                } else {
+                    title <- 'Noname'
+                }
+                data.frame(cov=covfile, glist=glist, title=title, 
+                           fraglen=as.character(fraglen), 
+                           color=NA, stringsAsFactors=F)
             }
-            if(!all(as.integer(unlist(fraglen.sp)) > 0)) {
-                stop("Fragment length must be positive integers! Check your 
-configuration file.\n")
-            }
-        } else {
-            ctg.tbl <- data.frame(ctg.tbl, fraglen=as.character(fraglen),
-                                  stringsAsFactors=F)
-        }
-        if(ncol(ctg.tbl) >= 5) {
-            colnames(ctg.tbl)[5] <- 'color'
-            # Validate color specifications.
-            col.validated <- col2rgb(ctg.tbl$color)
-        } else {
-            ctg.tbl <- data.frame(ctg.tbl, color=NA)
-        }
-        ctg.tbl
+        )
+    )
 
-    } else {  # a single bam file.
-        if('-E' %in% names(args.tbl)) {
-            glist <- args.tbl['-E']
-        } else {
-            glist <- '-1'
-        }
-        if('-T' %in% names(args.tbl)) {
-            title <- args.tbl['-T']
-        } else {
-            title <- 'Noname'
-        }
-        data.frame(cov=covfile, glist=glist, title=title, 
-                   fraglen=as.character(fraglen), color=NA, 
-                   stringsAsFactors=F)
+    # Read a config file.
+    if(ncol(ctg.tbl) < 3) {
+        stop("Configuration file must contain at least 3 columns! 
+Insufficient information provided.\n")
     }
+    colnames(ctg.tbl)[1:3] <- c('cov', 'glist', 'title')
+    if(ncol(ctg.tbl) >= 4) {
+        colnames(ctg.tbl)[4] <- 'fraglen'
+        fraglen.sp <- strsplit(ctg.tbl$fraglen, ":")
+        if(!all(sapply(fraglen.sp, function(x) {
+                    length(x) == 1 || length(x) == 2}))) {
+            stop("Fragment length format must be X or X:Y; X and Y are 
+integers.\n")
+        }
+        if(!all(as.integer(unlist(fraglen.sp)) > 0)) {
+            stop("Fragment length must be positive integers! Check your 
+configuration file.\n")
+        }
+    } else {
+        ctg.tbl <- data.frame(ctg.tbl, fraglen=as.character(fraglen),
+                              stringsAsFactors=F)
+    }
+    if(ncol(ctg.tbl) >= 5) {
+        colnames(ctg.tbl)[5] <- 'color'
+        # Validate color specifications.
+        col.validated <- col2rgb(ctg.tbl$color)
+    } else {
+        ctg.tbl <- data.frame(ctg.tbl, color=NA)
+    }
+    ctg.tbl
 }
 
 CheckRegionAllowed <- function(reg2plot, anno.tbl) {
@@ -394,6 +397,14 @@ or a pair of numerics separated by ','\n")
         updated.vl$hm.color <- "default"
     }
 
+    #### Color distribution. ####
+    if('-CD' %in% names(args.tbl)) {
+        stopifnot(as.numeric(args.tbl['-CD']) > 0)
+        updated.vl$color.distr <- as.numeric(args.tbl['-CD'])
+    } else if(!'color.distr' %in% existing.vl) {
+        updated.vl$color.distr <- .6
+    }
+
     #### Low count cutoff for rank-based normalization ####
     if('-LOW' %in% names(args.tbl)) {
         stopifnot(as.integer(args.tbl['-LOW']) >= 0)
@@ -435,7 +446,7 @@ or a pair of numerics separated by ','\n")
 CheckHMColorConfig <- function(hm.color, bam.pair) {
     if(hm.color != 'default') {
         v.colors <- unlist(strsplit(hm.color, ":"))
-        if(bam.pair && length(v.colors) != 2 || 
+        if(bam.pair && length(v.colors) != 2 && length(v.colors) != 3 || 
            !bam.pair && length(v.colors) != 1) {
             stop("Heatmap color specifications must correspond to bam-pair!\n")
         }
@@ -469,14 +480,19 @@ EchoPlotArgs <- function() {
     cat("    -NRS Number of random starts(default=30) in K-means\n")
     cat("    -RR  Reduce ratio(default=30). The parameter controls the heatmap height\n")
     cat("           The smaller the value, the taller the heatmap\n")
-    cat("    -SC  Color scale used to map values to colors in a heatmap.\n")
+    cat("    -SC  Color scale used to map values to colors in a heatmap\n")
     cat("           local(default): base on each individual heatmap\n")
     cat("           region: base on all heatmaps belong to the same region\n")
     cat("           global: base on all heatmaps together\n")
     cat("           min_val,max_val: custom scale using a pair of numerics\n")
     cat("    -FC  Flooding fraction:[0, 1), default=0.02\n")
-    cat("    -CO  Color for heatmap. For bam-pair, use color-pair(neg_color:pos_color).\n")
-    cat("           Hint: must use R colors, such as darkgreen, yellow and blue2.\n")
+    cat("    -CO  Color for heatmap. For bam-pair, use color-tri(neg_color:[neu_color]:pos_color)\n")
+    cat("           Hint: must use R colors, such as darkgreen, yellow and blue2\n")
+    cat("                 The neutral color is optional(default=black)\n")
+    cat("    -CD  Color distribution for heatmap(default=0.6). Must be a positive number\n")
+    cat("           Hint: lower values give more widely spaced colors at the negative end\n")
+    cat("                 In other words, they shift the neutral color to positive values\n")
+    cat("                 If set to 1, the neutral color represents 0(i.e. no bias)\n")
 
 }
 
@@ -487,8 +503,8 @@ EchoCoverageArgs <- function() {
     cat("         E.g. protein_coding,K562,rnaseq(order of descriptors does not matter)\n")
     cat("              means coding genes in K562 cell line drawn in rnaseq mode.\n")
     cat("  -D   Gene database: ensembl(default), refseq\n")
-    cat("  -L   Flanking region size\n")
-    cat("  -N   Flanking region factor(will override flanking size)\n")
+    cat("  -L   Flanking region size(will override flanking factor)\n")
+    cat("  -N   Flanking region factor\n")
     cat("  -RB  The fraction of extreme values to be trimmed on both ends\n")
     cat("         default=0, 0.05 means 5% of extreme values will be trimmed\n")
     cat("  -S   Randomly sample the regions for plot, must be:(0, 1]\n")

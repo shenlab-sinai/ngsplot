@@ -11,7 +11,7 @@
 # library(compiler)
 # enableJIT(3)
 
-ngsplot.version <- '2.47'
+ngsplot.version <- '2.47.1'
 # Program environment variable.
 progpath <- Sys.getenv('NGSPLOT')
 if(progpath == "") {
@@ -47,7 +47,7 @@ cmd.help <- function(){
 ###########################################################################
 #################### Deal with program input arguments ####################
 args <- commandArgs(T)
-# args <- unlist(strsplit('-G mm9 -R tss -C WT_IN_SORTED.bam -O WT_IN -Debug 1', ' '))
+# args <- unlist(strsplit('-G hg19 -R tss -C temp_config.txt -O tempXXX -D ensembl -L 2000 -S 0.1 -GO km -CS 100 -MQ 20 -SE 1 -RB 0 -FC 0.02 -MW 1 -H 0 -Debug 1', ' '))
 
 # Input argument parser.
 args.tbl <- parseArgs(args, c('-G', '-C', '-R', '-O'))

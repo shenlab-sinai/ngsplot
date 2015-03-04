@@ -531,7 +531,11 @@ plotheat <- function(reg.list, uniq.reg, enrichList, v.low.cutoff, go.algo,
 
         # Order genes.
         if(is.matrix(enrichSelected[[1]]) && nrow(enrichSelected[[1]]) > 1) {
-            lowCutoffs <- v.low.cutoff[plist]
+            if(bam.pair) {
+                lowCutoffs <- 0
+            } else {
+                lowCutoffs <- v.low.cutoff[plist]
+            }
             g.order <- OrderGenesHeatmap(enrichSelected, lowCutoffs, go.algo, 
                                          go.paras)
             go.list[[ur]] <- rev(rownames(enrichSelected[[1]][g.order, ]))

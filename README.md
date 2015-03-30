@@ -174,7 +174,7 @@ Usage: plotCorrGram.r -I ngsplot_output.zip -O output_name [Options]
       ```
       ngs.plot.r -G hg19 -R genebody -C config.hesc.k4.txt -O hesc.k4.genebody -D ensembl -FL 300
       ```
-      Data from: **ENCODE Project Consortium, et al. (2012). An integrated encyclopedia of DNA elements in the human genome. Nature 489, 57-74.** The avgprof and heatmap plotted by ngs.plot like this:
+      The avgprof and heatmap plotted by ngs.plot like this:
 
       ![hesc.k4.genebody.all.png](./webimgs/hesc.k4.genebody.all.png)
 
@@ -188,7 +188,7 @@ Usage: plotCorrGram.r -I ngsplot_output.zip -O output_name [Options]
       ```
       ngs.plot.r -G hg19 -R genebody -C config.hesc.k36.txt -O hesc.k36.genebody -D ensembl -FL 300
       ```
-      Data from: **ENCODE Project Consortium, et al. (2012). An integrated encyclopedia of DNA elements in the human genome. Nature 489, 57-74.** The avgprof and heatmap plotted by ngs.plot like this:
+      The avgprof and heatmap plotted by ngs.plot like this:
 
       ![hesc.k36.genebody.all.png](./webimgs/hesc.k36.genebody.all.png)
 
@@ -202,7 +202,7 @@ Usage: plotCorrGram.r -I ngsplot_output.zip -O output_name [Options]
       ```
       ngs.plot.r -G hg19 -R genebody -C config.hesc.k9.txt -O hesc.k9.genebody -D ensembl -FL 300
       ```
-      Data from: **ENCODE Project Consortium, et al. (2012). An integrated encyclopedia of DNA elements in the human genome. Nature 489, 57-74.** The avgprof and heatmap plotted by ngs.plot like this:
+      The avgprof and heatmap plotted by ngs.plot like this:
 
       ![hesc.k9.genebody.all.png](./webimgs/hesc.k9.genebody.all.png)
 
@@ -216,9 +216,11 @@ Usage: plotCorrGram.r -I ngsplot_output.zip -O output_name [Options]
       ```
       ngs.plot.r -G hg19 -R genebody -C config.hesc.k27.txt -O hesc.k27.genebody -D ensembl -FL 300
       ```
-      Data from: **ENCODE Project Consortium, et al. (2012). An integrated encyclopedia of DNA elements in the human genome. Nature 489, 57-74.** The avgprof and heatmap plotted by ngs.plot like this:
+      The avgprof and heatmap plotted by ngs.plot like this:
 
       ![hesc.k27.genebody.all.png](./webimgs/hesc.k27.genebody.all.png) 
+
+   For all the above examples, data are from: **ENCODE Project Consortium, et al. (2012). An integrated encyclopedia of DNA elements in the human genome. Nature 489, 57-74.**
 
 1. ngs.plot.r can be used to analyze RNA-seq data. Here We used an in-house RNA-seq dataset (unpublished) from human post-mortem brain tissue of schizophrenia patients as an example. One sample with acceptable RNA quality (RIN=7.8) and another sample with degraded RNA quality (RIN=3) are chosen.
    ```

@@ -1,0 +1,9 @@
+## Keep .bai and .cnt ##
+A bam file must be indexed to allow random access. Once a bam file is indexed, an index file will appear in the same folder with names like .bam.bai. It's important to keep it there or else ngs.plot will try to rebuild the index. The process may take some time.
+
+In order to normalize an NGS sample, the number of qualified short reads must be calculated. This information will be kept in a text file with names like .bam.cnt. ngs.plot will try to locate this file and if it is not there, it will count the number of short reads from a bam file. If you have a big bam file, this process can take quite a bit of time to finish.
+
+In summary, if you already have the above two files with your bam files, do not delete them. They only take a tiny portion of your disk storage but can save you a lot of running time.
+
+## Remove PCR duplicates ##
+It is recommended that you remove PCR duplication from your ChIP-seq alignment files. PCR is known to produce biased amplification towards certain genomic sequences. Sometimes this can cause spike-like patterns (although you can usually remove them using -RB option) in your plots. Excessive PCR duplication is also seen when a poor pulldown is sequenced by a high-throughput sequencer, such as the Illumina HiSeq2000. The duplication can be detected by the number of short reads aligned to the same location on the same strand. samtools has provided a tool called rmdup which can be conveniently used to remove PCR duplication from BAM files. Once the duplicates are removed, your bam files also become smaller and ngs.plot can run faster on them!

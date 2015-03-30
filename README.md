@@ -6,16 +6,12 @@ DNA sequencing is at the core of genomics. The NGS technology has been tremendou
 The signature advantage of ngs.plot is that it collects a large database of functional elements for many genomes. A user can ask for a functionally important region to be displayed in one command. It handles large sequencing data efficiently and has only modest memory requirement. For example, ngs.plot was used to draw a plot for all the genes on the mouse genome from **71GB of ChIP-seq data in 25 min**, with a **memory footprint of 2.7GB using 4 x 2.4GHz CPU cores**. ngs.plot is also easy to use. A user only needs to create a very small text file called configuration, telling the program which samples to look at and how they should be combined with different regions, and then run the program with one command. A web-based version (integrated into Galaxy) is also available for the ones who are "allergic" to terminals.
 
 ## Program Download Location
-Go to the "Downloads" folder of this repo.
+For ready-to-install packages and example bam files, go to the [ngs.plot download GDrive](https://drive.google.com/folderview?id=0B1PVLadG_dCKN1liNFY0MVM1Ulk&usp=sharing).
 
 ## Supported Genomes
-ngs.plot has an approach to install genomes on demand. It can support for any genome. All you need to do is to download an archive file and install it by yourself. The genome files can be found in this Google drive folder: [ngs.plot genome folder](https://drive.google.com/folderview?id=0B1PVLadG_dCKNEsybkh5TE9XZ1E&usp=sharing)
+ngs.plot has an approach to install genomes on demand. It can support for any genome. All you need to do is to download an archive file and install it by yourself. The genome files can be found in this Google drive folder: [ngs.plot genome folder](https://drive.google.com/folderview?id=0B1PVLadG_dCKNEsybkh5TE9XZ1E&usp=sharing).
 
-If you cannot find yours, please request your genome of interest in this post: [request your genome file](https://groups.google.com/forum/#!topic/ngsplot-discuss/GyoacAzV7jM)
-
-A list of the available genomes is listed in this Wiki: [SupportedGenomes](https://github.com/shenlab-sinai/ngsplot/wiki/SupportedGenomes)
-
-A brief list is here (not all): "human (hg18, hg19), chimpanzee (panTro4), rhesus macaque (rheMac2), mouse (mm9, mm10), rat (rn4, rn5), cow (bosTau6), chicken (galGal4), zebrafish (Zv9), drosophila (dm3), Caenorhabditis elegans (ce6, ceX), Saccharomyces cerevisiae (sacCer2, sacCer3), Schizosaccharomyces pombe (Asm294), Arabidopsis thaliana (TAIR10), Zea mays (AGPv3), rice (IRGSP-1.0)".
+If you cannot find yours, please request your genome of interest in this post: [request your genome file](https://groups.google.com/forum/#!topic/ngsplot-discuss/GyoacAzV7jM). A list of the available genomes is listed in this Wiki: [SupportedGenomes](https://github.com/shenlab-sinai/ngsplot/wiki/SupportedGenomes). A brief list is here (not all): "human (hg18, hg19), chimpanzee (panTro4), rhesus macaque (rheMac2), mouse (mm9, mm10), rat (rn4, rn5), cow (bosTau6), chicken (galGal4), zebrafish (Zv9), drosophila (dm3), Caenorhabditis elegans (ce6, ceX), Saccharomyces cerevisiae (sacCer2, sacCer3), Schizosaccharomyces pombe (Asm294), Arabidopsis thaliana (TAIR10), Zea mays (AGPv3), rice (IRGSP-1.0)".
 
 ## Extension Annotation Package: Enhancers and DHSs
 There are now two database files for the reference genome hg19 and mm9. The basic package is a light version of the genome, which only contains the regular stuffs like genebody, CGI and exon. While extension package is an extension of the genome, which contains enhancers or dhs.

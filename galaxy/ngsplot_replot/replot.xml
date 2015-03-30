@@ -1,0 +1,157 @@
+<tool id="replot" name="replot">
+<command interpreter="perl">
+#if $outtype.outtype2 == "prof":
+   runreplot.pl $input_zipfile $outtype.outtype2 $output_filename 
+   $outtype.WD
+   $outtype.HG
+   $outtype.SE
+   $outtype.H
+   $outtype.MW
+   $outtype.Y.Y2
+   $outtype.Y.Y3
+   $outtype.LEG
+   $outtype.BOX
+   $outtype.VLN
+   $outtype.XYL
+   $outtype.LWD
+   $outtype.FS
+#else if $outtype.outtype2 == "heatmap":
+   runreplot.pl $input_zipfile $outtype.outtype2 $output_filename 
+   $outtype.GO.GO2
+   $outtype.GO.KNC
+   $outtype.GO.MIT
+   $outtype.GO.NRS
+   $outtype.LOW
+   $outtype.RR
+   $outtype.FC
+   $outtype.CO
+   $outtype.CD
+   $outtype.FS
+   dummy
+   dummy
+   dummy
+#end if:
+
+</command>
+
+<!-->
+
+
+<-->
+
+<inputs>
+   <param  type="data"  name="input_zipfile" multiple="false" label="Input zip file created by ngsplot"/>
+
+   <conditional name="outtype">
+      <param  type="select"  name="outtype2" label="Select figure type to replot">
+         <option value="prof">Coverage Profile</option>
+         <option value="heatmap">Heatmap</option>
+      </param>
+
+      <when value="prof">
+         <param type="text" name="WD" value="8" label="Image width in inches" />
+         <param type="text" name="HG" value="7" label="Image height in inches" />
+         <param type="select" name="SE" label="Standard error shading" >
+            <option value="1">Yes, include standard error shading</option>
+            <option value="0">No, exclude standard error shading</option>
+         </param>
+         <param type="text" name="H" value="0" label="Opacity of shaded area under each curve" help="Use 0 for no shading. Suggested value of between 0 and 0.5 will add a semi-transparent shade under each curve."/>
+         <param type="text" name="MW" value="1" label="Moving window width to smooth average profiles" help="The unit of the window size is a data point. In ngs.plot, the number of data points on the X-axis is 100. A moving window width of 10 means averaging over 10% of the entire X-axis."/>
+         <conditional name="Y">
+            <param type="select" name="Y2" label="Define Y-axis scale?" >
+               <option value="no">No, let program decide</option>
+               <option value="yes">Yes</option>
+            </param>
+            <when value="yes">
+               <param type="text" name="Y3" value="0,100" label="Y-axis min_val,max_val" help="Enter minimum and maximum value separated by comma" />
+            </when>
+            <when value="no">
+               <param type="hidden" name="Y3" value="na" label="test"/>
+            </when>
+         </conditional>
+         <param type="select" name="LEG" label="Draw legend?" >
+            <option value="1">Yes</option>
+            <option value="0">No</option>
+         </param>
+         <param type="select" name="BOX" label="Draw box around plot?" >
+            <option value="1">Yes</option>
+            <option value="0">No</option>
+         </param>
+         <param type="select" name="VLN" label="Draw vertical lines?" >
+            <option value="1">Yes</option>
+            <option value="0">No</option>
+         </param>
+         <param type="select" name="XYL" label="Draw axis labels?" >
+            <option value="1">Yes</option>
+            <option value="0">No</option>
+         </param>
+         <param type="text" name="LWD" value="3" label="Line width" />
+         <param type="text" name="FS" value="12" label="Font size" />
+<!-->
+<-->
+
+      </when>
+      <when value="heatmap">
+         <conditional name="GO">
+            <param type="select" name="GO2" label="Gene order algorithm" >
+               <option value="total">Overall enrichment of the 1st profile (default)</option>
+               <option value="hc">Hierarchial clustering</option>
+               <option value="max">Peak value of the 1st profile</option>
+               <option value="prod">Product of all profiles on the same region</option>
+               <option value="diff">Difference between 1st and 2nd profiles</option>
+               <option value="km">K-means clustering.</option>
+               <option value="none">No ranking algorithm applied, use order in gene list.</option>
+            </param>
+            <when value="km">
+               <param type="text" name="KNC" value="5" label="K-means: Number of clusters" help=""/>
+               <param type="text" name="MIT" value="20" label="K-means: Number of iterations" help=""/>
+               <param type="text" name="NRS" value="30" label="K-means: Number of random starts" help="K-means is prone to local optima. Restarting it repeatedly may help to find a better solution."/>
+            </when> 
+            <when value="total">
+               <param type="hidden" name="KNC" value="NA" label="K-means: Number of clusters" help=""/>
+               <param type="hidden" name="MIT" value="NA" label="K-means: Number of iterations" help=""/>
+               <param type="hidden" name="NRS" value="NA" label="K-means: Number of random starts" help="K-means is prone to local optima. Restarting it repeatedly may help to find a better solution."/>
+            </when> 
+            <when value="hc">
+               <param type="hidden" name="KNC" value="NA" label="K-means: Number of clusters" help=""/>
+               <param type="hidden" name="MIT" value="NA" label="K-means: Number of iterations" help=""/>
+               <param type="hidden" name="NRS" value="NA" label="K-means: Number of random starts" help="K-means is prone to local optima. Restarting it repeatedly may help to find a better solution."/>
+            </when> 
+            <when value="max">
+               <param type="hidden" name="KNC" value="NA" label="K-means: Number of clusters" help=""/>
+               <param type="hidden" name="MIT" value="NA" label="K-means: Number of iterations" help=""/>
+               <param type="hidden" name="NRS" value="NA" label="K-means: Number of random starts" help="K-means is prone to local optima. Restarting it repeatedly may help to find a better solution."/>
+            </when> 
+            <when value="prod">
+               <param type="hidden" name="KNC" value="NA" label="K-means: Number of clusters" help=""/>
+               <param type="hidden" name="MIT" value="NA" label="K-means: Number of iterations" help=""/>
+               <param type="hidden" name="NRS" value="NA" label="K-means: Number of random starts" help="K-means is prone to local optima. Restarting it repeatedly may help to find a better solution."/>
+            </when> 
+            <when value="diff">
+               <param type="hidden" name="KNC" value="NA" label="K-means: Number of clusters" help=""/>
+               <param type="hidden" name="MIT" value="NA" label="K-means: Number of iterations" help=""/>
+               <param type="hidden" name="NRS" value="NA" label="K-means: Number of random starts" help="K-means is prone to local optima. Restarting it repeatedly may help to find a better solution."/>
+            </when> 
+            <when value="none">
+               <param type="hidden" name="KNC" value="NA" label="K-means: Number of clusters" help=""/>
+               <param type="hidden" name="MIT" value="NA" label="K-means: Number of iterations" help=""/>
+               <param type="hidden" name="NRS" value="NA" label="K-means: Number of random starts" help="K-means is prone to local optima. Restarting it repeatedly may help to find a better solution."/>
+            </when> 
+         </conditional>
+         <param type="text" name="LOW" value="10" label="Low count cutoff in rank-based normalization" help="This number is in raw read counts."/>
+         <param type="text" name="RR" value="30" label="Reduce ratio" help="This controls the heatmap height. The smaller the value, the taller the heatmap." />
+         <param type="text" name="FC" value="0.02" label="Flooding fraction" help="The default value of 0.02 means that the minimum value is truncated at 2% and the maximum value is truncated at 98%. A higher fraction results in plots that have higher brightness but are less dynamic." />
+         <param type="text" name="CO" value="default" label="Color for heatmap" help="For non bam-pair plots, input a single color. For bam-pair plots, use color-tri format (neg_color:[neu_color]:pos_color). Hint: must use R colors, such as darkgreen, yellow and blue2. The neutral color is optional(default=black)." />
+         <param type="text" name="CD" value="0.6" label="Color distribution for heatmap" help="Must be a positive number. Hint: lower values give more widely spaced colors at the negative end. In other words, they shift the neutral color to positive values. If set to 1, the neutral color represents 0(i.e. no bias). If set to >1, the neutral color represents a negative value." />
+         <param type="text" name="FS" value="12" label="Font size" />
+      </when>
+   </conditional>
+<!--
+-->
+</inputs>
+
+<help></help>
+<outputs>
+   <data format="pdf" name="output_filename" />
+</outputs>
+</tool>

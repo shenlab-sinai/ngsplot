@@ -1,0 +1,3175 @@
+<tool id="ngs.plot" name="ngs.plot">
+
+<command interpreter="perl">
+#if $numsamples.numsamples2 == "1":
+   runNGSplot.pl 
+   $genome_name 
+   $genomic_region_source_type.genomic_region 
+   $genomic_region_source_type.further_information 
+   $genomic_region_source_type.interval_size 
+   $genomic_region_source_type.flanking_region_option_source_type.flanking_region_option 
+   $genomic_region_source_type.flanking_region_option_source_type.flanking_region_size 
+   $numsamples.numsamples2
+   $numsamples.usepair.usepair1
+
+   $numsamples.usepair.bamfile1
+   $numsamples.usepair.reffile1
+   $numsamples.usepair.genelist1.usegenelist1
+   $numsamples.usepair.genelist1.genelist1
+   $numsamples.usepair.title1
+   $numsamples.usepair.fraglen1
+   $numsamples.usepair.linecol1
+
+   $gene_database
+   $randomly_sample
+   $GO.gene_order
+   $GO.KNC
+   $GO.MIT
+   $GO.NRS
+   $chunk_size
+   $quality_requirement
+   $standard_error
+   $radius_size
+   $flooding_fraction
+   $smooth_method
+   $shaded_area
+   $out_zip  $out_avg_png  $out_hm_png
+
+#else if $numsamples.numsamples2 == "2":
+   runNGSplot.pl 
+   $genome_name 
+   $genomic_region_source_type.genomic_region 
+   $genomic_region_source_type.further_information 
+   $genomic_region_source_type.interval_size 
+   $genomic_region_source_type.flanking_region_option_source_type.flanking_region_option 
+   $genomic_region_source_type.flanking_region_option_source_type.flanking_region_size 
+   $numsamples.numsamples2
+   $numsamples.usepair.usepair1
+
+   $numsamples.usepair.bamfile1
+   $numsamples.usepair.reffile1
+   $numsamples.usepair.genelist1.usegenelist1
+   $numsamples.usepair.genelist1.genelist1
+   $numsamples.usepair.title1
+   $numsamples.usepair.fraglen1
+   $numsamples.usepair.linecol1
+
+   $numsamples.usepair.bamfile2
+   $numsamples.usepair.reffile2
+   $numsamples.usepair.genelist2.usegenelist2
+   $numsamples.usepair.genelist2.genelist2
+   $numsamples.usepair.title2
+   $numsamples.usepair.fraglen2
+   $numsamples.usepair.linecol2
+
+   $gene_database
+   $randomly_sample
+   $GO.gene_order
+   $GO.KNC
+   $GO.MIT
+   $GO.NRS
+   $chunk_size
+   $quality_requirement
+   $standard_error
+   $radius_size
+   $flooding_fraction
+   $smooth_method
+   $shaded_area
+   $out_zip  $out_avg_png  $out_hm_png
+
+#else if $numsamples.numsamples2 == "3":
+   runNGSplot.pl 
+   $genome_name 
+   $genomic_region_source_type.genomic_region 
+   $genomic_region_source_type.further_information 
+   $genomic_region_source_type.interval_size 
+   $genomic_region_source_type.flanking_region_option_source_type.flanking_region_option 
+   $genomic_region_source_type.flanking_region_option_source_type.flanking_region_size 
+   $numsamples.numsamples2
+   $numsamples.usepair.usepair1
+
+   $numsamples.usepair.bamfile1
+   $numsamples.usepair.reffile1
+   $numsamples.usepair.genelist1.usegenelist1
+   $numsamples.usepair.genelist1.genelist1
+   $numsamples.usepair.title1
+   $numsamples.usepair.fraglen1
+   $numsamples.usepair.linecol1
+
+   $numsamples.usepair.bamfile2
+   $numsamples.usepair.reffile2
+   $numsamples.usepair.genelist2.usegenelist2
+   $numsamples.usepair.genelist2.genelist2
+   $numsamples.usepair.title2
+   $numsamples.usepair.fraglen2
+   $numsamples.usepair.linecol2
+
+   $numsamples.usepair.bamfile3
+   $numsamples.usepair.reffile3
+   $numsamples.usepair.genelist3.usegenelist3
+   $numsamples.usepair.genelist3.genelist3
+   $numsamples.usepair.title3
+   $numsamples.usepair.fraglen3
+   $numsamples.usepair.linecol3
+
+   $gene_database
+   $randomly_sample
+   $GO.gene_order
+   $GO.KNC
+   $GO.MIT
+   $GO.NRS
+   $chunk_size
+   $quality_requirement
+   $standard_error
+   $radius_size
+   $flooding_fraction
+   $smooth_method
+   $shaded_area
+   $out_zip  $out_avg_png  $out_hm_png
+
+#else if $numsamples.numsamples2 == "4":
+   runNGSplot.pl 
+   $genome_name 
+   $genomic_region_source_type.genomic_region 
+   $genomic_region_source_type.further_information 
+   $genomic_region_source_type.interval_size 
+   $genomic_region_source_type.flanking_region_option_source_type.flanking_region_option 
+   $genomic_region_source_type.flanking_region_option_source_type.flanking_region_size 
+   $numsamples.numsamples2
+   $numsamples.usepair.usepair1
+
+   $numsamples.usepair.bamfile1
+   $numsamples.usepair.reffile1
+   $numsamples.usepair.genelist1.usegenelist1
+   $numsamples.usepair.genelist1.genelist1
+   $numsamples.usepair.title1
+   $numsamples.usepair.fraglen1
+   $numsamples.usepair.linecol1
+
+   $numsamples.usepair.bamfile2
+   $numsamples.usepair.reffile2
+   $numsamples.usepair.genelist2.usegenelist2
+   $numsamples.usepair.genelist2.genelist2
+   $numsamples.usepair.title2
+   $numsamples.usepair.fraglen2
+   $numsamples.usepair.linecol2
+
+   $numsamples.usepair.bamfile3
+   $numsamples.usepair.reffile3
+   $numsamples.usepair.genelist3.usegenelist3
+   $numsamples.usepair.genelist3.genelist3
+   $numsamples.usepair.title3
+   $numsamples.usepair.fraglen3
+   $numsamples.usepair.linecol3
+
+   $numsamples.usepair.bamfile4
+   $numsamples.usepair.reffile4
+   $numsamples.usepair.genelist4.usegenelist4
+   $numsamples.usepair.genelist4.genelist4
+   $numsamples.usepair.title4
+   $numsamples.usepair.fraglen4
+   $numsamples.usepair.linecol4
+   
+   $gene_database
+   $randomly_sample
+   $GO.gene_order
+   $GO.KNC
+   $GO.MIT
+   $GO.NRS
+   $chunk_size
+   $quality_requirement
+   $standard_error
+   $radius_size
+   $flooding_fraction
+   $smooth_method
+   $shaded_area
+   $out_zip  $out_avg_png  $out_hm_png
+
+#else if $numsamples.numsamples2 == "5":
+   runNGSplot.pl 
+   $genome_name 
+   $genomic_region_source_type.genomic_region 
+   $genomic_region_source_type.further_information 
+   $genomic_region_source_type.interval_size 
+   $genomic_region_source_type.flanking_region_option_source_type.flanking_region_option 
+   $genomic_region_source_type.flanking_region_option_source_type.flanking_region_size 
+   $numsamples.numsamples2
+   $numsamples.usepair.usepair1
+
+   $numsamples.usepair.bamfile1
+   $numsamples.usepair.reffile1
+   $numsamples.usepair.genelist1.usegenelist1
+   $numsamples.usepair.genelist1.genelist1
+   $numsamples.usepair.title1
+   $numsamples.usepair.fraglen1
+   $numsamples.usepair.linecol1
+
+   $numsamples.usepair.bamfile2
+   $numsamples.usepair.reffile2
+   $numsamples.usepair.genelist2.usegenelist2
+   $numsamples.usepair.genelist2.genelist2
+   $numsamples.usepair.title2
+   $numsamples.usepair.fraglen2
+   $numsamples.usepair.linecol2
+
+   $numsamples.usepair.bamfile3
+   $numsamples.usepair.reffile3
+   $numsamples.usepair.genelist3.usegenelist3
+   $numsamples.usepair.genelist3.genelist3
+   $numsamples.usepair.title3
+   $numsamples.usepair.fraglen3
+   $numsamples.usepair.linecol3
+
+   $numsamples.usepair.bamfile4
+   $numsamples.usepair.reffile4
+   $numsamples.usepair.genelist4.usegenelist4
+   $numsamples.usepair.genelist4.genelist4
+   $numsamples.usepair.title4
+   $numsamples.usepair.fraglen4
+   $numsamples.usepair.linecol4
+
+   $numsamples.usepair.bamfile5
+   $numsamples.usepair.reffile5
+   $numsamples.usepair.genelist5.usegenelist5
+   $numsamples.usepair.genelist5.genelist5
+   $numsamples.usepair.title5
+   $numsamples.usepair.fraglen5
+   $numsamples.usepair.linecol5
+
+   $gene_database
+   $randomly_sample
+   $GO.gene_order
+   $GO.KNC
+   $GO.MIT
+   $GO.NRS
+   $chunk_size
+   $quality_requirement
+   $standard_error
+   $radius_size
+   $flooding_fraction
+   $smooth_method
+   $shaded_area
+   $out_zip  $out_avg_png  $out_hm_png
+
+#else if $numsamples.numsamples2 == "6":
+   runNGSplot.pl 
+   $genome_name 
+   $genomic_region_source_type.genomic_region 
+   $genomic_region_source_type.further_information 
+   $genomic_region_source_type.interval_size 
+   $genomic_region_source_type.flanking_region_option_source_type.flanking_region_option 
+   $genomic_region_source_type.flanking_region_option_source_type.flanking_region_size 
+   $numsamples.numsamples2
+   $numsamples.usepair.usepair1
+
+   $numsamples.usepair.bamfile1
+   $numsamples.usepair.reffile1
+   $numsamples.usepair.genelist1.usegenelist1
+   $numsamples.usepair.genelist1.genelist1
+   $numsamples.usepair.title1
+   $numsamples.usepair.fraglen1
+   $numsamples.usepair.linecol1
+
+   $numsamples.usepair.bamfile2
+   $numsamples.usepair.reffile2
+   $numsamples.usepair.genelist2.usegenelist2
+   $numsamples.usepair.genelist2.genelist2
+   $numsamples.usepair.title2
+   $numsamples.usepair.fraglen2
+   $numsamples.usepair.linecol2
+
+   $numsamples.usepair.bamfile3
+   $numsamples.usepair.reffile3
+   $numsamples.usepair.genelist3.usegenelist3
+   $numsamples.usepair.genelist3.genelist3
+   $numsamples.usepair.title3
+   $numsamples.usepair.fraglen3
+   $numsamples.usepair.linecol3
+
+   $numsamples.usepair.bamfile4
+   $numsamples.usepair.reffile4
+   $numsamples.usepair.genelist4.usegenelist4
+   $numsamples.usepair.genelist4.genelist4
+   $numsamples.usepair.title4
+   $numsamples.usepair.fraglen4
+   $numsamples.usepair.linecol4
+
+   $numsamples.usepair.bamfile5
+   $numsamples.usepair.reffile5
+   $numsamples.usepair.genelist5.usegenelist5
+   $numsamples.usepair.genelist5.genelist5
+   $numsamples.usepair.title5
+   $numsamples.usepair.fraglen5
+   $numsamples.usepair.linecol5
+
+   $numsamples.usepair.bamfile6
+   $numsamples.usepair.reffile6
+   $numsamples.usepair.genelist6.usegenelist6
+   $numsamples.usepair.genelist6.genelist6
+   $numsamples.usepair.title6
+   $numsamples.usepair.fraglen6
+   $numsamples.usepair.linecol6
+
+   $gene_database
+   $randomly_sample
+   $GO.gene_order
+   $GO.KNC
+   $GO.MIT
+   $GO.NRS
+   $chunk_size
+   $quality_requirement
+   $standard_error
+   $radius_size
+   $flooding_fraction
+   $smooth_method
+   $shaded_area
+   $out_zip  $out_avg_png  $out_hm_png
+
+#else if $numsamples.numsamples2 == "7":
+   runNGSplot.pl 
+   $genome_name 
+   $genomic_region_source_type.genomic_region 
+   $genomic_region_source_type.further_information 
+   $genomic_region_source_type.interval_size 
+   $genomic_region_source_type.flanking_region_option_source_type.flanking_region_option 
+   $genomic_region_source_type.flanking_region_option_source_type.flanking_region_size 
+   $numsamples.numsamples2
+   $numsamples.usepair.usepair1
+
+   $numsamples.usepair.bamfile1
+   $numsamples.usepair.reffile1
+   $numsamples.usepair.genelist1.usegenelist1
+   $numsamples.usepair.genelist1.genelist1
+   $numsamples.usepair.title1
+   $numsamples.usepair.fraglen1
+   $numsamples.usepair.linecol1
+
+   $numsamples.usepair.bamfile2
+   $numsamples.usepair.reffile2
+   $numsamples.usepair.genelist2.usegenelist2
+   $numsamples.usepair.genelist2.genelist2
+   $numsamples.usepair.title2
+   $numsamples.usepair.fraglen2
+   $numsamples.usepair.linecol2
+
+   $numsamples.usepair.bamfile3
+   $numsamples.usepair.reffile3
+   $numsamples.usepair.genelist3.usegenelist3
+   $numsamples.usepair.genelist3.genelist3
+   $numsamples.usepair.title3
+   $numsamples.usepair.fraglen3
+   $numsamples.usepair.linecol3
+
+   $numsamples.usepair.bamfile4
+   $numsamples.usepair.reffile4
+   $numsamples.usepair.genelist4.usegenelist4
+   $numsamples.usepair.genelist4.genelist4
+   $numsamples.usepair.title4
+   $numsamples.usepair.fraglen4
+   $numsamples.usepair.linecol4
+
+   $numsamples.usepair.bamfile5
+   $numsamples.usepair.reffile5
+   $numsamples.usepair.genelist5.usegenelist5
+   $numsamples.usepair.genelist5.genelist5
+   $numsamples.usepair.title5
+   $numsamples.usepair.fraglen5
+   $numsamples.usepair.linecol5
+
+   $numsamples.usepair.bamfile6
+   $numsamples.usepair.reffile6
+   $numsamples.usepair.genelist6.usegenelist6
+   $numsamples.usepair.genelist6.genelist6
+   $numsamples.usepair.title6
+   $numsamples.usepair.fraglen6
+   $numsamples.usepair.linecol6
+
+   $numsamples.usepair.bamfile7
+   $numsamples.usepair.reffile7
+   $numsamples.usepair.genelist7.usegenelist7
+   $numsamples.usepair.genelist7.genelist7
+   $numsamples.usepair.title7
+   $numsamples.usepair.fraglen7
+   $numsamples.usepair.linecol7
+
+   $gene_database
+   $randomly_sample
+   $GO.gene_order
+   $GO.KNC
+   $GO.MIT
+   $GO.NRS
+   $chunk_size
+   $quality_requirement
+   $standard_error
+   $radius_size
+   $flooding_fraction
+   $smooth_method
+   $shaded_area
+   $out_zip  $out_avg_png  $out_hm_png
+
+#else if $numsamples.numsamples2 == "8":
+   runNGSplot.pl 
+   $genome_name 
+   $genomic_region_source_type.genomic_region 
+   $genomic_region_source_type.further_information 
+   $genomic_region_source_type.interval_size 
+   $genomic_region_source_type.flanking_region_option_source_type.flanking_region_option 
+   $genomic_region_source_type.flanking_region_option_source_type.flanking_region_size 
+   $numsamples.numsamples2
+   $numsamples.usepair.usepair1
+
+   $numsamples.usepair.bamfile1
+   $numsamples.usepair.reffile1
+   $numsamples.usepair.genelist1.usegenelist1
+   $numsamples.usepair.genelist1.genelist1
+   $numsamples.usepair.title1
+   $numsamples.usepair.fraglen1
+   $numsamples.usepair.linecol1
+
+   $numsamples.usepair.bamfile2
+   $numsamples.usepair.reffile2
+   $numsamples.usepair.genelist2.usegenelist2
+   $numsamples.usepair.genelist2.genelist2
+   $numsamples.usepair.title2
+   $numsamples.usepair.fraglen2
+   $numsamples.usepair.linecol2
+
+   $numsamples.usepair.bamfile3
+   $numsamples.usepair.reffile3
+   $numsamples.usepair.genelist3.usegenelist3
+   $numsamples.usepair.genelist3.genelist3
+   $numsamples.usepair.title3
+   $numsamples.usepair.fraglen3
+   $numsamples.usepair.linecol3
+
+   $numsamples.usepair.bamfile4
+   $numsamples.usepair.reffile4
+   $numsamples.usepair.genelist4.usegenelist4
+   $numsamples.usepair.genelist4.genelist4
+   $numsamples.usepair.title4
+   $numsamples.usepair.fraglen4
+   $numsamples.usepair.linecol4
+
+   $numsamples.usepair.bamfile5
+   $numsamples.usepair.reffile5
+   $numsamples.usepair.genelist5.usegenelist5
+   $numsamples.usepair.genelist5.genelist5
+   $numsamples.usepair.title5
+   $numsamples.usepair.fraglen5
+   $numsamples.usepair.linecol5
+
+   $numsamples.usepair.bamfile6
+   $numsamples.usepair.reffile6
+   $numsamples.usepair.genelist6.usegenelist6
+   $numsamples.usepair.genelist6.genelist6
+   $numsamples.usepair.title6
+   $numsamples.usepair.fraglen6
+   $numsamples.usepair.linecol6
+
+   $numsamples.usepair.bamfile7
+   $numsamples.usepair.reffile7
+   $numsamples.usepair.genelist7.usegenelist7
+   $numsamples.usepair.genelist7.genelist7
+   $numsamples.usepair.title7
+   $numsamples.usepair.fraglen7
+   $numsamples.usepair.linecol7
+
+   $numsamples.usepair.bamfile8
+   $numsamples.usepair.reffile8
+   $numsamples.usepair.genelist8.usegenelist8
+   $numsamples.usepair.genelist8.genelist8
+   $numsamples.usepair.title8
+   $numsamples.usepair.fraglen8
+   $numsamples.usepair.linecol8
+
+   $gene_database
+   $randomly_sample
+   $GO.gene_order
+   $GO.KNC
+   $GO.MIT
+   $GO.NRS
+   $chunk_size
+   $quality_requirement
+   $standard_error
+   $radius_size
+   $flooding_fraction
+   $smooth_method
+   $shaded_area
+   $out_zip  $out_avg_png  $out_hm_png
+
+#else if $numsamples.numsamples2 == "9":
+   runNGSplot.pl 
+   $genome_name 
+   $genomic_region_source_type.genomic_region 
+   $genomic_region_source_type.further_information 
+   $genomic_region_source_type.interval_size 
+   $genomic_region_source_type.flanking_region_option_source_type.flanking_region_option 
+   $genomic_region_source_type.flanking_region_option_source_type.flanking_region_size 
+   $numsamples.numsamples2
+   $numsamples.usepair.usepair1
+
+   $numsamples.usepair.bamfile1
+   $numsamples.usepair.reffile1
+   $numsamples.usepair.genelist1.usegenelist1
+   $numsamples.usepair.genelist1.genelist1
+   $numsamples.usepair.title1
+   $numsamples.usepair.fraglen1
+   $numsamples.usepair.linecol1
+
+   $numsamples.usepair.bamfile2
+   $numsamples.usepair.reffile2
+   $numsamples.usepair.genelist2.usegenelist2
+   $numsamples.usepair.genelist2.genelist2
+   $numsamples.usepair.title2
+   $numsamples.usepair.fraglen2
+   $numsamples.usepair.linecol2
+
+   $numsamples.usepair.bamfile3
+   $numsamples.usepair.reffile3
+   $numsamples.usepair.genelist3.usegenelist3
+   $numsamples.usepair.genelist3.genelist3
+   $numsamples.usepair.title3
+   $numsamples.usepair.fraglen3
+   $numsamples.usepair.linecol3
+
+   $numsamples.usepair.bamfile4
+   $numsamples.usepair.reffile4
+   $numsamples.usepair.genelist4.usegenelist4
+   $numsamples.usepair.genelist4.genelist4
+   $numsamples.usepair.title4
+   $numsamples.usepair.fraglen4
+   $numsamples.usepair.linecol4
+
+   $numsamples.usepair.bamfile5
+   $numsamples.usepair.reffile5
+   $numsamples.usepair.genelist5.usegenelist5
+   $numsamples.usepair.genelist5.genelist5
+   $numsamples.usepair.title5
+   $numsamples.usepair.fraglen5
+   $numsamples.usepair.linecol5
+
+   $numsamples.usepair.bamfile6
+   $numsamples.usepair.reffile6
+   $numsamples.usepair.genelist6.usegenelist6
+   $numsamples.usepair.genelist6.genelist6
+   $numsamples.usepair.title6
+   $numsamples.usepair.fraglen6
+   $numsamples.usepair.linecol6
+
+   $numsamples.usepair.bamfile7
+   $numsamples.usepair.reffile7
+   $numsamples.usepair.genelist7.usegenelist7
+   $numsamples.usepair.genelist7.genelist7
+   $numsamples.usepair.title7
+   $numsamples.usepair.fraglen7
+   $numsamples.usepair.linecol7
+
+   $numsamples.usepair.bamfile8
+   $numsamples.usepair.reffile8
+   $numsamples.usepair.genelist8.usegenelist8
+   $numsamples.usepair.genelist8.genelist8
+   $numsamples.usepair.title8
+   $numsamples.usepair.fraglen8
+   $numsamples.usepair.linecol8
+
+   $numsamples.usepair.bamfile9
+   $numsamples.usepair.reffile9
+   $numsamples.usepair.genelist9.usegenelist9
+   $numsamples.usepair.genelist9.genelist9
+   $numsamples.usepair.title9
+   $numsamples.usepair.fraglen9
+   $numsamples.usepair.linecol9
+
+   $gene_database
+   $randomly_sample
+   $GO.gene_order
+   $GO.KNC
+   $GO.MIT
+   $GO.NRS
+   $chunk_size
+   $quality_requirement
+   $standard_error
+   $radius_size
+   $flooding_fraction
+   $smooth_method
+   $shaded_area
+   $out_zip  $out_avg_png  $out_hm_png
+
+#else if $numsamples.numsamples2 == "10":
+   runNGSplot.pl 
+   $genome_name 
+   $genomic_region_source_type.genomic_region 
+   $genomic_region_source_type.further_information 
+   $genomic_region_source_type.interval_size 
+   $genomic_region_source_type.flanking_region_option_source_type.flanking_region_option 
+   $genomic_region_source_type.flanking_region_option_source_type.flanking_region_size 
+   $numsamples.numsamples2
+   $numsamples.usepair.usepair1
+
+   $numsamples.usepair.bamfile1
+   $numsamples.usepair.reffile1
+   $numsamples.usepair.genelist1.usegenelist1
+   $numsamples.usepair.genelist1.genelist1
+   $numsamples.usepair.title1
+   $numsamples.usepair.fraglen1
+   $numsamples.usepair.linecol1
+
+   $numsamples.usepair.bamfile2
+   $numsamples.usepair.reffile2
+   $numsamples.usepair.genelist2.usegenelist2
+   $numsamples.usepair.genelist2.genelist2
+   $numsamples.usepair.title2
+   $numsamples.usepair.fraglen2
+   $numsamples.usepair.linecol2
+
+   $numsamples.usepair.bamfile3
+   $numsamples.usepair.reffile3
+   $numsamples.usepair.genelist3.usegenelist3
+   $numsamples.usepair.genelist3.genelist3
+   $numsamples.usepair.title3
+   $numsamples.usepair.fraglen3
+   $numsamples.usepair.linecol3
+
+   $numsamples.usepair.bamfile4
+   $numsamples.usepair.reffile4
+   $numsamples.usepair.genelist4.usegenelist4
+   $numsamples.usepair.genelist4.genelist4
+   $numsamples.usepair.title4
+   $numsamples.usepair.fraglen4
+   $numsamples.usepair.linecol4
+
+   $numsamples.usepair.bamfile5
+   $numsamples.usepair.reffile5
+   $numsamples.usepair.genelist5.usegenelist5
+   $numsamples.usepair.genelist5.genelist5
+   $numsamples.usepair.title5
+   $numsamples.usepair.fraglen5
+   $numsamples.usepair.linecol5
+
+   $numsamples.usepair.bamfile6
+   $numsamples.usepair.reffile6
+   $numsamples.usepair.genelist6.usegenelist6
+   $numsamples.usepair.genelist6.genelist6
+   $numsamples.usepair.title6
+   $numsamples.usepair.fraglen6
+   $numsamples.usepair.linecol6
+
+   $numsamples.usepair.bamfile7
+   $numsamples.usepair.reffile7
+   $numsamples.usepair.genelist7.usegenelist7
+   $numsamples.usepair.genelist7.genelist7
+   $numsamples.usepair.title7
+   $numsamples.usepair.fraglen7
+   $numsamples.usepair.linecol7
+
+   $numsamples.usepair.bamfile8
+   $numsamples.usepair.reffile8
+   $numsamples.usepair.genelist8.usegenelist8
+   $numsamples.usepair.genelist8.genelist8
+   $numsamples.usepair.title8
+   $numsamples.usepair.fraglen8
+   $numsamples.usepair.linecol8
+
+   $numsamples.usepair.bamfile9
+   $numsamples.usepair.reffile9
+   $numsamples.usepair.genelist9.usegenelist9
+   $numsamples.usepair.genelist9.genelist9
+   $numsamples.usepair.title9
+   $numsamples.usepair.fraglen9
+   $numsamples.usepair.linecol9
+
+   $numsamples.usepair.bamfile10
+   $numsamples.usepair.reffile10
+   $numsamples.usepair.genelist10.usegenelist10
+   $numsamples.usepair.genelist10.genelist10
+   $numsamples.usepair.title10
+   $numsamples.usepair.fraglen10
+   $numsamples.usepair.linecol10
+
+   $gene_database
+   $randomly_sample
+   $GO.gene_order
+   $GO.KNC
+   $GO.MIT
+   $GO.NRS
+   $chunk_size
+   $quality_requirement
+   $standard_error
+   $radius_size
+   $flooding_fraction
+   $smooth_method
+   $shaded_area
+   $out_zip  $out_avg_png  $out_hm_png
+
+#end if:
+
+</command>
+
+<!-->
+<-->
+
+<inputs>
+   <param  type="text" value="mm9" name="genome_name" label="Genome" help="(hg19, mm9, rn4, or other genomes supported by your NGS.plot installation)" >
+   </param>
+   <conditional name="genomic_region_source_type">
+      <param type="select" name="genomic_region" label="Genomic region" help="">
+         <option value="tss">TSS</option>
+         <option value="tes">TES</option>
+         <option value="genebody">Genebody</option>
+         <option value="exon">Exon</option>
+         <option value="cgi">CGI</option>
+         <option value="bed">Customized bed file</option>
+      </param>
+
+      <when value="tss"> 
+         <param type="select" name="further_information"  label="Further information: Not required for TSS">
+            <option value="na">Not Required</option>
+         </param>
+         <param name="interval_size" type="select" label="Interval Region Size: Not required for TSS">
+            <option value="na">Not Required</option>
+         </param>
+         <conditional name="flanking_region_option_source_type">
+            <param type="select" name="flanking_region_option" label="Choose one method below to plot flanking region">
+               <option value="flanking_region_size">Specify flanking region size in base pairs</option>
+               <!--option value="flanking_floating_size">Specify fractional size with respect to interval size</option-->
+            </param>
+            <when value="flanking_region_size">
+               <param name="flanking_region_size" size="30" type="text" value="2000" label="Flanking region size" help="default varies by type: TSS=2000;TES=2000;Genebody=2000;Exon=500;CGI=500;Bed=1000"/>
+            </when>
+            <!--when value="flanking_floating_size">
+               <param name="flanking_region_size" size="30" type="text" value="0.33" label="Flanking region size as a fraction (or multiple) of interval size"/>  
+            </when-->
+         </conditional>
+      </when> 
+      <when value="tes"> 
+         <param type="select" name="further_information"  label="Further information: Not required for TES">
+            <option value="na">Not Required</option>
+         </param>
+         <param name="interval_size" type="select" label="Interval Region Size: Not required for TES">
+            <option value="na">Not Required</option>
+         </param>
+         <conditional name="flanking_region_option_source_type">
+            <param type="select" name="flanking_region_option" label="Choose one method below to plot flanking region">
+               <option value="flanking_region_size">Specify flanking region size in base pairs</option>
+               <!--option value="flanking_floating_size">Specify fractional size with respect to interval size</option-->
+            </param>
+            <when value="flanking_region_size">
+               <param name="flanking_region_size" size="30" type="text" value="2000" label="Flanking region size" help="default varies by type: TSS=2000;TES=2000;Genebody=2000;Exon=500;CGI=500;Bed=1000"/>
+            </when>
+            <!--when value="flanking_floating_size">
+               <param name="flanking_region_size" size="30" type="text" value="0.33" label="Flanking region size as a fraction (or multiple) of interval size"/>  
+            </when-->
+         </conditional>
+      </when> 
+      <when value="genebody"> 
+         <param type="select" name="further_information"  label="You selected Genebody, further information can be provided for specific regions to plot">
+            <option value="chipseq">ChIP-seq</option>
+            <option value="rnaseq">RNA-seq</option>
+         </param>
+         <param name="interval_size" type="select" label="Interval Region Size" help="By default, Exon and CGI are small interval; Genebody and bed files are large interval. The X-axis of the plot is separated into 5 equal sized parts. If large interval is chosen, the middle 3 parts are for interval region and the 1 part on each side is for flanking region. If small interval is chosen, the middle 1 part is for interval region and the 2 parts on each side is for flanking region.">
+            <option value="automatic">Default</option>
+            <option value="0">Small</option>
+            <option value="1">Large</option>
+         </param>
+         <conditional name="flanking_region_option_source_type">
+            <param type="select" name="flanking_region_option" label="Choose one method below to plot flanking region">
+               <option value="flanking_region_size">Specify flanking region size in base pairs</option>
+               <option value="flanking_floating_size">Specify fractional size with respect to interval size</option>
+            </param>
+            <when value="flanking_region_size">
+               <param name="flanking_region_size" size="30" type="text" value="2000" label="Flanking region size" help="default varies by type: TSS=2000;TES=2000;Genebody=2000;Exon=500;CGI=500;Bed=1000"/>
+            </when>
+            <when value="flanking_floating_size">
+               <param name="flanking_region_size" size="30" type="text" value="0.33" label="Flanking region size as a fraction (or multiple) of interval size"/>
+            </when>
+         </conditional>            
+      </when>
+      <when value="exon"> 
+         <param type="select" name="further_information"  label="You selected Exon, further information can be provided for specific regions to plot">
+            <option value="canonical">Canonical</option>
+            <option value="variant">Variant</option>
+            <option value="promoter">Promoter</option>
+            <option value="polyA">polyA</option>
+            <option value="altAcceptor">altAcceptor</option>
+            <option value="altDonor">altDonor</option>
+            <option value="altBoth">altBoth</option>
+         </param>
+         <param name="interval_size" type="select" label="Interval Region Size" help="By default, Exon and CGI are small interval; Genebody and bed files are large interval. The X-axis of the plot is separated into 5 equal sized parts. If large interval is chosen, the middle 3 parts are for interval region and the 1 part on each side is for flanking region. If small interval is chosen, the middle 1 part is for interval region and the 2 parts on each side is for flanking region.">
+            <option value="automatic">Default</option>
+            <option value="0">Small</option>
+            <option value="1">Large</option>
+         </param>
+         <conditional name="flanking_region_option_source_type">
+            <param type="select" name="flanking_region_option" label="Choose one method below to plot flanking region">
+               <option value="flanking_region_size">Specify flanking region size in base pairs</option>
+               <option value="flanking_floating_size">Specify fractional size with respect to interval size</option>
+            </param>
+            <when value="flanking_region_size">
+               <param name="flanking_region_size" size="30" type="text" value="500" label="Flanking region size" help="default varies by type: TSS=2000;TES=2000;Genebody=2000;Exon=500;CGI=500;Bed=1000"/>
+            </when>
+            <when value="flanking_floating_size">
+               <param name="flanking_region_size" size="30" type="text" value="0.33" label="Flanking region size as a fraction (or multiple) of interval size"/>
+            </when>
+         </conditional>
+      </when>
+      <when value="cgi"> 
+         <param type="select" name="further_information"  label="You select CGI, further information can be provided for specific regions to plot">
+            <option value="ProximalPromoter">ProximalPromoter</option>
+            <option value="Genebody">GeneBody</option>
+            <option value="Genedesert">GeneDesert</option>
+            <option value="OtherIntergenic">OtherIntergenic</option>
+            <option value="Pericentromere">Pericentromere</option>
+            <option value="Subtelomere">Subtelomere</option>
+            <option value="Promoter1k">Promoter1k</option>
+            <option value="Promoter3k">Promoter3k</option>
+         </param>
+         <param name="interval_size" type="select" label="Interval Region Size" help="By default, Exon and CGI are small interval; Genebody and bed files are large interval. The X-axis of the plot is separated into 5 equal sized parts. If large interval is chosen, the middle 3 parts are for interval region and the 1 part on each side is for flanking region. If small interval is chosen, the middle 1 part is for interval region and the 2 parts on each side is for flanking region.">
+            <option value="automatic">Default</option>
+            <option value="0">Small</option>
+            <option value="1">Large</option>
+         </param>
+         <conditional name="flanking_region_option_source_type">
+            <param type="select" name="flanking_region_option" label="Choose one method below to plot flanking region">
+               <option value="flanking_region_size">Specify flanking region size in base pairs</option>
+               <option value="flanking_floating_size">Specify fractional size with respect to interval size</option>
+            </param>
+            <when value="flanking_region_size">
+               <param name="flanking_region_size" size="30" type="text" value="500" label="Flanking region size" help="default varies by type: TSS=2000;TES=2000;Genebody=2000;Exon=500;CGI=500;Bed=1000"/>
+            </when>
+            <when value="flanking_floating_size">
+               <param name="flanking_region_size" size="30" type="text" value="0.33" label="Flanking region size as a fraction (or multiple) of interval size"/>  
+            </when>
+         </conditional>
+      </when> 
+      <when value="bed"> 
+         <param type="select" name="further_information"  label="Further information: Not required for bed input">
+            <option value="na">Not Required</option>
+         </param>
+         <param name="interval_size" type="select" label="Interval Region Size" help="By default, Exon and CGI are small interval; Genebody and bed files are large interval. The X-axis of the plot is separated into 5 equal sized parts. If large interval is chosen, the middle 3 parts are for interval region and the 1 part on each side is for flanking region. If small interval is chosen, the middle 1 part is for interval region and the 2 parts on each side is for flanking region.">
+            <option value="automatic">Default</option>
+            <option value="0">Small</option>
+            <option value="1">Large</option>
+         </param>
+         <conditional name="flanking_region_option_source_type">
+            <param type="select" name="flanking_region_option" label="Choose one method below to plot flanking region">
+               <option value="flanking_region_size">Specify flanking region size in base pairs</option>
+               <option value="flanking_floating_size">Specify fractional size with respect to interval size</option>
+            </param>
+            <when value="flanking_region_size">
+               <param name="flanking_region_size" size="30" type="text" value="1000" label="Flanking region size" help="default varies by type: TSS=2000;TES=2000;Genebody=2000;Exon=500;CGI=500;Bed=1000"/>
+            </when>
+            <when value="flanking_floating_size">
+               <param name="flanking_region_size" size="30" type="text" value="0.33" label="Flanking region size as a fraction (or multiple) of interval size"/>  
+            </when>
+         </conditional>
+      </when> 
+   </conditional>
+
+
+   <conditional name="numsamples">
+      <param type="select" name="numsamples2" label="Number of samples to plot">
+         <option value="1">1</option>
+         <option value="2">2</option>
+         <option value="3">3</option>
+         <option value="4">4</option>
+         <option value="5">5</option>
+         <option value="6">6</option>
+         <option value="7">7</option>
+         <option value="8">8</option>
+         <option value="9">9</option>
+         <option value="10">10</option>
+      </param>
+
+      <when value="1">                     
+         <conditional name="usepair">
+            <param type="select" name="usepair1" label="Use reference alignment?" help="Using a reference bam file will allow the plots to display log2 fold changes instead of read count intensities.">
+               <option value="no">No</option>
+               <option value="yes">Yes</option>
+            </param>
+            <when value="no">                     
+               <!-- START: 1 sample, no refpairs, entry 1-->
+               <param  type="data"  name="bamfile1" label="Sample 1: Input BAM file"/>
+               <param  type="hidden"  name="reffile1" value="na"/>  
+               <conditional name="genelist1">
+                  <param type="select" name="usegenelist1" label="Sample 1: Gene list">
+                     <option value="no">Plot whole genome</option>
+                     <option value="yes">Provide restricted gene list</option>
+                  </param>
+                  <when value="no">                     
+                     <param type="hidden"  name="genelist1"  value="-1"/>
+                  </when>
+                  <when value="yes">
+                     <param type="data"  name="genelist1"  label="Choose the uploaded gene list for plotting"/>
+                  </when>
+               </conditional>
+               <param  type="text"  name="title1" value="plot1" label="Sample 1: Image title"/>  
+               <param  type="text"  name="fraglen1" value="150" label="Sample 1: Expected fragment length"/>  
+               <param  type="text"  name="linecol1" value="green" label="Sample 1: Line plot color"/>  
+               <!-- END: 1 sample, no refpairs, entry 1-->
+            </when> 
+            <when value="yes">                     
+               <!-- START: 1 sample, yes refpairs, entry 1-->
+               <param  type="data"  name="bamfile1" label="Sample 1: Input BAM file"/>
+               <param  type="data"  name="reffile1" label="Sample 1: Reference BAM file"/>  
+               <conditional name="genelist1">
+                  <param type="select" name="usegenelist1" label="Sample 1: Gene list">
+                     <option value="no">Plot whole genome</option>
+                     <option value="yes">Provide restricted gene list</option>
+                  </param>
+                  <when value="no">                     
+                     <param type="hidden"  name="genelist1"  value="-1"/>
+                  </when>
+                  <when value="yes">
+                     <param type="data"  name="genelist1"  label="Choose the uploaded gene list for plotting"/>
+                  </when>
+               </conditional>
+               <param  type="text"  name="title1" value="plot1" label="Sample 1: Image title"/>  
+               <param  type="text"  name="fraglen1" value="150" label="Sample 1: Expected fragment length"/>  
+               <param  type="text"  name="linecol1" value="green" label="Sample 1: Line plot color"/>  
+               <!-- END: 1 sample, yes refpairs, entry 1-->
+            </when> 
+         </conditional>
+      </when>                     
+      <when value="2">                     
+         <conditional name="usepair">
+            <param type="select" name="usepair1" label="Use reference alignment?" help="Using a reference bam file will allow the plots to display log2 fold changes instead of read count intensities.">
+               <option value="no">No</option>
+               <option value="yes">Yes</option>
+            </param>
+            <when value="no">                     
+               <!-- START: 2 samples, no refpairs, entry 1-->
+               <param  type="data"  name="bamfile1" label="Sample 1: Input BAM file"/>
+               <param  type="hidden"  name="reffile1" value="na"/>  
+               <conditional name="genelist1">
+                  <param type="select" name="usegenelist1" label="Sample 1: Gene list">
+                     <option value="no">Plot whole genome</option>
+                     <option value="yes">Provide restricted gene list</option>
+                  </param>
+                  <when value="no">                     
+                     <param type="hidden"  name="genelist1"  value="-1"/>
+                  </when>
+                  <when value="yes">
+                     <param type="data"  name="genelist1"  label="Choose the uploaded gene list for plotting"/>
+                  </when>
+               </conditional>
+               <param  type="text"  name="title1" value="plot1" label="Sample 1: Image title"/>  
+               <param  type="text"  name="fraglen1" value="150" label="Sample 1: Expected fragment length"/>  
+               <param  type="text"  name="linecol1" value="green" label="Sample 1: Line plot color"/>  
+               <!-- END: 2 samples, no refpairs, entry 1-->
+               <!-- START: 2 samples, no refpairs, entry 2-->
+               <param  type="data"  name="bamfile2" label="Sample 2: Input BAM file"/>
+               <param  type="hidden"  name="reffile2" value="na"/>  
+               <conditional name="genelist2">
+                  <param type="select" name="usegenelist2" label="Sample 2: Gene list">
+                     <option value="no">Plot whole genome</option>
+                     <option value="yes">Provide restricted gene list</option>
+                  </param>
+                  <when value="no">                     
+                     <param type="hidden"  name="genelist2"  value="-1"/>
+                  </when>
+                  <when value="yes">
+                     <param type="data"  name="genelist2"  label="Choose the uploaded gene list for plotting"/>
+                  </when>
+               </conditional>
+               <param  type="text"  name="title2" value="plot2" label="Sample 2: Image title"/>  
+               <param  type="text"  name="fraglen2" value="150" label="Sample 2: Expected fragment length"/>  
+               <param  type="text"  name="linecol2" value="blue" label="Sample 2: Line plot color"/>  
+               <!-- END: 2 samples, no refpairs, entry 2-->
+            </when> 
+            <when value="yes">                     
+               <!-- START: 2 samples, yes refpairs, entry 1-->
+               <param  type="data"  name="bamfile1" label="Sample 1: Input BAM file"/>
+               <param  type="data"  name="reffile1" label="Sample 1: Reference BAM file"/>  
+               <conditional name="genelist1">
+                  <param type="select" name="usegenelist1" label="Sample 1: Gene list">
+                     <option value="no">Plot whole genome</option>
+                     <option value="yes">Provide restricted gene list</option>
+                  </param>
+                  <when value="no">                     
+                     <param type="hidden"  name="genelist1"  value="-1"/>
+                  </when>
+                  <when value="yes">
+                     <param type="data"  name="genelist1"  label="Choose the uploaded gene list for plotting"/>
+                  </when>
+               </conditional>
+               <param  type="text"  name="title1" value="plot1" label="Sample 1: Image title"/>  
+               <param  type="text"  name="fraglen1" value="150" label="Sample 1: Expected fragment length"/>  
+               <param  type="text"  name="linecol1" value="green" label="Sample 1: Line plot color"/>  
+               <!-- END: 2 samples, yes refpairs, entry 1-->
+               <!-- START: 2 samples, yes refpairs, entry 2-->
+               <param  type="data"  name="bamfile2" label="Sample 2: Input BAM file"/>
+               <param  type="data"  name="reffile2" label="Sample 2: Reference BAM file"/>  
+               <conditional name="genelist2">
+                  <param type="select" name="usegenelist2" label="Sample 2: Gene list">
+                     <option value="no">Plot whole genome</option>
+                     <option value="yes">Provide restricted gene list</option>
+                  </param>
+                  <when value="no">                     
+                     <param type="hidden"  name="genelist2"  value="-1"/>
+                  </when>
+                  <when value="yes">
+                     <param type="data"  name="genelist2"  label="Choose the uploaded gene list for plotting"/>
+                  </when>
+               </conditional>
+               <param  type="text"  name="title2" value="plot2" label="Sample 2: Image title"/>  
+               <param  type="text"  name="fraglen2" value="150" label="Sample 2: Expected fragment length"/>  
+               <param  type="text"  name="linecol2" value="blue" label="Sample 2: Line plot color"/>  
+               <!-- END: 2 samples, yes refpairs, entry 2-->
+            </when> 
+         </conditional>
+      </when>                     
+      <when value="3">                     
+         <conditional name="usepair">
+            <param type="select" name="usepair1" label="Use reference alignment?" help="Using a reference bam file will allow the plots to display log2 fold changes instead of read count intensities.">
+               <option value="no">No</option>
+               <option value="yes">Yes</option>
+            </param>
+            <when value="no">                     
+               <!-- START: 3 samples, no refpairs, entry 1-->
+               <param  type="data"  name="bamfile1" label="Sample 1: Input BAM file"/>
+               <param  type="hidden"  name="reffile1" value="na"/>  
+               <conditional name="genelist1">
+                  <param type="select" name="usegenelist1" label="Sample 1: Gene list">
+                     <option value="no">Plot whole genome</option>
+                     <option value="yes">Provide restricted gene list</option>
+                  </param>
+                  <when value="no">                     
+                     <param type="hidden"  name="genelist1"  value="-1"/>
+                  </when>
+                  <when value="yes">
+                     <param type="data"  name="genelist1"  label="Choose the uploaded gene list for plotting"/>
+                  </when>
+               </conditional>
+               <param  type="text"  name="title1" value="plot1" label="Sample 1: Image title"/>  
+               <param  type="text"  name="fraglen1" value="150" label="Sample 1: Expected fragment length"/>  
+               <param  type="text"  name="linecol1" value="green" label="Sample 1: Line plot color"/>  
+               <!-- END: 3 samples, no refpairs, entry 1-->
+               <!-- START: 3 samples, no refpairs, entry 2-->
+               <param  type="data"  name="bamfile2" label="Sample 2: Input BAM file"/>
+               <param  type="hidden"  name="reffile2" value="na"/>  
+               <conditional name="genelist2">
+                  <param type="select" name="usegenelist2" label="Sample 2: Gene list">
+                     <option value="no">Plot whole genome</option>
+                     <option value="yes">Provide restricted gene list</option>
+                  </param>
+                  <when value="no">                     
+                     <param type="hidden"  name="genelist2"  value="-1"/>
+                  </when>
+                  <when value="yes">
+                     <param type="data"  name="genelist2"  label="Choose the uploaded gene list for plotting"/>
+                  </when>
+               </conditional>
+               <param  type="text"  name="title2" value="plot2" label="Sample 2: Image title"/>  
+               <param  type="text"  name="fraglen2" value="150" label="Sample 2: Expected fragment length"/>  
+               <param  type="text"  name="linecol2" value="blue" label="Sample 2: Line plot color"/>  
+               <!-- END: 3 samples, no refpairs, entry 2-->
+               <!-- START: 3 samples, no refpairs, entry 3-->
+               <param  type="data"  name="bamfile3" label="Sample 3: Input BAM file"/>
+               <param  type="hidden"  name="reffile3" value="na"/>  
+               <conditional name="genelist3">
+                  <param type="select" name="usegenelist3" label="Sample 3: Gene list">
+                     <option value="no">Plot whole genome</option>
+                     <option value="yes">Provide restricted gene list</option>
+                  </param>
+                  <when value="no">                     
+                     <param type="hidden"  name="genelist3"  value="-1"/>
+                  </when>
+                  <when value="yes">
+                     <param type="data"  name="genelist3"  label="Choose the uploaded gene list for plotting"/>
+                  </when>
+               </conditional>
+               <param  type="text"  name="title3" value="plot3" label="Sample 3: Image title"/>  
+               <param  type="text"  name="fraglen3" value="150" label="Sample 3: Expected fragment length"/>  
+               <param  type="text"  name="linecol3" value="red" label="Sample 3: Line plot color"/>  
+               <!-- END: 3 samples, no refpairs, entry 3-->
+            </when> 
+            <when value="yes">                     
+               <!-- START: 3 samples, yes refpairs, entry 1-->
+               <param  type="data"  name="bamfile1" label="Sample 1: Input BAM file"/>
+               <param  type="data"  name="reffile1" label="Sample 1: Reference BAM file"/>  
+               <conditional name="genelist1">
+                  <param type="select" name="usegenelist1" label="Sample 1: Gene list">
+                     <option value="no">Plot whole genome</option>
+                     <option value="yes">Provide restricted gene list</option>
+                  </param>
+                  <when value="no">                     
+                     <param type="hidden"  name="genelist1"  value="-1"/>
+                  </when>
+                  <when value="yes">
+                     <param type="data"  name="genelist1"  label="Choose the uploaded gene list for plotting"/>
+                  </when>
+               </conditional>
+               <param  type="text"  name="title1" value="plot1" label="Sample 1: Image title"/>  
+               <param  type="text"  name="fraglen1" value="150" label="Sample 1: Expected fragment length"/>  
+               <param  type="text"  name="linecol1" value="green" label="Sample 1: Line plot color"/>  
+               <!-- END: 3 samples, yes refpairs, entry 1-->
+               <!-- START: 3 samples, yes refpairs, entry 2-->
+               <param  type="data"  name="bamfile2" label="Sample 2: Input BAM file"/>
+               <param  type="data"  name="reffile2" label="Sample 2: Reference BAM file"/>  
+               <conditional name="genelist2">
+                  <param type="select" name="usegenelist2" label="Sample 2: Gene list">
+                     <option value="no">Plot whole genome</option>
+                     <option value="yes">Provide restricted gene list</option>
+                  </param>
+                  <when value="no">                     
+                     <param type="hidden"  name="genelist2"  value="-1"/>
+                  </when>
+                  <when value="yes">
+                     <param type="data"  name="genelist2"  label="Choose the uploaded gene list for plotting"/>
+                  </when>
+               </conditional>
+               <param  type="text"  name="title2" value="plot2" label="Sample 2: Image title"/>  
+               <param  type="text"  name="fraglen2" value="150" label="Sample 2: Expected fragment length"/>  
+               <param  type="text"  name="linecol2" value="blue" label="Sample 2: Line plot color"/>  
+               <!-- END: 3 samples, yes refpairs, entry 2-->
+               <!-- START: 3 samples, yes refpairs, entry 3-->
+               <param  type="data"  name="bamfile3" label="Sample 3: Input BAM file"/>
+               <param  type="data"  name="reffile3" label="Sample 3: Reference BAM file"/>  
+               <conditional name="genelist3">
+                  <param type="select" name="usegenelist3" label="Sample 3: Gene list">
+                     <option value="no">Plot whole genome</option>
+                     <option value="yes">Provide restricted gene list</option>
+                  </param>
+                  <when value="no">                     
+                     <param type="hidden"  name="genelist3"  value="-1"/>
+                  </when>
+                  <when value="yes">
+                     <param type="data"  name="genelist3"  label="Choose the uploaded gene list for plotting"/>
+                  </when>
+               </conditional>
+               <param  type="text"  name="title3" value="plot3" label="Sample 3: Image title"/>  
+               <param  type="text"  name="fraglen3" value="150" label="Sample 3: Expected fragment length"/>  
+               <param  type="text"  name="linecol3" value="red" label="Sample 3: Line plot color"/>  
+               <!-- END: 3 samples, yes refpairs, entry 2-->
+            </when> 
+         </conditional>
+      </when>                     
+      <when value="4">                     
+         <conditional name="usepair">
+            <param type="select" name="usepair1" label="Use reference alignment?" help="Using a reference bam file will allow the plots to display log2 fold changes instead of read count intensities.">
+               <option value="no">No</option>
+               <option value="yes">Yes</option>
+            </param>
+            <when value="no">                     
+               <!-- START: 4 samples, no refpairs, entry 1-->
+               <param  type="data"  name="bamfile1" label="Sample 1: Input BAM file"/>
+               <param  type="hidden"  name="reffile1" value="na"/>  
+               <conditional name="genelist1">
+                  <param type="select" name="usegenelist1" label="Sample 1: Gene list">
+                     <option value="no">Plot whole genome</option>
+                     <option value="yes">Provide restricted gene list</option>
+                  </param>
+                  <when value="no">                     
+                     <param type="hidden"  name="genelist1"  value="-1"/>
+                  </when>
+                  <when value="yes">
+                     <param type="data"  name="genelist1"  label="Choose the uploaded gene list for plotting"/>
+                  </when>
+               </conditional>
+               <param  type="text"  name="title1" value="plot1" label="Sample 1: Image title"/>  
+               <param  type="text"  name="fraglen1" value="150" label="Sample 1: Expected fragment length"/>  
+               <param  type="text"  name="linecol1" value="green" label="Sample 1: Line plot color"/>  
+               <!-- END: 4 samples, no refpairs, entry 1-->
+               <!-- START: 4 samples, no refpairs, entry 2-->
+               <param  type="data"  name="bamfile2" label="Sample 2: Input BAM file"/>
+               <param  type="hidden"  name="reffile2" value="na"/>  
+               <conditional name="genelist2">
+                  <param type="select" name="usegenelist2" label="Sample 2: Gene list">
+                     <option value="no">Plot whole genome</option>
+                     <option value="yes">Provide restricted gene list</option>
+                  </param>
+                  <when value="no">                     
+                     <param type="hidden"  name="genelist2"  value="-1"/>
+                  </when>
+                  <when value="yes">
+                     <param type="data"  name="genelist2"  label="Choose the uploaded gene list for plotting"/>
+                  </when>
+               </conditional>
+               <param  type="text"  name="title2" value="plot2" label="Sample 2: Image title"/>  
+               <param  type="text"  name="fraglen2" value="150" label="Sample 2: Expected fragment length"/>  
+               <param  type="text"  name="linecol2" value="blue" label="Sample 2: Line plot color"/>  
+               <!-- END: 4 samples, no refpairs, entry 2-->
+               <!-- START: 4 samples, no refpairs, entry 3-->
+               <param  type="data"  name="bamfile3" label="Sample 3: Input BAM file"/>
+               <param  type="hidden"  name="reffile3" value="na"/>  
+               <conditional name="genelist3">
+                  <param type="select" name="usegenelist3" label="Sample 3: Gene list">
+                     <option value="no">Plot whole genome</option>
+                     <option value="yes">Provide restricted gene list</option>
+                  </param>
+                  <when value="no">                     
+                     <param type="hidden"  name="genelist3"  value="-1"/>
+                  </when>
+                  <when value="yes">
+                     <param type="data"  name="genelist3"  label="Choose the uploaded gene list for plotting"/>
+                  </when>
+               </conditional>
+               <param  type="text"  name="title3" value="plot3" label="Sample 3: Image title"/>  
+               <param  type="text"  name="fraglen3" value="150" label="Sample 3: Expected fragment length"/>  
+               <param  type="text"  name="linecol3" value="red" label="Sample 3: Line plot color"/>  
+               <!-- END: 4 samples, no refpairs, entry 3-->
+               <!-- START: 4 samples, no refpairs, entry 4-->
+               <param  type="data"  name="bamfile4" label="Sample 4: Input BAM file"/>
+               <param  type="hidden"  name="reffile4" value="na"/>  
+               <conditional name="genelist4">
+                  <param type="select" name="usegenelist4" label="Sample 4: Gene list">
+                     <option value="no">Plot whole genome</option>
+                     <option value="yes">Provide restricted gene list</option>
+                  </param>
+                  <when value="no">                     
+                     <param type="hidden"  name="genelist4"  value="-1"/>
+                  </when>
+                  <when value="yes">
+                     <param type="data"  name="genelist4"  label="Choose the uploaded gene list for plotting"/>
+                  </when>
+               </conditional>
+               <param  type="text"  name="title4" value="plot4" label="Sample 4: Image title"/>  
+               <param  type="text"  name="fraglen4" value="150" label="Sample 4: Expected fragment length"/>  
+               <param  type="text"  name="linecol4" value="pink" label="Sample 4: Line plot color"/>  
+               <!-- END: 4 samples, no refpairs, entry 4-->
+            </when> 
+            <when value="yes">                     
+               <!-- START: 4 samples, yes refpairs, entry 1-->
+               <param  type="data"  name="bamfile1" label="Sample 1: Input BAM file"/>
+               <param  type="data"  name="reffile1" label="Sample 1: Reference BAM file"/>  
+               <conditional name="genelist1">
+                  <param type="select" name="usegenelist1" label="Sample 1: Gene list">
+                     <option value="no">Plot whole genome</option>
+                     <option value="yes">Provide restricted gene list</option>
+                  </param>
+                  <when value="no">                     
+                     <param type="hidden"  name="genelist1"  value="-1"/>
+                  </when>
+                  <when value="yes">
+                     <param type="data"  name="genelist1"  label="Choose the uploaded gene list for plotting"/>
+                  </when>
+               </conditional>
+               <param  type="text"  name="title1" value="plot1" label="Sample 1: Image title"/>  
+               <param  type="text"  name="fraglen1" value="150" label="Sample 1: Expected fragment length"/>  
+               <param  type="text"  name="linecol1" value="green" label="Sample 1: Line plot color"/>  
+               <!-- END: 4 samples, yes refpairs, entry 1-->
+               <!-- START: 4 samples, yes refpairs, entry 2-->
+               <param  type="data"  name="bamfile2" label="Sample 2: Input BAM file"/>
+               <param  type="data"  name="reffile2" label="Sample 2: Reference BAM file"/>  
+               <conditional name="genelist2">
+                  <param type="select" name="usegenelist2" label="Sample 2: Gene list">
+                     <option value="no">Plot whole genome</option>
+                     <option value="yes">Provide restricted gene list</option>
+                  </param>
+                  <when value="no">                     
+                     <param type="hidden"  name="genelist2"  value="-1"/>
+                  </when>
+                  <when value="yes">
+                     <param type="data"  name="genelist2"  label="Choose the uploaded gene list for plotting"/>
+                  </when>
+               </conditional>
+               <param  type="text"  name="title2" value="plot2" label="Sample 2: Image title"/>  
+               <param  type="text"  name="fraglen2" value="150" label="Sample 2: Expected fragment length"/>  
+               <param  type="text"  name="linecol2" value="blue" label="Sample 2: Line plot color"/>  
+               <!-- END: 4 samples, yes refpairs, entry 2-->
+               <!-- START: 4 samples, yes refpairs, entry 3-->
+               <param  type="data"  name="bamfile3" label="Sample 3: Input BAM file"/>
+               <param  type="data"  name="reffile3" label="Sample 3: Reference BAM file"/>  
+               <conditional name="genelist3">
+                  <param type="select" name="usegenelist3" label="Sample 3: Gene list">
+                     <option value="no">Plot whole genome</option>
+                     <option value="yes">Provide restricted gene list</option>
+                  </param>
+                  <when value="no">                     
+                     <param type="hidden"  name="genelist3"  value="-1"/>
+                  </when>
+                  <when value="yes">
+                     <param type="data"  name="genelist3"  label="Choose the uploaded gene list for plotting"/>
+                  </when>
+               </conditional>
+               <param  type="text"  name="title3" value="plot3" label="Sample 3: Image title"/>  
+               <param  type="text"  name="fraglen3" value="150" label="Sample 3: Expected fragment length"/>  
+               <param  type="text"  name="linecol3" value="red" label="Sample 3: Line plot color"/>  
+               <!-- END: 4 samples, yes refpairs, entry 3-->
+               <!-- START: 4 samples, yes refpairs, entry 4-->
+               <param  type="data"  name="bamfile4" label="Sample 4: Input BAM file"/>
+               <param  type="data"  name="reffile4" label="Sample 4: Reference BAM file"/>  
+               <conditional name="genelist4">
+                  <param type="select" name="usegenelist4" label="Sample 4: Gene list">
+                     <option value="no">Plot whole genome</option>
+                     <option value="yes">Provide restricted gene list</option>
+                  </param>
+                  <when value="no">                     
+                     <param type="hidden"  name="genelist4"  value="-1"/>
+                  </when>
+                  <when value="yes">
+                     <param type="data"  name="genelist4"  label="Choose the uploaded gene list for plotting"/>
+                  </when>
+               </conditional>
+               <param  type="text"  name="title4" value="plot4" label="Sample 4: Image title"/>  
+               <param  type="text"  name="fraglen4" value="150" label="Sample 4: Expected fragment length"/>  
+               <param  type="text"  name="linecol4" value="pink" label="Sample 4: Line plot color"/>  
+               <!-- END: 4 samples, yes refpairs, entry 4-->
+            </when> 
+         </conditional>
+      </when>                     
+      <when value="5">           
+         <conditional name="usepair">
+            <param type="select" name="usepair1" label="Use reference alignment?" help="Using a reference bam file will allow the plots to display log2 fold changes instead of read count intensities.">
+               <option value="no">No</option>
+               <option value="yes">Yes</option>
+            </param>
+            <when value="no">                     
+               <!-- START: 5 samples, no refpairs, entry 1-->
+               <param  type="data"  name="bamfile1" label="Sample 1: Input BAM file"/>
+               <param  type="hidden"  name="reffile1" value="na"/>  
+               <conditional name="genelist1">
+                  <param type="select" name="usegenelist1" label="Sample 1: Gene list">
+                     <option value="no">Plot whole genome</option>
+                     <option value="yes">Provide restricted gene list</option>
+                  </param>
+                  <when value="no">                     
+                     <param type="hidden"  name="genelist1"  value="-1"/>
+                  </when>
+                  <when value="yes">
+                     <param type="data"  name="genelist1"  label="Choose the uploaded gene list for plotting"/>
+                  </when>
+               </conditional>
+               <param  type="text"  name="title1" value="plot1" label="Sample 1: Image title"/>  
+               <param  type="text"  name="fraglen1" value="150" label="Sample 1: Expected fragment length"/>  
+               <param  type="text"  name="linecol1" value="green" label="Sample 1: Line plot color"/>  
+               <!-- END: 5 samples, no refpairs, entry 1-->
+               <!-- START: 5 samples, no refpairs, entry 2-->
+               <param  type="data"  name="bamfile2" label="Sample 2: Input BAM file"/>
+               <param  type="hidden"  name="reffile2" value="na"/>  
+               <conditional name="genelist2">
+                  <param type="select" name="usegenelist2" label="Sample 2: Gene list">
+                     <option value="no">Plot whole genome</option>
+                     <option value="yes">Provide restricted gene list</option>
+                  </param>
+                  <when value="no">                     
+                     <param type="hidden"  name="genelist2"  value="-1"/>
+                  </when>
+                  <when value="yes">
+                     <param type="data"  name="genelist2"  label="Choose the uploaded gene list for plotting"/>
+                  </when>
+               </conditional>
+               <param  type="text"  name="title2" value="plot2" label="Sample 2: Image title"/>  
+               <param  type="text"  name="fraglen2" value="150" label="Sample 2: Expected fragment length"/>  
+               <param  type="text"  name="linecol2" value="blue" label="Sample 2: Line plot color"/>  
+               <!-- END: 5 samples, no refpairs, entry 2-->
+               <!-- START: 5 samples, no refpairs, entry 3-->
+               <param  type="data"  name="bamfile3" label="Sample 3: Input BAM file"/>
+               <param  type="hidden"  name="reffile3" value="na"/>  
+               <conditional name="genelist3">
+                  <param type="select" name="usegenelist3" label="Sample 3: Gene list">
+                     <option value="no">Plot whole genome</option>
+                     <option value="yes">Provide restricted gene list</option>
+                  </param>
+                  <when value="no">                     
+                     <param type="hidden"  name="genelist3"  value="-1"/>
+                  </when>
+                  <when value="yes">
+                     <param type="data"  name="genelist3"  label="Choose the uploaded gene list for plotting"/>
+                  </when>
+               </conditional>
+               <param  type="text"  name="title3" value="plot3" label="Sample 3: Image title"/>  
+               <param  type="text"  name="fraglen3" value="150" label="Sample 3: Expected fragment length"/>  
+               <param  type="text"  name="linecol3" value="red" label="Sample 3: Line plot color"/>  
+               <!-- END: 5 samples, no refpairs, entry 3-->
+               <!-- START: 5 samples, no refpairs, entry 4-->
+               <param  type="data"  name="bamfile4" label="Sample 4: Input BAM file"/>
+               <param  type="hidden"  name="reffile4" value="na"/>  
+               <conditional name="genelist4">
+                  <param type="select" name="usegenelist4" label="Sample 4: Gene list">
+                     <option value="no">Plot whole genome</option>
+                     <option value="yes">Provide restricted gene list</option>
+                  </param>
+                  <when value="no">                     
+                     <param type="hidden"  name="genelist4"  value="-1"/>
+                  </when>
+                  <when value="yes">
+                     <param type="data"  name="genelist4"  label="Choose the uploaded gene list for plotting"/>
+                  </when>
+               </conditional>
+               <param  type="text"  name="title4" value="plot4" label="Sample 4: Image title"/>  
+               <param  type="text"  name="fraglen4" value="150" label="Sample 4: Expected fragment length"/>  
+               <param  type="text"  name="linecol4" value="pink" label="Sample 4: Line plot color"/>  
+               <!-- END: 5 samples, no refpairs, entry 4-->
+               <!-- START: 5 samples, no refpairs, entry 5-->
+               <param  type="data"  name="bamfile5" label="Sample 5: Input BAM file"/>
+               <param  type="hidden"  name="reffile5" value="na"/>  
+               <conditional name="genelist5">
+                  <param type="select" name="usegenelist5" label="Sample 5: Gene list">
+                     <option value="no">Plot whole genome</option>
+                     <option value="yes">Provide restricted gene list</option>
+                  </param>
+                  <when value="no">                     
+                     <param type="hidden"  name="genelist5"  value="-1"/>
+                  </when>
+                  <when value="yes">
+                     <param type="data"  name="genelist5"  label="Choose the uploaded gene list for plotting"/>
+                  </when>
+               </conditional>
+               <param  type="text"  name="title5" value="plot5" label="Sample 5: Image title"/>  
+               <param  type="text"  name="fraglen5" value="150" label="Sample 5: Expected fragment length"/>  
+               <param  type="text"  name="linecol5" value="slateblue" label="Sample 5: Line plot color"/>  
+               <!-- END: 5 samples, no refpairs, entry 5-->
+            </when> 
+            <when value="yes">                     
+               <!-- START: 5 samples, yes refpairs, entry 1-->
+               <param  type="data"  name="bamfile1" label="Sample 1: Input BAM file"/>
+               <param  type="data"  name="reffile1" label="Sample 1: Reference BAM file"/>  
+               <conditional name="genelist1">
+                  <param type="select" name="usegenelist1" label="Sample 1: Gene list">
+                     <option value="no">Plot whole genome</option>
+                     <option value="yes">Provide restricted gene list</option>
+                  </param>
+                  <when value="no">                     
+                     <param type="hidden"  name="genelist1"  value="-1"/>
+                  </when>
+                  <when value="yes">
+                     <param type="data"  name="genelist1"  label="Choose the uploaded gene list for plotting"/>
+                  </when>
+               </conditional>
+               <param  type="text"  name="title1" value="plot1" label="Sample 1: Image title"/>  
+               <param  type="text"  name="fraglen1" value="150" label="Sample 1: Expected fragment length"/>  
+               <param  type="text"  name="linecol1" value="green" label="Sample 1: Line plot color"/>  
+               <!-- END: 5 samples, yes refpairs, entry 1-->
+               <!-- START: 5 samples, yes refpairs, entry 2-->
+               <param  type="data"  name="bamfile2" label="Sample 2: Input BAM file"/>
+               <param  type="data"  name="reffile2" label="Sample 2: Reference BAM file"/>  
+               <conditional name="genelist2">
+                  <param type="select" name="usegenelist2" label="Sample 2: Gene list">
+                     <option value="no">Plot whole genome</option>
+                     <option value="yes">Provide restricted gene list</option>
+                  </param>
+                  <when value="no">                     
+                     <param type="hidden"  name="genelist2"  value="-1"/>
+                  </when>
+                  <when value="yes">
+                     <param type="data"  name="genelist2"  label="Choose the uploaded gene list for plotting"/>
+                  </when>
+               </conditional>
+               <param  type="text"  name="title2" value="plot2" label="Sample 2: Image title"/>  
+               <param  type="text"  name="fraglen2" value="150" label="Sample 2: Expected fragment length"/>  
+               <param  type="text"  name="linecol2" value="blue" label="Sample 2: Line plot color"/>  
+               <!-- END: 5 samples, yes refpairs, entry 2-->
+               <!-- START: 5 samples, yes refpairs, entry 3-->
+               <param  type="data"  name="bamfile3" label="Sample 3: Input BAM file"/>
+               <param  type="data"  name="reffile3" label="Sample 3: Reference BAM file"/>  
+               <conditional name="genelist3">
+                  <param type="select" name="usegenelist3" label="Sample 3: Gene list">
+                     <option value="no">Plot whole genome</option>
+                     <option value="yes">Provide restricted gene list</option>
+                  </param>
+                  <when value="no">                     
+                     <param type="hidden"  name="genelist3"  value="-1"/>
+                  </when>
+                  <when value="yes">
+                     <param type="data"  name="genelist3"  label="Choose the uploaded gene list for plotting"/>
+                  </when>
+               </conditional>
+               <param  type="text"  name="title3" value="plot3" label="Sample 3: Image title"/>  
+               <param  type="text"  name="fraglen3" value="150" label="Sample 3: Expected fragment length"/>  
+               <param  type="text"  name="linecol3" value="red" label="Sample 3: Line plot color"/>  
+               <!-- END: 5 samples, yes refpairs, entry 3-->
+               <!-- START: 5 samples, yes refpairs, entry 4-->
+               <param  type="data"  name="bamfile4" label="Sample 4: Input BAM file"/>
+               <param  type="data"  name="reffile4" label="Sample 4: Reference BAM file"/>  
+               <conditional name="genelist4">
+                  <param type="select" name="usegenelist4" label="Sample 4: Gene list">
+                     <option value="no">Plot whole genome</option>
+                     <option value="yes">Provide restricted gene list</option>
+                  </param>
+                  <when value="no">                     
+                     <param type="hidden"  name="genelist4"  value="-1"/>
+                  </when>
+                  <when value="yes">
+                     <param type="data"  name="genelist4"  label="Choose the uploaded gene list for plotting"/>
+                  </when>
+               </conditional>
+               <param  type="text"  name="title4" value="plot4" label="Sample 4: Image title"/>  
+               <param  type="text"  name="fraglen4" value="150" label="Sample 4: Expected fragment length"/>  
+               <param  type="text"  name="linecol4" value="pink" label="Sample 4: Line plot color"/>  
+               <!-- END: 5 samples, yes refpairs, entry 4-->
+               <!-- START: 5 samples, yes refpairs, entry 5-->
+               <param  type="data"  name="bamfile5" label="Sample 5: Input BAM file"/>
+               <param  type="data"  name="reffile5" label="Sample 5: Reference BAM file"/>  
+               <conditional name="genelist5">
+                  <param type="select" name="usegenelist5" label="Sample 5: Gene list">
+                     <option value="no">Plot whole genome</option>
+                     <option value="yes">Provide restricted gene list</option>
+                  </param>
+                  <when value="no">                     
+                     <param type="hidden"  name="genelist5"  value="-1"/>
+                  </when>
+                  <when value="yes">
+                     <param type="data"  name="genelist5"  label="Choose the uploaded gene list for plotting"/>
+                  </when>
+               </conditional>
+               <param  type="text"  name="title5" value="plot5" label="Sample 5: Image title"/>  
+               <param  type="text"  name="fraglen5" value="150" label="Sample 5: Expected fragment length"/>  
+               <param  type="text"  name="linecol5" value="slateblue" label="Sample 5: Line plot color"/>  
+               <!-- END: 5 samples, yes refpairs, entry 5-->
+            </when> 
+         </conditional>
+      </when>                     
+      <when value="6">                     
+         <conditional name="usepair">
+            <param type="select" name="usepair1" label="Use reference alignment?"  help="Using a reference bam file will allow the plots to display log2 fold changes instead of read count intensities.">
+               <option value="no">No</option>
+               <option value="yes">Yes</option>
+            </param>
+            <when value="no">                     
+               <!-- START: 6 samples, no refpairs, entry 1-->
+               <param  type="data"  name="bamfile1" label="Sample 1: Input BAM file"/>
+               <param  type="hidden"  name="reffile1" value="na"/>  
+               <conditional name="genelist1">
+                  <param type="select" name="usegenelist1" label="Sample 1: Gene list">
+                     <option value="no">Plot whole genome</option>
+                     <option value="yes">Provide restricted gene list</option>
+                  </param>
+                  <when value="no">                     
+                     <param type="hidden"  name="genelist1"  value="-1"/>
+                  </when>
+                  <when value="yes">
+                     <param type="data"  name="genelist1"  label="Choose the uploaded gene list for plotting"/>
+                  </when>
+               </conditional>
+               <param  type="text"  name="title1" value="plot1" label="Sample 1: Image title"/>  
+               <param  type="text"  name="fraglen1" value="150" label="Sample 1: Expected fragment length"/>  
+               <param  type="text"  name="linecol1" value="green" label="Sample 1: Line plot color"/>  
+               <!-- END: 6 samples, no refpairs, entry 1-->
+               <!-- START: 6 samples, no refpairs, entry 2-->
+               <param  type="data"  name="bamfile2" label="Sample 2: Input BAM file"/>
+               <param  type="hidden"  name="reffile2" value="na"/>  
+               <conditional name="genelist2">
+                  <param type="select" name="usegenelist2" label="Sample 2: Gene list">
+                     <option value="no">Plot whole genome</option>
+                     <option value="yes">Provide restricted gene list</option>
+                  </param>
+                  <when value="no">                     
+                     <param type="hidden"  name="genelist2"  value="-1"/>
+                  </when>
+                  <when value="yes">
+                     <param type="data"  name="genelist2"  label="Choose the uploaded gene list for plotting"/>
+                  </when>
+               </conditional>
+               <param  type="text"  name="title2" value="plot2" label="Sample 2: Image title"/>  
+               <param  type="text"  name="fraglen2" value="150" label="Sample 2: Expected fragment length"/>  
+               <param  type="text"  name="linecol2" value="blue" label="Sample 2: Line plot color"/>  
+               <!-- END: 6 samples, no refpairs, entry 2-->
+               <!-- START: 6 samples, no refpairs, entry 3-->
+               <param  type="data"  name="bamfile3" label="Sample 3: Input BAM file"/>
+               <param  type="hidden"  name="reffile3" value="na"/>  
+               <conditional name="genelist3">
+                  <param type="select" name="usegenelist3" label="Sample 3: Gene list">
+                     <option value="no">Plot whole genome</option>
+                     <option value="yes">Provide restricted gene list</option>
+                  </param>
+                  <when value="no">                     
+                     <param type="hidden"  name="genelist3"  value="-1"/>
+                  </when>
+                  <when value="yes">
+                     <param type="data"  name="genelist3"  label="Choose the uploaded gene list for plotting"/>
+                  </when>
+               </conditional>
+               <param  type="text"  name="title3" value="plot3" label="Sample 3: Image title"/>  
+               <param  type="text"  name="fraglen3" value="150" label="Sample 3: Expected fragment length"/>  
+               <param  type="text"  name="linecol3" value="red" label="Sample 3: Line plot color"/>  
+               <!-- END: 6 samples, no refpairs, entry 3-->
+               <!-- START: 6 samples, no refpairs, entry 4-->
+               <param  type="data"  name="bamfile4" label="Sample 4: Input BAM file"/>
+               <param  type="hidden"  name="reffile4" value="na"/>  
+               <conditional name="genelist4">
+                  <param type="select" name="usegenelist4" label="Sample 4: Gene list">
+                     <option value="no">Plot whole genome</option>
+                     <option value="yes">Provide restricted gene list</option>
+                  </param>
+                  <when value="no">                     
+                     <param type="hidden"  name="genelist4"  value="-1"/>
+                  </when>
+                  <when value="yes">
+                     <param type="data"  name="genelist4"  label="Choose the uploaded gene list for plotting"/>
+                  </when>
+               </conditional>
+               <param  type="text"  name="title4" value="plot4" label="Sample 4: Image title"/>  
+               <param  type="text"  name="fraglen4" value="150" label="Sample 4: Expected fragment length"/>  
+               <param  type="text"  name="linecol4" value="pink" label="Sample 4: Line plot color"/>  
+               <!-- END: 6 samples, no refpairs, entry 4-->
+               <!-- START: 6 samples, no refpairs, entry 5-->
+               <param  type="data"  name="bamfile5" label="Sample 5: Input BAM file"/>
+               <param  type="hidden"  name="reffile5" value="na"/>  
+               <conditional name="genelist5">
+                  <param type="select" name="usegenelist5" label="Sample 5: Gene list">
+                     <option value="no">Plot whole genome</option>
+                     <option value="yes">Provide restricted gene list</option>
+                  </param>
+                  <when value="no">                     
+                     <param type="hidden"  name="genelist5"  value="-1"/>
+                  </when>
+                  <when value="yes">
+                     <param type="data"  name="genelist5"  label="Choose the uploaded gene list for plotting"/>
+                  </when>
+               </conditional>
+               <param  type="text"  name="title5" value="plot5" label="Sample 5: Image title"/>  
+               <param  type="text"  name="fraglen5" value="150" label="Sample 5: Expected fragment length"/>  
+               <param  type="text"  name="linecol5" value="slateblue" label="Sample 5: Line plot color"/>  
+               <!-- END: 6 samples, no refpairs, entry 5-->
+               <!-- START: 6 samples, no refpairs, entry 6-->
+               <param  type="data"  name="bamfile6" label="Sample 6: Input BAM file"/>
+               <param  type="hidden"  name="reffile6" value="na"/>  
+               <conditional name="genelist6">
+                  <param type="select" name="usegenelist6" label="Sample 6: Gene list">
+                     <option value="no">Plot whole genome</option>
+                     <option value="yes">Provide restricted gene list</option>
+                  </param>
+                  <when value="no">                     
+                     <param type="hidden"  name="genelist6"  value="-1"/>
+                  </when>
+                  <when value="yes">
+                     <param type="data"  name="genelist6"  label="Choose the uploaded gene list for plotting"/>
+                  </when>
+               </conditional>
+               <param  type="text"  name="title6" value="plot6" label="Sample 6: Image title"/>  
+               <param  type="text"  name="fraglen6" value="150" label="Sample 6: Expected fragment length"/>  
+               <param  type="text"  name="linecol6" value="sienna" label="Sample 6: Line plot color"/>  
+               <!-- END: 6 samples, no refpairs, entry 6-->
+            </when> 
+            <when value="yes">                     
+               <!-- START: 6 samples, yes refpairs, entry 1-->
+               <param  type="data"  name="bamfile1" label="Sample 1: Input BAM file"/>
+               <param  type="data"  name="reffile1" label="Sample 1: Reference BAM file"/>  
+               <conditional name="genelist1">
+                  <param type="select" name="usegenelist1" label="Sample 1: Gene list">
+                     <option value="no">Plot whole genome</option>
+                     <option value="yes">Provide restricted gene list</option>
+                  </param>
+                  <when value="no">                     
+                     <param type="hidden"  name="genelist1"  value="-1"/>
+                  </when>
+                  <when value="yes">
+                     <param type="data"  name="genelist1"  label="Choose the uploaded gene list for plotting"/>
+                  </when>
+               </conditional>
+               <param  type="text"  name="title1" value="plot1" label="Sample 1: Image title"/>  
+               <param  type="text"  name="fraglen1" value="150" label="Sample 1: Expected fragment length"/>  
+               <param  type="text"  name="linecol1" value="green" label="Sample 1: Line plot color"/>  
+               <!-- END: 6 samples, yes refpairs, entry 1-->
+               <!-- START: 6 samples, yes refpairs, entry 2-->
+               <param  type="data"  name="bamfile2" label="Sample 2: Input BAM file"/>
+               <param  type="data"  name="reffile2" label="Sample 2: Reference BAM file"/>  
+               <conditional name="genelist2">
+                  <param type="select" name="usegenelist2" label="Sample 2: Gene list">
+                     <option value="no">Plot whole genome</option>
+                     <option value="yes">Provide restricted gene list</option>
+                  </param>
+                  <when value="no">                     
+                     <param type="hidden"  name="genelist2"  value="-1"/>
+                  </when>
+                  <when value="yes">
+                     <param type="data"  name="genelist2"  label="Choose the uploaded gene list for plotting"/>
+                  </when>
+               </conditional>
+               <param  type="text"  name="title2" value="plot2" label="Sample 2: Image title"/>  
+               <param  type="text"  name="fraglen2" value="150" label="Sample 2: Expected fragment length"/>  
+               <param  type="text"  name="linecol2" value="blue" label="Sample 2: Line plot color"/>  
+               <!-- END: 6 samples, yes refpairs, entry 2-->
+               <!-- START: 6 samples, yes refpairs, entry 3-->
+               <param  type="data"  name="bamfile3" label="Sample 3: Input BAM file"/>
+               <param  type="data"  name="reffile3" label="Sample 3: Reference BAM file"/>  
+               <conditional name="genelist3">
+                  <param type="select" name="usegenelist3" label="Sample 3: Gene list">
+                     <option value="no">Plot whole genome</option>
+                     <option value="yes">Provide restricted gene list</option>
+                  </param>
+                  <when value="no">                     
+                     <param type="hidden"  name="genelist3"  value="-1"/>
+                  </when>
+                  <when value="yes">
+                     <param type="data"  name="genelist3"  label="Choose the uploaded gene list for plotting"/>
+                  </when>
+               </conditional>
+               <param  type="text"  name="title3" value="plot3" label="Sample 3: Image title"/>  
+               <param  type="text"  name="fraglen3" value="150" label="Sample 3: Expected fragment length"/>  
+               <param  type="text"  name="linecol3" value="red" label="Sample 3: Line plot color"/>  
+               <!-- END: 6 samples, yes refpairs, entry 3-->
+               <!-- START: 6 samples, yes refpairs, entry 4-->
+               <param  type="data"  name="bamfile4" label="Sample 4: Input BAM file"/>
+               <param  type="data"  name="reffile4" label="Sample 4: Reference BAM file"/>  
+               <conditional name="genelist4">
+                  <param type="select" name="usegenelist4" label="Sample 4: Gene list">
+                     <option value="no">Plot whole genome</option>
+                     <option value="yes">Provide restricted gene list</option>
+                  </param>
+                  <when value="no">                     
+                     <param type="hidden"  name="genelist4"  value="-1"/>
+                  </when>
+                  <when value="yes">
+                     <param type="data"  name="genelist4"  label="Choose the uploaded gene list for plotting"/>
+                  </when>
+               </conditional>
+               <param  type="text"  name="title4" value="plot4" label="Sample 4: Image title"/>  
+               <param  type="text"  name="fraglen4" value="150" label="Sample 4: Expected fragment length"/>  
+               <param  type="text"  name="linecol4" value="pink" label="Sample 4: Line plot color"/>  
+               <!-- END: 6 samples, yes refpairs, entry 4-->
+               <!-- START: 6 samples, yes refpairs, entry 5-->
+               <param  type="data"  name="bamfile5" label="Sample 5: Input BAM file"/>
+               <param  type="data"  name="reffile5" label="Sample 5: Reference BAM file"/>  
+               <conditional name="genelist5">
+                  <param type="select" name="usegenelist5" label="Sample 5: Gene list">
+                     <option value="no">Plot whole genome</option>
+                     <option value="yes">Provide restricted gene list</option>
+                  </param>
+                  <when value="no">                     
+                     <param type="hidden"  name="genelist5"  value="-1"/>
+                  </when>
+                  <when value="yes">
+                     <param type="data"  name="genelist5"  label="Choose the uploaded gene list for plotting"/>
+                  </when>
+               </conditional>
+               <param  type="text"  name="title5" value="plot5" label="Sample 5: Image title"/>  
+               <param  type="text"  name="fraglen5" value="150" label="Sample 5: Expected fragment length"/>  
+               <param  type="text"  name="linecol5" value="slateblue" label="Sample 5: Line plot color"/>  
+               <!-- END: 6 samples, yes refpairs, entry 5-->
+               <!-- START: 6 samples, yes refpairs, entry 6-->
+               <param  type="data"  name="bamfile6" label="Sample 6: Input BAM file"/>
+               <param  type="data"  name="reffile6" label="Sample 6: Reference BAM file"/>  
+               <conditional name="genelist6">
+                  <param type="select" name="usegenelist6" label="Sample 6: Gene list">
+                     <option value="no">Plot whole genome</option>
+                     <option value="yes">Provide restricted gene list</option>
+                  </param>
+                  <when value="no">                     
+                     <param type="hidden"  name="genelist6"  value="-1"/>
+                  </when>
+                  <when value="yes">
+                     <param type="data"  name="genelist6"  label="Choose the uploaded gene list for plotting"/>
+                  </when>
+               </conditional>
+               <param  type="text"  name="title6" value="plot6" label="Sample 6: Image title"/>  
+               <param  type="text"  name="fraglen6" value="150" label="Sample 6: Expected fragment length"/>  
+               <param  type="text"  name="linecol6" value="sienna" label="Sample 6: Line plot color"/>  
+               <!-- END: 6 samples, yes refpairs, entry 6-->
+            </when> 
+         </conditional>
+      </when>                     
+      <when value="7">                     
+         <conditional name="usepair">
+            <param type="select" name="usepair1" label="Use reference alignment?" help="Using a reference bam file will allow the plots to display log2 fold changes instead of read count intensities.">
+               <option value="no">No</option>
+               <option value="yes">Yes</option>
+            </param>
+            <when value="no">                     
+               <!-- START: 7 samples, no refpairs, entry 1-->
+               <param  type="data"  name="bamfile1" label="Sample 1: Input BAM file"/>
+               <param  type="hidden"  name="reffile1" value="na"/>  
+               <conditional name="genelist1">
+                  <param type="select" name="usegenelist1" label="Sample 1: Gene list">
+                     <option value="no">Plot whole genome</option>
+                     <option value="yes">Provide restricted gene list</option>
+                  </param>
+                  <when value="no">                     
+                     <param type="hidden"  name="genelist1"  value="-1"/>
+                  </when>
+                  <when value="yes">
+                     <param type="data"  name="genelist1"  label="Choose the uploaded gene list for plotting"/>
+                  </when>
+               </conditional>
+               <param  type="text"  name="title1" value="plot1" label="Sample 1: Image title"/>  
+               <param  type="text"  name="fraglen1" value="150" label="Sample 1: Expected fragment length"/>  
+               <param  type="text"  name="linecol1" value="green" label="Sample 1: Line plot color"/>  
+               <!-- END: 7 samples, no refpairs, entry 1-->
+               <!-- START: 7 samples, no refpairs, entry 2-->
+               <param  type="data"  name="bamfile2" label="Sample 2: Input BAM file"/>
+               <param  type="hidden"  name="reffile2" value="na"/>  
+               <conditional name="genelist2">
+                  <param type="select" name="usegenelist2" label="Sample 2: Gene list">
+                     <option value="no">Plot whole genome</option>
+                     <option value="yes">Provide restricted gene list</option>
+                  </param>
+                  <when value="no">                     
+                     <param type="hidden"  name="genelist2"  value="-1"/>
+                  </when>
+                  <when value="yes">
+                     <param type="data"  name="genelist2"  label="Choose the uploaded gene list for plotting"/>
+                  </when>
+               </conditional>
+               <param  type="text"  name="title2" value="plot2" label="Sample 2: Image title"/>  
+               <param  type="text"  name="fraglen2" value="150" label="Sample 2: Expected fragment length"/>  
+               <param  type="text"  name="linecol2" value="blue" label="Sample 2: Line plot color"/>  
+               <!-- END: 7 samples, no refpairs, entry 2-->
+               <!-- START: 7 samples, no refpairs, entry 3-->
+               <param  type="data"  name="bamfile3" label="Sample 3: Input BAM file"/>
+               <param  type="hidden"  name="reffile3" value="na"/>  
+               <conditional name="genelist3">
+                  <param type="select" name="usegenelist3" label="Sample 3: Gene list">
+                     <option value="no">Plot whole genome</option>
+                     <option value="yes">Provide restricted gene list</option>
+                  </param>
+                  <when value="no">                     
+                     <param type="hidden"  name="genelist3"  value="-1"/>
+                  </when>
+                  <when value="yes">
+                     <param type="data"  name="genelist3"  label="Choose the uploaded gene list for plotting"/>
+                  </when>
+               </conditional>
+               <param  type="text"  name="title3" value="plot3" label="Sample 3: Image title"/>  
+               <param  type="text"  name="fraglen3" value="150" label="Sample 3: Expected fragment length"/>  
+               <param  type="text"  name="linecol3" value="red" label="Sample 3: Line plot color"/>  
+               <!-- END: 7 samples, no refpairs, entry 3-->
+               <!-- START: 7 samples, no refpairs, entry 4-->
+               <param  type="data"  name="bamfile4" label="Sample 4: Input BAM file"/>
+               <param  type="hidden"  name="reffile4" value="na"/>  
+               <conditional name="genelist4">
+                  <param type="select" name="usegenelist4" label="Sample 4: Gene list">
+                     <option value="no">Plot whole genome</option>
+                     <option value="yes">Provide restricted gene list</option>
+                  </param>
+                  <when value="no">                     
+                     <param type="hidden"  name="genelist4"  value="-1"/>
+                  </when>
+                  <when value="yes">
+                     <param type="data"  name="genelist4"  label="Choose the uploaded gene list for plotting"/>
+                  </when>
+               </conditional>
+               <param  type="text"  name="title4" value="plot4" label="Sample 4: Image title"/>  
+               <param  type="text"  name="fraglen4" value="150" label="Sample 4: Expected fragment length"/>  
+               <param  type="text"  name="linecol4" value="pink" label="Sample 4: Line plot color"/>  
+               <!-- END: 7 samples, no refpairs, entry 4-->
+               <!-- START: 7 samples, no refpairs, entry 5-->
+               <param  type="data"  name="bamfile5" label="Sample 5: Input BAM file"/>
+               <param  type="hidden"  name="reffile5" value="na"/>  
+               <conditional name="genelist5">
+                  <param type="select" name="usegenelist5" label="Sample 5: Gene list">
+                     <option value="no">Plot whole genome</option>
+                     <option value="yes">Provide restricted gene list</option>
+                  </param>
+                  <when value="no">                     
+                     <param type="hidden"  name="genelist5"  value="-1"/>
+                  </when>
+                  <when value="yes">
+                     <param type="data"  name="genelist5"  label="Choose the uploaded gene list for plotting"/>
+                  </when>
+               </conditional>
+               <param  type="text"  name="title5" value="plot5" label="Sample 5: Image title"/>  
+               <param  type="text"  name="fraglen5" value="150" label="Sample 5: Expected fragment length"/>  
+               <param  type="text"  name="linecol5" value="slateblue" label="Sample 5: Line plot color"/>  
+               <!-- END: 7 samples, no refpairs, entry 5-->
+               <!-- START: 7 samples, no refpairs, entry 6-->
+               <param  type="data"  name="bamfile6" label="Sample 6: Input BAM file"/>
+               <param  type="hidden"  name="reffile6" value="na"/>  
+               <conditional name="genelist6">
+                  <param type="select" name="usegenelist6" label="Sample 6: Gene list">
+                     <option value="no">Plot whole genome</option>
+                     <option value="yes">Provide restricted gene list</option>
+                  </param>
+                  <when value="no">                     
+                     <param type="hidden"  name="genelist6"  value="-1"/>
+                  </when>
+                  <when value="yes">
+                     <param type="data"  name="genelist6"  label="Choose the uploaded gene list for plotting"/>
+                  </when>
+               </conditional>
+               <param  type="text"  name="title6" value="plot6" label="Sample 6: Image title"/>  
+               <param  type="text"  name="fraglen6" value="150" label="Sample 6: Expected fragment length"/>  
+               <param  type="text"  name="linecol6" value="sienna" label="Sample 6: Line plot color"/>  
+               <!-- END: 7 samples, no refpairs, entry 6-->
+               <!-- START: 7 samples, no refpairs, entry 7-->
+               <param  type="data"  name="bamfile7" label="Sample 7: Input BAM file"/>
+               <param  type="hidden"  name="reffile7" value="na"/>  
+               <conditional name="genelist7">
+                  <param type="select" name="usegenelist7" label="Sample 7: Gene list">
+                     <option value="no">Plot whole genome</option>
+                     <option value="yes">Provide restricted gene list</option>
+                  </param>
+                  <when value="no">                     
+                     <param type="hidden"  name="genelist7"  value="-1"/>
+                  </when>
+                  <when value="yes">
+                     <param type="data"  name="genelist7"  label="Choose the uploaded gene list for plotting"/>
+                  </when>
+               </conditional>
+               <param  type="text"  name="title7" value="plot7" label="Sample 7: Image title"/>  
+               <param  type="text"  name="fraglen7" value="150" label="Sample 7: Expected fragment length"/>  
+               <param  type="text"  name="linecol7" value="tomato" label="Sample 7: Line plot color"/>  
+               <!-- END: 7 samples, no refpairs, entry 7-->
+            </when> 
+            <when value="yes">                     
+               <!-- START: 7 samples, yes refpairs, entry 1-->
+               <param  type="data"  name="bamfile1" label="Sample 1: Input BAM file"/>
+               <param  type="data"  name="reffile1" label="Sample 1: Reference BAM file"/>  
+               <conditional name="genelist1">
+                  <param type="select" name="usegenelist1" label="Sample 1: Gene list">
+                     <option value="no">Plot whole genome</option>
+                     <option value="yes">Provide restricted gene list</option>
+                  </param>
+                  <when value="no">                     
+                     <param type="hidden"  name="genelist1"  value="-1"/>
+                  </when>
+                  <when value="yes">
+                     <param type="data"  name="genelist1"  label="Choose the uploaded gene list for plotting"/>
+                  </when>
+               </conditional>
+               <param  type="text"  name="title1" value="plot1" label="Sample 1: Image title"/>  
+               <param  type="text"  name="fraglen1" value="150" label="Sample 1: Expected fragment length"/>  
+               <param  type="text"  name="linecol1" value="green" label="Sample 1: Line plot color"/>  
+               <!-- END: 7 samples, yes refpairs, entry 1-->
+               <!-- START: 7 samples, yes refpairs, entry 2-->
+               <param  type="data"  name="bamfile2" label="Sample 2: Input BAM file"/>
+               <param  type="data"  name="reffile2" label="Sample 2: Reference BAM file"/>  
+               <conditional name="genelist2">
+                  <param type="select" name="usegenelist2" label="Sample 2: Gene list">
+                     <option value="no">Plot whole genome</option>
+                     <option value="yes">Provide restricted gene list</option>
+                  </param>
+                  <when value="no">                     
+                     <param type="hidden"  name="genelist2"  value="-1"/>
+                  </when>
+                  <when value="yes">
+                     <param type="data"  name="genelist2"  label="Choose the uploaded gene list for plotting"/>
+                  </when>
+               </conditional>
+               <param  type="text"  name="title2" value="plot2" label="Sample 2: Image title"/>  
+               <param  type="text"  name="fraglen2" value="150" label="Sample 2: Expected fragment length"/>  
+               <param  type="text"  name="linecol2" value="blue" label="Sample 2: Line plot color"/>  
+               <!-- END: 7 samples, yes refpairs, entry 2-->
+               <!-- START: 7 samples, yes refpairs, entry 3-->
+               <param  type="data"  name="bamfile3" label="Sample 3: Input BAM file"/>
+               <param  type="data"  name="reffile3" label="Sample 3: Reference BAM file"/>  
+               <conditional name="genelist3">
+                  <param type="select" name="usegenelist3" label="Sample 3: Gene list">
+                     <option value="no">Plot whole genome</option>
+                     <option value="yes">Provide restricted gene list</option>
+                  </param>
+                  <when value="no">                     
+                     <param type="hidden"  name="genelist3"  value="-1"/>
+                  </when>
+                  <when value="yes">
+                     <param type="data"  name="genelist3"  label="Choose the uploaded gene list for plotting"/>
+                  </when>
+               </conditional>
+               <param  type="text"  name="title3" value="plot3" label="Sample 3: Image title"/>  
+               <param  type="text"  name="fraglen3" value="150" label="Sample 3: Expected fragment length"/>  
+               <param  type="text"  name="linecol3" value="red" label="Sample 3: Line plot color"/>  
+               <!-- END: 7 samples, yes refpairs, entry 3-->
+               <!-- START: 7 samples, yes refpairs, entry 4-->
+               <param  type="data"  name="bamfile4" label="Sample 4: Input BAM file"/>
+               <param  type="data"  name="reffile4" label="Sample 4: Reference BAM file"/>  
+               <conditional name="genelist4">
+                  <param type="select" name="usegenelist4" label="Sample 4: Gene list">
+                     <option value="no">Plot whole genome</option>
+                     <option value="yes">Provide restricted gene list</option>
+                  </param>
+                  <when value="no">                     
+                     <param type="hidden"  name="genelist4"  value="-1"/>
+                  </when>
+                  <when value="yes">
+                     <param type="data"  name="genelist4"  label="Choose the uploaded gene list for plotting"/>
+                  </when>
+               </conditional>
+               <param  type="text"  name="title4" value="plot4" label="Sample 4: Image title"/>  
+               <param  type="text"  name="fraglen4" value="150" label="Sample 4: Expected fragment length"/>  
+               <param  type="text"  name="linecol4" value="pink" label="Sample 4: Line plot color"/>  
+               <!-- END: 7 samples, yes refpairs, entry 4-->
+               <!-- START: 7 samples, yes refpairs, entry 5-->
+               <param  type="data"  name="bamfile5" label="Sample 5: Input BAM file"/>
+               <param  type="data"  name="reffile5" label="Sample 5: Reference BAM file"/>  
+               <conditional name="genelist5">
+                  <param type="select" name="usegenelist5" label="Sample 5: Gene list">
+                     <option value="no">Plot whole genome</option>
+                     <option value="yes">Provide restricted gene list</option>
+                  </param>
+                  <when value="no">                     
+                     <param type="hidden"  name="genelist5"  value="-1"/>
+                  </when>
+                  <when value="yes">
+                     <param type="data"  name="genelist5"  label="Choose the uploaded gene list for plotting"/>
+                  </when>
+               </conditional>
+               <param  type="text"  name="title5" value="plot5" label="Sample 5: Image title"/>  
+               <param  type="text"  name="fraglen5" value="150" label="Sample 5: Expected fragment length"/>  
+               <param  type="text"  name="linecol5" value="slateblue" label="Sample 5: Line plot color"/>  
+               <!-- END: 7 samples, yes refpairs, entry 5-->
+               <!-- START: 7 samples, yes refpairs, entry 6-->
+               <param  type="data"  name="bamfile6" label="Sample 6: Input BAM file"/>
+               <param  type="data"  name="reffile6" label="Sample 6: Reference BAM file"/>  
+               <conditional name="genelist6">
+                  <param type="select" name="usegenelist6" label="Sample 6: Gene list">
+                     <option value="no">Plot whole genome</option>
+                     <option value="yes">Provide restricted gene list</option>
+                  </param>
+                  <when value="no">                     
+                     <param type="hidden"  name="genelist6"  value="-1"/>
+                  </when>
+                  <when value="yes">
+                     <param type="data"  name="genelist6"  label="Choose the uploaded gene list for plotting"/>
+                  </when>
+               </conditional>
+               <param  type="text"  name="title6" value="plot6" label="Sample 6: Image title"/>  
+               <param  type="text"  name="fraglen6" value="150" label="Sample 6: Expected fragment length"/>  
+               <param  type="text"  name="linecol6" value="sienna" label="Sample 6: Line plot color"/>  
+               <!-- END: 7 samples, yes refpairs, entry 6-->
+               <!-- START: 7 samples, yes refpairs, entry 7-->
+               <param  type="data"  name="bamfile7" label="Sample 7: Input BAM file"/>
+               <param  type="data"  name="reffile7" label="Sample 7: Reference BAM file"/>  
+               <conditional name="genelist7">
+                  <param type="select" name="usegenelist7" label="Sample 7: Gene list">
+                     <option value="no">Plot whole genome</option>
+                     <option value="yes">Provide restricted gene list</option>
+                  </param>
+                  <when value="no">                     
+                     <param type="hidden"  name="genelist7"  value="-1"/>
+                  </when>
+                  <when value="yes">
+                     <param type="data"  name="genelist7"  label="Choose the uploaded gene list for plotting"/>
+                  </when>
+               </conditional>
+               <param  type="text"  name="title7" value="plot7" label="Sample 7: Image title"/>  
+               <param  type="text"  name="fraglen7" value="150" label="Sample 7: Expected fragment length"/>  
+               <param  type="text"  name="linecol7" value="tomato" label="Sample 7: Line plot color"/>  
+               <!-- END: 7 samples, yes refpairs, entry 7-->
+            </when> 
+         </conditional>
+     </when>                     
+      <when value="8">                     
+         <conditional name="usepair">
+            <param type="select" name="usepair1" label="Use reference alignment?" help="Using a reference bam file will allow the plots to display log2 fold changes instead of read count intensities.">
+               <option value="no">No</option>
+               <option value="yes">Yes</option>
+            </param>
+            <when value="no">                     
+               <!-- START: 8 samples, no refpairs, entry 1-->
+               <param  type="data"  name="bamfile1" label="Sample 1: Input BAM file"/>
+               <param  type="hidden"  name="reffile1" value="na"/>  
+               <conditional name="genelist1">
+                  <param type="select" name="usegenelist1" label="Sample 1: Gene list">
+                     <option value="no">Plot whole genome</option>
+                     <option value="yes">Provide restricted gene list</option>
+                  </param>
+                  <when value="no">                     
+                     <param type="hidden"  name="genelist1"  value="-1"/>
+                  </when>
+                  <when value="yes">
+                     <param type="data"  name="genelist1"  label="Choose the uploaded gene list for plotting"/>
+                  </when>
+               </conditional>
+               <param  type="text"  name="title1" value="plot1" label="Sample 1: Image title"/>  
+               <param  type="text"  name="fraglen1" value="150" label="Sample 1: Expected fragment length"/>  
+               <param  type="text"  name="linecol1" value="green" label="Sample 1: Line plot color"/>  
+               <!-- END: 8 samples, no refpairs, entry 1-->
+               <!-- START: 8 samples, no refpairs, entry 2-->
+               <param  type="data"  name="bamfile2" label="Sample 2: Input BAM file"/>
+               <param  type="hidden"  name="reffile2" value="na"/>  
+               <conditional name="genelist2">
+                  <param type="select" name="usegenelist2" label="Sample 2: Gene list">
+                     <option value="no">Plot whole genome</option>
+                     <option value="yes">Provide restricted gene list</option>
+                  </param>
+                  <when value="no">                     
+                     <param type="hidden"  name="genelist2"  value="-1"/>
+                  </when>
+                  <when value="yes">
+                     <param type="data"  name="genelist2"  label="Choose the uploaded gene list for plotting"/>
+                  </when>
+               </conditional>
+               <param  type="text"  name="title2" value="plot2" label="Sample 2: Image title"/>  
+               <param  type="text"  name="fraglen2" value="150" label="Sample 2: Expected fragment length"/>  
+               <param  type="text"  name="linecol2" value="blue" label="Sample 2: Line plot color"/>  
+               <!-- END: 8 samples, no refpairs, entry 2-->
+               <!-- START: 8 samples, no refpairs, entry 3-->
+               <param  type="data"  name="bamfile3" label="Sample 3: Input BAM file"/>
+               <param  type="hidden"  name="reffile3" value="na"/>  
+               <conditional name="genelist3">
+                  <param type="select" name="usegenelist3" label="Sample 3: Gene list">
+                     <option value="no">Plot whole genome</option>
+                     <option value="yes">Provide restricted gene list</option>
+                  </param>
+                  <when value="no">                     
+                     <param type="hidden"  name="genelist3"  value="-1"/>
+                  </when>
+                  <when value="yes">
+                     <param type="data"  name="genelist3"  label="Choose the uploaded gene list for plotting"/>
+                  </when>
+               </conditional>
+               <param  type="text"  name="title3" value="plot3" label="Sample 3: Image title"/>  
+               <param  type="text"  name="fraglen3" value="150" label="Sample 3: Expected fragment length"/>  
+               <param  type="text"  name="linecol3" value="red" label="Sample 3: Line plot color"/>  
+               <!-- END: 8 samples, no refpairs, entry 3-->
+               <!-- START: 8 samples, no refpairs, entry 4-->
+               <param  type="data"  name="bamfile4" label="Sample 4: Input BAM file"/>
+               <param  type="hidden"  name="reffile4" value="na"/>  
+               <conditional name="genelist4">
+                  <param type="select" name="usegenelist4" label="Sample 4: Gene list">
+                     <option value="no">Plot whole genome</option>
+                     <option value="yes">Provide restricted gene list</option>
+                  </param>
+                  <when value="no">                     
+                     <param type="hidden"  name="genelist4"  value="-1"/>
+                  </when>
+                  <when value="yes">
+                     <param type="data"  name="genelist4"  label="Choose the uploaded gene list for plotting"/>
+                  </when>
+               </conditional>
+               <param  type="text"  name="title4" value="plot4" label="Sample 4: Image title"/>  
+               <param  type="text"  name="fraglen4" value="150" label="Sample 4: Expected fragment length"/>  
+               <param  type="text"  name="linecol4" value="pink" label="Sample 4: Line plot color"/>  
+               <!-- END: 8 samples, no refpairs, entry 4-->
+               <!-- START: 8 samples, no refpairs, entry 5-->
+               <param  type="data"  name="bamfile5" label="Sample 5: Input BAM file"/>
+               <param  type="hidden"  name="reffile5" value="na"/>  
+               <conditional name="genelist5">
+                  <param type="select" name="usegenelist5" label="Sample 5: Gene list">
+                     <option value="no">Plot whole genome</option>
+                     <option value="yes">Provide restricted gene list</option>
+                  </param>
+                  <when value="no">                     
+                     <param type="hidden"  name="genelist5"  value="-1"/>
+                  </when>
+                  <when value="yes">
+                     <param type="data"  name="genelist5"  label="Choose the uploaded gene list for plotting"/>
+                  </when>
+               </conditional>
+               <param  type="text"  name="title5" value="plot5" label="Sample 5: Image title"/>  
+               <param  type="text"  name="fraglen5" value="150" label="Sample 5: Expected fragment length"/>  
+               <param  type="text"  name="linecol5" value="slateblue" label="Sample 5: Line plot color"/>  
+               <!-- END: 8 samples, no refpairs, entry 5-->
+               <!-- START: 8 samples, no refpairs, entry 6-->
+               <param  type="data"  name="bamfile6" label="Sample 6: Input BAM file"/>
+               <param  type="hidden"  name="reffile6" value="na"/>  
+               <conditional name="genelist6">
+                  <param type="select" name="usegenelist6" label="Sample 6: Gene list">
+                     <option value="no">Plot whole genome</option>
+                     <option value="yes">Provide restricted gene list</option>
+                  </param>
+                  <when value="no">                     
+                     <param type="hidden"  name="genelist6"  value="-1"/>
+                  </when>
+                  <when value="yes">
+                     <param type="data"  name="genelist6"  label="Choose the uploaded gene list for plotting"/>
+                  </when>
+               </conditional>
+               <param  type="text"  name="title6" value="plot6" label="Sample 6: Image title"/>  
+               <param  type="text"  name="fraglen6" value="150" label="Sample 6: Expected fragment length"/>  
+               <param  type="text"  name="linecol6" value="sienna" label="Sample 6: Line plot color"/>  
+               <!-- END: 8 samples, no refpairs, entry 6-->
+               <!-- START: 8 samples, no refpairs, entry 7-->
+               <param  type="data"  name="bamfile7" label="Sample 7: Input BAM file"/>
+               <param  type="hidden"  name="reffile7" value="na"/>  
+               <conditional name="genelist7">
+                  <param type="select" name="usegenelist7" label="Sample 7: Gene list">
+                     <option value="no">Plot whole genome</option>
+                     <option value="yes">Provide restricted gene list</option>
+                  </param>
+                  <when value="no">                     
+                     <param type="hidden"  name="genelist7"  value="-1"/>
+                  </when>
+                  <when value="yes">
+                     <param type="data"  name="genelist7"  label="Choose the uploaded gene list for plotting"/>
+                  </when>
+               </conditional>
+               <param  type="text"  name="title7" value="plot7" label="Sample 7: Image title"/>  
+               <param  type="text"  name="fraglen7" value="150" label="Sample 7: Expected fragment length"/>  
+               <param  type="text"  name="linecol7" value="tomato" label="Sample 7: Line plot color"/>  
+               <!-- END: 8 samples, no refpairs, entry 7-->
+               <!-- START: 8 samples, no refpairs, entry 8-->
+               <param  type="data"  name="bamfile8" label="Sample 8: Input BAM file"/>
+               <param  type="hidden"  name="reffile8" value="na"/>  
+               <conditional name="genelist7">
+                  <param type="select" name="usegenelist8" label="Sample 8: Gene list">
+                     <option value="no">Plot whole genome</option>
+                     <option value="yes">Provide restricted gene list</option>
+                  </param>
+                  <when value="no">                     
+                     <param type="hidden"  name="genelist8"  value="-1"/>
+                  </when>
+                  <when value="yes">
+                     <param type="data"  name="genelist8"  label="Choose the uploaded gene list for plotting"/>
+                  </when>
+               </conditional>
+               <param  type="text"  name="title8" value="plot8" label="Sample 8: Image title"/>  
+               <param  type="text"  name="fraglen8" value="150" label="Sample 8: Expected fragment length"/>  
+               <param  type="text"  name="linecol8" value="turquoise" label="Sample 8: Line plot color"/>  
+               <!-- END: 8 samples, no refpairs, entry 8-->
+            </when> 
+            <when value="yes">                     
+               <!-- START: 8 samples, yes refpairs, entry 1-->
+               <param  type="data"  name="bamfile1" label="Sample 1: Input BAM file"/>
+               <param  type="data"  name="reffile1" label="Sample 1: Reference BAM file"/>  
+               <conditional name="genelist1">
+                  <param type="select" name="usegenelist1" label="Sample 1: Gene list">
+                     <option value="no">Plot whole genome</option>
+                     <option value="yes">Provide restricted gene list</option>
+                  </param>
+                  <when value="no">                     
+                     <param type="hidden"  name="genelist1"  value="-1"/>
+                  </when>
+                  <when value="yes">
+                     <param type="data"  name="genelist1"  label="Choose the uploaded gene list for plotting"/>
+                  </when>
+               </conditional>
+               <param  type="text"  name="title1" value="plot1" label="Sample 1: Image title"/>  
+               <param  type="text"  name="fraglen1" value="150" label="Sample 1: Expected fragment length"/>  
+               <param  type="text"  name="linecol1" value="green" label="Sample 1: Line plot color"/>  
+               <!-- END: 8 samples, yes refpairs, entry 1-->
+               <!-- START: 8 samples, yes refpairs, entry 2-->
+               <param  type="data"  name="bamfile2" label="Sample 2: Input BAM file"/>
+               <param  type="data"  name="reffile2" label="Sample 2: Reference BAM file"/>  
+               <conditional name="genelist2">
+                  <param type="select" name="usegenelist2" label="Sample 2: Gene list">
+                     <option value="no">Plot whole genome</option>
+                     <option value="yes">Provide restricted gene list</option>
+                  </param>
+                  <when value="no">                     
+                     <param type="hidden"  name="genelist2"  value="-1"/>
+                  </when>
+                  <when value="yes">
+                     <param type="data"  name="genelist2"  label="Choose the uploaded gene list for plotting"/>
+                  </when>
+               </conditional>
+               <param  type="text"  name="title2" value="plot2" label="Sample 2: Image title"/>  
+               <param  type="text"  name="fraglen2" value="150" label="Sample 2: Expected fragment length"/>  
+               <param  type="text"  name="linecol2" value="blue" label="Sample 2: Line plot color"/>  
+               <!-- END: 8 samples, yes refpairs, entry 2-->
+               <!-- START: 8 samples, yes refpairs, entry 3-->
+               <param  type="data"  name="bamfile3" label="Sample 3: Input BAM file"/>
+               <param  type="data"  name="reffile3" label="Sample 3: Reference BAM file"/>  
+               <conditional name="genelist3">
+                  <param type="select" name="usegenelist3" label="Sample 3: Gene list">
+                     <option value="no">Plot whole genome</option>
+                     <option value="yes">Provide restricted gene list</option>
+                  </param>
+                  <when value="no">                     
+                     <param type="hidden"  name="genelist3"  value="-1"/>
+                  </when>
+                  <when value="yes">
+                     <param type="data"  name="genelist3"  label="Choose the uploaded gene list for plotting"/>
+                  </when>
+               </conditional>
+               <param  type="text"  name="title3" value="plot3" label="Sample 3: Image title"/>  
+               <param  type="text"  name="fraglen3" value="150" label="Sample 3: Expected fragment length"/>  
+               <param  type="text"  name="linecol3" value="red" label="Sample 3: Line plot color"/>  
+               <!-- END: 8 samples, yes refpairs, entry 3-->
+               <!-- START: 8 samples, yes refpairs, entry 4-->
+               <param  type="data"  name="bamfile4" label="Sample 4: Input BAM file"/>
+               <param  type="data"  name="reffile4" label="Sample 4: Reference BAM file"/>  
+               <conditional name="genelist4">
+                  <param type="select" name="usegenelist4" label="Sample 4: Gene list">
+                     <option value="no">Plot whole genome</option>
+                     <option value="yes">Provide restricted gene list</option>
+                  </param>
+                  <when value="no">                     
+                     <param type="hidden"  name="genelist4"  value="-1"/>
+                  </when>
+                  <when value="yes">
+                     <param type="data"  name="genelist4"  label="Choose the uploaded gene list for plotting"/>
+                  </when>
+               </conditional>
+               <param  type="text"  name="title4" value="plot4" label="Sample 4: Image title"/>  
+               <param  type="text"  name="fraglen4" value="150" label="Sample 4: Expected fragment length"/>  
+               <param  type="text"  name="linecol4" value="pink" label="Sample 4: Line plot color"/>  
+               <!-- END: 8 samples, yes refpairs, entry 4-->
+               <!-- START: 8 samples, yes refpairs, entry 5-->
+               <param  type="data"  name="bamfile5" label="Sample 5: Input BAM file"/>
+               <param  type="data"  name="reffile5" label="Sample 5: Reference BAM file"/>  
+               <conditional name="genelist5">
+                  <param type="select" name="usegenelist5" label="Sample 5: Gene list">
+                     <option value="no">Plot whole genome</option>
+                     <option value="yes">Provide restricted gene list</option>
+                  </param>
+                  <when value="no">                     
+                     <param type="hidden"  name="genelist5"  value="-1"/>
+                  </when>
+                  <when value="yes">
+                     <param type="data"  name="genelist5"  label="Choose the uploaded gene list for plotting"/>
+                  </when>
+               </conditional>
+               <param  type="text"  name="title5" value="plot5" label="Sample 5: Image title"/>  
+               <param  type="text"  name="fraglen5" value="150" label="Sample 5: Expected fragment length"/>  
+               <param  type="text"  name="linecol5" value="slateblue" label="Sample 5: Line plot color"/>  
+               <!-- END: 8 samples, yes refpairs, entry 5-->
+               <!-- START: 8 samples, yes refpairs, entry 6-->
+               <param  type="data"  name="bamfile6" label="Sample 6: Input BAM file"/>
+               <param  type="data"  name="reffile6" label="Sample 6: Reference BAM file"/>  
+               <conditional name="genelist6">
+                  <param type="select" name="usegenelist6" label="Sample 6: Gene list">
+                     <option value="no">Plot whole genome</option>
+                     <option value="yes">Provide restricted gene list</option>
+                  </param>
+                  <when value="no">                     
+                     <param type="hidden"  name="genelist6"  value="-1"/>
+                  </when>
+                  <when value="yes">
+                     <param type="data"  name="genelist6"  label="Choose the uploaded gene list for plotting"/>
+                  </when>
+               </conditional>
+               <param  type="text"  name="title6" value="plot6" label="Sample 6: Image title"/>  
+               <param  type="text"  name="fraglen6" value="150" label="Sample 6: Expected fragment length"/>  
+               <param  type="text"  name="linecol6" value="sienna" label="Sample 6: Line plot color"/>  
+               <!-- END: 8 samples, yes refpairs, entry 6-->
+               <!-- START: 8 samples, yes refpairs, entry 7-->
+               <param  type="data"  name="bamfile7" label="Sample 7: Input BAM file"/>
+               <param  type="data"  name="reffile7" label="Sample 7: Reference BAM file"/>  
+               <conditional name="genelist7">
+                  <param type="select" name="usegenelist7" label="Sample 7: Gene list">
+                     <option value="no">Plot whole genome</option>
+                     <option value="yes">Provide restricted gene list</option>
+                  </param>
+                  <when value="no">                     
+                     <param type="hidden"  name="genelist7"  value="-1"/>
+                  </when>
+                  <when value="yes">
+                     <param type="data"  name="genelist7"  label="Choose the uploaded gene list for plotting"/>
+                  </when>
+               </conditional>
+               <param  type="text"  name="title7" value="plot7" label="Sample 7: Image title"/>  
+               <param  type="text"  name="fraglen7" value="150" label="Sample 7: Expected fragment length"/>  
+               <param  type="text"  name="linecol7" value="tomato" label="Sample 7: Line plot color"/>  
+               <!-- END: 8 samples, yes refpairs, entry 7-->
+               <!-- START: 8 samples, yes refpairs, entry 8-->
+               <param  type="data"  name="bamfile8" label="Sample 8: Input BAM file"/>
+               <param  type="data"  name="reffile8" label="Sample 8: Reference BAM file"/>  
+               <conditional name="genelist8">
+                  <param type="select" name="usegenelist8" label="Sample 8: Gene list">
+                     <option value="no">Plot whole genome</option>
+                     <option value="yes">Provide restricted gene list</option>
+                  </param>
+                  <when value="no">                     
+                     <param type="hidden"  name="genelist8"  value="-1"/>
+                  </when>
+                  <when value="yes">
+                     <param type="data"  name="genelist8"  label="Choose the uploaded gene list for plotting"/>
+                  </when>
+               </conditional>
+               <param  type="text"  name="title8" value="plot8" label="Sample 8: Image title"/>  
+               <param  type="text"  name="fraglen8" value="150" label="Sample 8: Expected fragment length"/>  
+               <param  type="text"  name="linecol8" value="turquoise" label="Sample 8: Line plot color"/>  
+               <!-- END: 8 samples, yes refpairs, entry 8-->
+            </when> 
+         </conditional>
+      </when>                     
+      <when value="9">                     
+         <conditional name="usepair">
+            <param type="select" name="usepair1" label="Use reference alignment?" help="Using a reference bam file will allow the plots to display log2 fold changes instead of read count intensities.">
+               <option value="no">No</option>
+               <option value="yes">Yes</option>
+            </param>
+            <when value="no">                     
+               <!-- START: 9 samples, no refpairs, entry 1-->
+               <param  type="data"  name="bamfile1" label="Sample 1: Input BAM file"/>
+               <param  type="hidden"  name="reffile1" value="na"/>  
+               <conditional name="genelist1">
+                  <param type="select" name="usegenelist1" label="Sample 1: Gene list">
+                     <option value="no">Plot whole genome</option>
+                     <option value="yes">Provide restricted gene list</option>
+                  </param>
+                  <when value="no">                     
+                     <param type="hidden"  name="genelist1"  value="-1"/>
+                  </when>
+                  <when value="yes">
+                     <param type="data"  name="genelist1"  label="Choose the uploaded gene list for plotting"/>
+                  </when>
+               </conditional>
+               <param  type="text"  name="title1" value="plot1" label="Sample 1: Image title"/>  
+               <param  type="text"  name="fraglen1" value="150" label="Sample 1: Expected fragment length"/>  
+               <param  type="text"  name="linecol1" value="green" label="Sample 1: Line plot color"/>  
+               <!-- END: 9 samples, no refpairs, entry 1-->
+               <!-- START: 9 samples, no refpairs, entry 2-->
+               <param  type="data"  name="bamfile2" label="Sample 2: Input BAM file"/>
+               <param  type="hidden"  name="reffile2" value="na"/>  
+               <conditional name="genelist2">
+                  <param type="select" name="usegenelist2" label="Sample 2: Gene list">
+                     <option value="no">Plot whole genome</option>
+                     <option value="yes">Provide restricted gene list</option>
+                  </param>
+                  <when value="no">                     
+                     <param type="hidden"  name="genelist2"  value="-1"/>
+                  </when>
+                  <when value="yes">
+                     <param type="data"  name="genelist2"  label="Choose the uploaded gene list for plotting"/>
+                  </when>
+               </conditional>
+               <param  type="text"  name="title2" value="plot2" label="Sample 2: Image title"/>  
+               <param  type="text"  name="fraglen2" value="150" label="Sample 2: Expected fragment length"/>  
+               <param  type="text"  name="linecol2" value="blue" label="Sample 2: Line plot color"/>  
+               <!-- END: 9 samples, no refpairs, entry 2-->
+               <!-- START: 9 samples, no refpairs, entry 3-->
+               <param  type="data"  name="bamfile3" label="Sample 3: Input BAM file"/>
+               <param  type="hidden"  name="reffile3" value="na"/>  
+               <conditional name="genelist3">
+                  <param type="select" name="usegenelist3" label="Sample 3: Gene list">
+                     <option value="no">Plot whole genome</option>
+                     <option value="yes">Provide restricted gene list</option>
+                  </param>
+                  <when value="no">                     
+                     <param type="hidden"  name="genelist3"  value="-1"/>
+                  </when>
+                  <when value="yes">
+                     <param type="data"  name="genelist3"  label="Choose the uploaded gene list for plotting"/>
+                  </when>
+               </conditional>
+               <param  type="text"  name="title3" value="plot3" label="Sample 3: Image title"/>  
+               <param  type="text"  name="fraglen3" value="150" label="Sample 3: Expected fragment length"/>  
+               <param  type="text"  name="linecol3" value="red" label="Sample 3: Line plot color"/>  
+               <!-- END: 9 samples, no refpairs, entry 3-->
+               <!-- START: 9 samples, no refpairs, entry 4-->
+               <param  type="data"  name="bamfile4" label="Sample 4: Input BAM file"/>
+               <param  type="hidden"  name="reffile4" value="na"/>  
+               <conditional name="genelist4">
+                  <param type="select" name="usegenelist4" label="Sample 4: Gene list">
+                     <option value="no">Plot whole genome</option>
+                     <option value="yes">Provide restricted gene list</option>
+                  </param>
+                  <when value="no">                     
+                     <param type="hidden"  name="genelist4"  value="-1"/>
+                  </when>
+                  <when value="yes">
+                     <param type="data"  name="genelist4"  label="Choose the uploaded gene list for plotting"/>
+                  </when>
+               </conditional>
+               <param  type="text"  name="title4" value="plot4" label="Sample 4: Image title"/>  
+               <param  type="text"  name="fraglen4" value="150" label="Sample 4: Expected fragment length"/>  
+               <param  type="text"  name="linecol4" value="pink" label="Sample 4: Line plot color"/>  
+               <!-- END: 9 samples, no refpairs, entry 4-->
+               <!-- START: 9 samples, no refpairs, entry 5-->
+               <param  type="data"  name="bamfile5" label="Sample 5: Input BAM file"/>
+               <param  type="hidden"  name="reffile5" value="na"/>  
+               <conditional name="genelist5">
+                  <param type="select" name="usegenelist5" label="Sample 5: Gene list">
+                     <option value="no">Plot whole genome</option>
+                     <option value="yes">Provide restricted gene list</option>
+                  </param>
+                  <when value="no">                     
+                     <param type="hidden"  name="genelist5"  value="-1"/>
+                  </when>
+                  <when value="yes">
+                     <param type="data"  name="genelist5"  label="Choose the uploaded gene list for plotting"/>
+                  </when>
+               </conditional>
+               <param  type="text"  name="title5" value="plot5" label="Sample 5: Image title"/>  
+               <param  type="text"  name="fraglen5" value="150" label="Sample 5: Expected fragment length"/>  
+               <param  type="text"  name="linecol5" value="slateblue" label="Sample 5: Line plot color"/>  
+               <!-- END: 9 samples, no refpairs, entry 5-->
+               <!-- START: 9 samples, no refpairs, entry 6-->
+               <param  type="data"  name="bamfile6" label="Sample 6: Input BAM file"/>
+               <param  type="hidden"  name="reffile6" value="na"/>  
+               <conditional name="genelist6">
+                  <param type="select" name="usegenelist6" label="Sample 6: Gene list">
+                     <option value="no">Plot whole genome</option>
+                     <option value="yes">Provide restricted gene list</option>
+                  </param>
+                  <when value="no">                     
+                     <param type="hidden"  name="genelist6"  value="-1"/>
+                  </when>
+                  <when value="yes">
+                     <param type="data"  name="genelist6"  label="Choose the uploaded gene list for plotting"/>
+                  </when>
+               </conditional>
+               <param  type="text"  name="title6" value="plot6" label="Sample 6: Image title"/>  
+               <param  type="text"  name="fraglen6" value="150" label="Sample 6: Expected fragment length"/>  
+               <param  type="text"  name="linecol6" value="sienna" label="Sample 6: Line plot color"/>  
+               <!-- END: 9 samples, no refpairs, entry 6-->
+               <!-- START: 9 samples, no refpairs, entry 7-->
+               <param  type="data"  name="bamfile7" label="Sample 7: Input BAM file"/>
+               <param  type="hidden"  name="reffile7" value="na"/>  
+               <conditional name="genelist7">
+                  <param type="select" name="usegenelist7" label="Sample 7: Gene list">
+                     <option value="no">Plot whole genome</option>
+                     <option value="yes">Provide restricted gene list</option>
+                  </param>
+                  <when value="no">                     
+                     <param type="hidden"  name="genelist7"  value="-1"/>
+                  </when>
+                  <when value="yes">
+                     <param type="data"  name="genelist7"  label="Choose the uploaded gene list for plotting"/>
+                  </when>
+               </conditional>
+               <param  type="text"  name="title7" value="plot7" label="Sample 7: Image title"/>  
+               <param  type="text"  name="fraglen7" value="150" label="Sample 7: Expected fragment length"/>  
+               <param  type="text"  name="linecol7" value="tomato" label="Sample 7: Line plot color"/>  
+               <!-- END: 9 samples, no refpairs, entry 7-->
+               <!-- START: 9 samples, no refpairs, entry 8-->
+               <param  type="data"  name="bamfile8" label="Sample 8: Input BAM file"/>
+               <param  type="hidden"  name="reffile8" value="na"/>  
+               <conditional name="genelist8">
+                  <param type="select" name="usegenelist8" label="Sample 8: Gene list">
+                     <option value="no">Plot whole genome</option>
+                     <option value="yes">Provide restricted gene list</option>
+                  </param>
+                  <when value="no">                     
+                     <param type="hidden"  name="genelist8"  value="-1"/>
+                  </when>
+                  <when value="yes">
+                     <param type="data"  name="genelist8"  label="Choose the uploaded gene list for plotting"/>
+                  </when>
+               </conditional>
+               <param  type="text"  name="title8" value="plot8" label="Sample 8: Image title"/>  
+               <param  type="text"  name="fraglen8" value="150" label="Sample 8: Expected fragment length"/>  
+               <param  type="text"  name="linecol8" value="turquoise" label="Sample 8: Line plot color"/>  
+               <!-- END: 9 samples, no refpairs, entry 8-->
+               <!-- START: 9 samples, no refpairs, entry 9-->
+               <param  type="data"  name="bamfile9" label="Sample 9: Input BAM file"/>
+               <param  type="hidden"  name="reffile9" value="na"/>  
+               <conditional name="genelist9">
+                  <param type="select" name="usegenelist9" label="Sample 9: Gene list">
+                     <option value="no">Plot whole genome</option>
+                     <option value="yes">Provide restricted gene list</option>
+                  </param>
+                  <when value="no">                     
+                     <param type="hidden"  name="genelist9"  value="-1"/>
+                  </when>
+                  <when value="yes">
+                     <param type="data"  name="genelist9"  label="Choose the uploaded gene list for plotting"/>
+                  </when>
+               </conditional>
+               <param  type="text"  name="title9" value="plot9" label="Sample 9: Image title"/>  
+               <param  type="text"  name="fraglen9" value="150" label="Sample 9: Expected fragment length"/>  
+               <param  type="text"  name="linecol9" value="violetred" label="Sample 9: Line plot color"/>  
+               <!-- END: 9 samples, no refpairs, entry 9-->
+            </when> 
+            <when value="yes">                     
+               <!-- START: 9 samples, yes refpairs, entry 1-->
+               <param  type="data"  name="bamfile1" label="Sample 1: Input BAM file"/>
+               <param  type="data"  name="reffile1" label="Sample 1: Reference BAM file"/>  
+               <conditional name="genelist1">
+                  <param type="select" name="usegenelist1" label="Sample 1: Gene list">
+                     <option value="no">Plot whole genome</option>
+                     <option value="yes">Provide restricted gene list</option>
+                  </param>
+                  <when value="no">                     
+                     <param type="hidden"  name="genelist1"  value="-1"/>
+                  </when>
+                  <when value="yes">
+                     <param type="data"  name="genelist1"  label="Choose the uploaded gene list for plotting"/>
+                  </when>
+               </conditional>
+               <param  type="text"  name="title1" value="plot1" label="Sample 1: Image title"/>  
+               <param  type="text"  name="fraglen1" value="150" label="Sample 1: Expected fragment length"/>  
+               <param  type="text"  name="linecol1" value="green" label="Sample 1: Line plot color"/>  
+               <!-- END: 9 samples, yes refpairs, entry 1-->
+               <!-- START: 9 samples, yes refpairs, entry 2-->
+               <param  type="data"  name="bamfile2" label="Sample 2: Input BAM file"/>
+               <param  type="data"  name="reffile2" label="Sample 2: Reference BAM file"/>  
+               <conditional name="genelist2">
+                  <param type="select" name="usegenelist2" label="Sample 2: Gene list">
+                     <option value="no">Plot whole genome</option>
+                     <option value="yes">Provide restricted gene list</option>
+                  </param>
+                  <when value="no">                     
+                     <param type="hidden"  name="genelist2"  value="-1"/>
+                  </when>
+                  <when value="yes">
+                     <param type="data"  name="genelist2"  label="Choose the uploaded gene list for plotting"/>
+                  </when>
+               </conditional>
+               <param  type="text"  name="title2" value="plot2" label="Sample 2: Image title"/>  
+               <param  type="text"  name="fraglen2" value="150" label="Sample 2: Expected fragment length"/>  
+               <param  type="text"  name="linecol2" value="blue" label="Sample 2: Line plot color"/>  
+               <!-- END: 9 samples, yes refpairs, entry 2-->
+               <!-- START: 9 samples, yes refpairs, entry 3-->
+               <param  type="data"  name="bamfile3" label="Sample 3: Input BAM file"/>
+               <param  type="data"  name="reffile3" label="Sample 3: Reference BAM file"/>  
+               <conditional name="genelist3">
+                  <param type="select" name="usegenelist3" label="Sample 3: Gene list">
+                     <option value="no">Plot whole genome</option>
+                     <option value="yes">Provide restricted gene list</option>
+                  </param>
+                  <when value="no">                     
+                     <param type="hidden"  name="genelist3"  value="-1"/>
+                  </when>
+                  <when value="yes">
+                     <param type="data"  name="genelist3"  label="Choose the uploaded gene list for plotting"/>
+                  </when>
+               </conditional>
+               <param  type="text"  name="title3" value="plot3" label="Sample 3: Image title"/>  
+               <param  type="text"  name="fraglen3" value="150" label="Sample 3: Expected fragment length"/>  
+               <param  type="text"  name="linecol3" value="red" label="Sample 3: Line plot color"/>  
+               <!-- END: 9 samples, yes refpairs, entry 3-->
+               <!-- START: 9 samples, yes refpairs, entry 4-->
+               <param  type="data"  name="bamfile4" label="Sample 4: Input BAM file"/>
+               <param  type="data"  name="reffile4" label="Sample 4: Reference BAM file"/>  
+               <conditional name="genelist4">
+                  <param type="select" name="usegenelist4" label="Sample 4: Gene list">
+                     <option value="no">Plot whole genome</option>
+                     <option value="yes">Provide restricted gene list</option>
+                  </param>
+                  <when value="no">                     
+                     <param type="hidden"  name="genelist4"  value="-1"/>
+                  </when>
+                  <when value="yes">
+                     <param type="data"  name="genelist4"  label="Choose the uploaded gene list for plotting"/>
+                  </when>
+               </conditional>
+               <param  type="text"  name="title4" value="plot4" label="Sample 4: Image title"/>  
+               <param  type="text"  name="fraglen4" value="150" label="Sample 4: Expected fragment length"/>  
+               <param  type="text"  name="linecol4" value="pink" label="Sample 4: Line plot color"/>  
+               <!-- END: 9 samples, yes refpairs, entry 4-->
+               <!-- START: 9 samples, yes refpairs, entry 5-->
+               <param  type="data"  name="bamfile5" label="Sample 5: Input BAM file"/>
+               <param  type="data"  name="reffile5" label="Sample 5: Reference BAM file"/>  
+               <conditional name="genelist5">
+                  <param type="select" name="usegenelist5" label="Sample 5: Gene list">
+                     <option value="no">Plot whole genome</option>
+                     <option value="yes">Provide restricted gene list</option>
+                  </param>
+                  <when value="no">                     
+                     <param type="hidden"  name="genelist5"  value="-1"/>
+                  </when>
+                  <when value="yes">
+                     <param type="data"  name="genelist5"  label="Choose the uploaded gene list for plotting"/>
+                  </when>
+               </conditional>
+               <param  type="text"  name="title5" value="plot5" label="Sample 5: Image title"/>  
+               <param  type="text"  name="fraglen5" value="150" label="Sample 5: Expected fragment length"/>  
+               <param  type="text"  name="linecol5" value="slateblue" label="Sample 5: Line plot color"/>  
+               <!-- END: 9 samples, yes refpairs, entry 5-->
+               <!-- START: 9 samples, yes refpairs, entry 6-->
+               <param  type="data"  name="bamfile6" label="Sample 6: Input BAM file"/>
+               <param  type="data"  name="reffile6" label="Sample 6: Reference BAM file"/>  
+               <conditional name="genelist6">
+                  <param type="select" name="usegenelist6" label="Sample 6: Gene list">
+                     <option value="no">Plot whole genome</option>
+                     <option value="yes">Provide restricted gene list</option>
+                  </param>
+                  <when value="no">                     
+                     <param type="hidden"  name="genelist6"  value="-1"/>
+                  </when>
+                  <when value="yes">
+                     <param type="data"  name="genelist6"  label="Choose the uploaded gene list for plotting"/>
+                  </when>
+               </conditional>
+               <param  type="text"  name="title6" value="plot6" label="Sample 6: Image title"/>  
+               <param  type="text"  name="fraglen6" value="150" label="Sample 6: Expected fragment length"/>  
+               <param  type="text"  name="linecol6" value="sienna" label="Sample 6: Line plot color"/>  
+               <!-- END: 9 samples, yes refpairs, entry 6-->
+               <!-- START: 9 samples, yes refpairs, entry 7-->
+               <param  type="data"  name="bamfile7" label="Sample 7: Input BAM file"/>
+               <param  type="data"  name="reffile7" label="Sample 7: Reference BAM file"/>  
+               <conditional name="genelist7">
+                  <param type="select" name="usegenelist7" label="Sample 7: Gene list">
+                     <option value="no">Plot whole genome</option>
+                     <option value="yes">Provide restricted gene list</option>
+                  </param>
+                  <when value="no">                     
+                     <param type="hidden"  name="genelist7"  value="-1"/>
+                  </when>
+                  <when value="yes">
+                     <param type="data"  name="genelist7"  label="Choose the uploaded gene list for plotting"/>
+                  </when>
+               </conditional>
+               <param  type="text"  name="title7" value="plot7" label="Sample 7: Image title"/>  
+               <param  type="text"  name="fraglen7" value="150" label="Sample 7: Expected fragment length"/>  
+               <param  type="text"  name="linecol7" value="tomato" label="Sample 7: Line plot color"/>  
+               <!-- END: 9 samples, yes refpairs, entry 7-->
+               <!-- START: 9 samples, yes refpairs, entry 8-->
+               <param  type="data"  name="bamfile8" label="Sample 8: Input BAM file"/>
+               <param  type="data"  name="reffile8" label="Sample 8: Reference BAM file"/>  
+               <conditional name="genelist8">
+                  <param type="select" name="usegenelist8" label="Sample 8: Gene list">
+                     <option value="no">Plot whole genome</option>
+                     <option value="yes">Provide restricted gene list</option>
+                  </param>
+                  <when value="no">                     
+                     <param type="hidden"  name="genelist8"  value="-1"/>
+                  </when>
+                  <when value="yes">
+                     <param type="data"  name="genelist8"  label="Choose the uploaded gene list for plotting"/>
+                  </when>
+               </conditional>
+               <param  type="text"  name="title8" value="plot8" label="Sample 8: Image title"/>  
+               <param  type="text"  name="fraglen8" value="150" label="Sample 8: Expected fragment length"/>  
+               <param  type="text"  name="linecol8" value="turquoise" label="Sample 8: Line plot color"/>  
+               <!-- END: 9 samples, yes refpairs, entry 8-->
+               <!-- START: 9 samples, yes refpairs, entry 9-->
+               <param  type="data"  name="bamfile9" label="Sample 9: Input BAM file"/>
+               <param  type="data"  name="reffile9" label="Sample 9: Reference BAM file"/>  
+               <conditional name="genelist9">
+                  <param type="select" name="usegenelist9" label="Sample 9: Gene list">
+                     <option value="no">Plot whole genome</option>
+                     <option value="yes">Provide restricted gene list</option>
+                  </param>
+                  <when value="no">                     
+                     <param type="hidden"  name="genelist9"  value="-1"/>
+                  </when>
+                  <when value="yes">
+                     <param type="data"  name="genelist9"  label="Choose the uploaded gene list for plotting"/>
+                  </when>
+               </conditional>
+               <param  type="text"  name="title9" value="plot9" label="Sample 9: Image title"/>  
+               <param  type="text"  name="fraglen9" value="150" label="Sample 9: Expected fragment length"/>  
+               <param  type="text"  name="linecol9" value="violetred" label="Sample 9: Line plot color"/>  
+               <!-- END: 9 samples, yes refpairs, entry 9-->
+            </when> 
+         </conditional>
+      </when>                     
+      <when value="10">                     
+         <conditional name="usepair">
+            <param type="select" name="usepair1" label="Use reference alignment?" help="Using a reference bam file will allow the plots to display log2 fold changes instead of read count intensities.">
+               <option value="no">No</option>
+               <option value="yes">Yes</option>
+            </param>
+            <when value="no">                     
+               <!-- START: 10 samples, no refpairs, entry 1-->
+               <param  type="data"  name="bamfile1" label="Sample 1: Input BAM file"/>
+               <param  type="hidden"  name="reffile1" value="na"/>  
+               <conditional name="genelist1">
+                  <param type="select" name="usegenelist1" label="Sample 1: Gene list">
+                     <option value="no">Plot whole genome</option>
+                     <option value="yes">Provide restricted gene list</option>
+                  </param>
+                  <when value="no">                     
+                     <param type="hidden"  name="genelist1"  value="-1"/>
+                  </when>
+                  <when value="yes">
+                     <param type="data"  name="genelist1"  label="Choose the uploaded gene list for plotting"/>
+                  </when>
+               </conditional>
+               <param  type="text"  name="title1" value="plot1" label="Sample 1: Image title"/>  
+               <param  type="text"  name="fraglen1" value="150" label="Sample 1: Expected fragment length"/>  
+               <param  type="text"  name="linecol1" value="green" label="Sample 1: Line plot color"/>  
+               <!-- END: 10 samples, no refpairs, entry 1-->
+               <!-- START: 10 samples, no refpairs, entry 2-->
+               <param  type="data"  name="bamfile2" label="Sample 2: Input BAM file"/>
+               <param  type="hidden"  name="reffile2" value="na"/>  
+               <conditional name="genelist2">
+                  <param type="select" name="usegenelist2" label="Sample 2: Gene list">
+                     <option value="no">Plot whole genome</option>
+                     <option value="yes">Provide restricted gene list</option>
+                  </param>
+                  <when value="no">                     
+                     <param type="hidden"  name="genelist2"  value="-1"/>
+                  </when>
+                  <when value="yes">
+                     <param type="data"  name="genelist2"  label="Choose the uploaded gene list for plotting"/>
+                  </when>
+               </conditional>
+               <param  type="text"  name="title2" value="plot2" label="Sample 2: Image title"/>  
+               <param  type="text"  name="fraglen2" value="150" label="Sample 2: Expected fragment length"/>  
+               <param  type="text"  name="linecol2" value="blue" label="Sample 2: Line plot color"/>  
+               <!-- END: 10 samples, no refpairs, entry 2-->
+               <!-- START: 10 samples, no refpairs, entry 3-->
+               <param  type="data"  name="bamfile3" label="Sample 3: Input BAM file"/>
+               <param  type="hidden"  name="reffile3" value="na"/>  
+               <conditional name="genelist3">
+                  <param type="select" name="usegenelist3" label="Sample 3: Gene list">
+                     <option value="no">Plot whole genome</option>
+                     <option value="yes">Provide restricted gene list</option>
+                  </param>
+                  <when value="no">                     
+                     <param type="hidden"  name="genelist3"  value="-1"/>
+                  </when>
+                  <when value="yes">
+                     <param type="data"  name="genelist3"  label="Choose the uploaded gene list for plotting"/>
+                  </when>
+               </conditional>
+               <param  type="text"  name="title3" value="plot3" label="Sample 3: Image title"/>  
+               <param  type="text"  name="fraglen3" value="150" label="Sample 3: Expected fragment length"/>  
+               <param  type="text"  name="linecol3" value="red" label="Sample 3: Line plot color"/>  
+               <!-- END: 10 samples, no refpairs, entry 3-->
+               <!-- START: 10 samples, no refpairs, entry 4-->
+               <param  type="data"  name="bamfile4" label="Sample 4: Input BAM file"/>
+               <param  type="hidden"  name="reffile4" value="na"/>  
+               <conditional name="genelist4">
+                  <param type="select" name="usegenelist4" label="Sample 4: Gene list">
+                     <option value="no">Plot whole genome</option>
+                     <option value="yes">Provide restricted gene list</option>
+                  </param>
+                  <when value="no">                     
+                     <param type="hidden"  name="genelist4"  value="-1"/>
+                  </when>
+                  <when value="yes">
+                     <param type="data"  name="genelist4"  label="Choose the uploaded gene list for plotting"/>
+                  </when>
+               </conditional>
+               <param  type="text"  name="title4" value="plot4" label="Sample 4: Image title"/>  
+               <param  type="text"  name="fraglen4" value="150" label="Sample 4: Expected fragment length"/>  
+               <param  type="text"  name="linecol4" value="pink" label="Sample 4: Line plot color"/>  
+               <!-- END: 10 samples, no refpairs, entry 4-->
+               <!-- START: 10 samples, no refpairs, entry 5-->
+               <param  type="data"  name="bamfile5" label="Sample 5: Input BAM file"/>
+               <param  type="hidden"  name="reffile5" value="na"/>  
+               <conditional name="genelist5">
+                  <param type="select" name="usegenelist5" label="Sample 5: Gene list">
+                     <option value="no">Plot whole genome</option>
+                     <option value="yes">Provide restricted gene list</option>
+                  </param>
+                  <when value="no">                     
+                     <param type="hidden"  name="genelist5"  value="-1"/>
+                  </when>
+                  <when value="yes">
+                     <param type="data"  name="genelist5"  label="Choose the uploaded gene list for plotting"/>
+                  </when>
+               </conditional>
+               <param  type="text"  name="title5" value="plot5" label="Sample 5: Image title"/>  
+               <param  type="text"  name="fraglen5" value="150" label="Sample 5: Expected fragment length"/>  
+               <param  type="text"  name="linecol5" value="slateblue" label="Sample 5: Line plot color"/>  
+               <!-- END: 10 samples, no refpairs, entry 5-->
+               <!-- START: 10 samples, no refpairs, entry 6-->
+               <param  type="data"  name="bamfile6" label="Sample 6: Input BAM file"/>
+               <param  type="hidden"  name="reffile6" value="na"/>  
+               <conditional name="genelist6">
+                  <param type="select" name="usegenelist6" label="Sample 6: Gene list">
+                     <option value="no">Plot whole genome</option>
+                     <option value="yes">Provide restricted gene list</option>
+                  </param>
+                  <when value="no">                     
+                     <param type="hidden"  name="genelist6"  value="-1"/>
+                  </when>
+                  <when value="yes">
+                     <param type="data"  name="genelist6"  label="Choose the uploaded gene list for plotting"/>
+                  </when>
+               </conditional>
+               <param  type="text"  name="title6" value="plot6" label="Sample 6: Image title"/>  
+               <param  type="text"  name="fraglen6" value="150" label="Sample 6: Expected fragment length"/>  
+               <param  type="text"  name="linecol6" value="sienna" label="Sample 6: Line plot color"/>  
+               <!-- END: 10 samples, no refpairs, entry 6-->
+               <!-- START: 10 samples, no refpairs, entry 7-->
+               <param  type="data"  name="bamfile7" label="Sample 7: Input BAM file"/>
+               <param  type="hidden"  name="reffile7" value="na"/>  
+               <conditional name="genelist7">
+                  <param type="select" name="usegenelist7" label="Sample 7: Gene list">
+                     <option value="no">Plot whole genome</option>
+                     <option value="yes">Provide restricted gene list</option>
+                  </param>
+                  <when value="no">                     
+                     <param type="hidden"  name="genelist7"  value="-1"/>
+                  </when>
+                  <when value="yes">
+                     <param type="data"  name="genelist7"  label="Choose the uploaded gene list for plotting"/>
+                  </when>
+               </conditional>
+               <param  type="text"  name="title7" value="plot7" label="Sample 7: Image title"/>  
+               <param  type="text"  name="fraglen7" value="150" label="Sample 7: Expected fragment length"/>  
+               <param  type="text"  name="linecol7" value="tomato" label="Sample 7: Line plot color"/>  
+               <!-- END: 10 samples, no refpairs, entry 7-->
+               <!-- START: 10 samples, no refpairs, entry 8-->
+               <param  type="data"  name="bamfile8" label="Sample 8: Input BAM file"/>
+               <param  type="hidden"  name="reffile8" value="na"/>  
+               <conditional name="genelist8">
+                  <param type="select" name="usegenelist8" label="Sample 8: Gene list">
+                     <option value="no">Plot whole genome</option>
+                     <option value="yes">Provide restricted gene list</option>
+                  </param>
+                  <when value="no">                     
+                     <param type="hidden"  name="genelist8"  value="-1"/>
+                  </when>
+                  <when value="yes">
+                     <param type="data"  name="genelist8"  label="Choose the uploaded gene list for plotting"/>
+                  </when>
+               </conditional>
+               <param  type="text"  name="title8" value="plot8" label="Sample 8: Image title"/>  
+               <param  type="text"  name="fraglen8" value="150" label="Sample 8: Expected fragment length"/>  
+               <param  type="text"  name="linecol8" value="turquoise" label="Sample 8: Line plot color"/>  
+               <!-- END: 10 samples, no refpairs, entry 8-->
+               <!-- START: 10 samples, no refpairs, entry 9-->
+               <param  type="data"  name="bamfile9" label="Sample 9: Input BAM file"/>
+               <param  type="hidden"  name="reffile9" value="na"/>  
+               <conditional name="genelist9">
+                  <param type="select" name="usegenelist9" label="Sample 9: Gene list">
+                     <option value="no">Plot whole genome</option>
+                     <option value="yes">Provide restricted gene list</option>
+                  </param>
+                  <when value="no">                     
+                     <param type="hidden"  name="genelist9"  value="-1"/>
+                  </when>
+                  <when value="yes">
+                     <param type="data"  name="genelist9"  label="Choose the uploaded gene list for plotting"/>
+                  </when>
+               </conditional>
+               <param  type="text"  name="title9" value="plot9" label="Sample 9: Image title"/>  
+               <param  type="text"  name="fraglen9" value="150" label="Sample 9: Expected fragment length"/>  
+               <param  type="text"  name="linecol9" value="violetred" label="Sample 9: Line plot color"/>  
+               <!-- END: 10 samples, no refpairs, entry 9-->
+               <!-- START: 10 samples, no refpairs, entry 10-->
+               <param  type="data"  name="bamfile10" label="Sample 10: Input BAM file"/>
+               <param  type="hidden"  name="reffile10" value="na"/>  
+               <conditional name="genelist10">
+                  <param type="select" name="usegenelist10" label="Sample 10: Gene list">
+                     <option value="no">Plot whole genome</option>
+                     <option value="yes">Provide restricted gene list</option>
+                  </param>
+                  <when value="no">                     
+                     <param type="hidden"  name="genelist10"  value="-1"/>
+                  </when>
+                  <when value="yes">
+                     <param type="data"  name="genelist10"  label="Choose the uploaded gene list for plotting"/>
+                  </when>
+               </conditional>
+               <param  type="text"  name="title10" value="plot10" label="Sample 10: Image title"/>  
+               <param  type="text"  name="fraglen10" value="150" label="Sample 10: Expected fragment length"/>  
+               <param  type="text"  name="linecol10" value="tan3" label="Sample 10: Line plot color"/>  
+               <!-- END: 10 samples, no refpairs, entry 10-->
+            </when> 
+            <when value="yes">                     
+               <!-- START: 10 samples, yes refpairs, entry 1-->
+               <param  type="data"  name="bamfile1" label="Sample 1: Input BAM file"/>
+               <param  type="data"  name="reffile1" label="Sample 1: Reference BAM file"/>  
+               <conditional name="genelist1">
+                  <param type="select" name="usegenelist1" label="Sample 1: Gene list">
+                     <option value="no">Plot whole genome</option>
+                     <option value="yes">Provide restricted gene list</option>
+                  </param>
+                  <when value="no">                     
+                     <param type="hidden"  name="genelist1"  value="-1"/>
+                  </when>
+                  <when value="yes">
+                     <param type="data"  name="genelist1"  label="Choose the uploaded gene list for plotting"/>
+                  </when>
+               </conditional>
+               <param  type="text"  name="title1" value="plot1" label="Sample 1: Image title"/>  
+               <param  type="text"  name="fraglen1" value="150" label="Sample 1: Expected fragment length"/>  
+               <param  type="text"  name="linecol1" value="green" label="Sample 1: Line plot color"/>  
+               <!-- END: 10 samples, yes refpairs, entry 1-->
+               <!-- START: 10 samples, yes refpairs, entry 2-->
+               <param  type="data"  name="bamfile2" label="Sample 2: Input BAM file"/>
+               <param  type="data"  name="reffile2" label="Sample 2: Reference BAM file"/>  
+               <conditional name="genelist2">
+                  <param type="select" name="usegenelist2" label="Sample 2: Gene list">
+                     <option value="no">Plot whole genome</option>
+                     <option value="yes">Provide restricted gene list</option>
+                  </param>
+                  <when value="no">                     
+                     <param type="hidden"  name="genelist2"  value="-1"/>
+                  </when>
+                  <when value="yes">
+                     <param type="data"  name="genelist2"  label="Choose the uploaded gene list for plotting"/>
+                  </when>
+               </conditional>
+               <param  type="text"  name="title2" value="plot2" label="Sample 2: Image title"/>  
+               <param  type="text"  name="fraglen2" value="150" label="Sample 2: Expected fragment length"/>  
+               <param  type="text"  name="linecol2" value="blue" label="Sample 2: Line plot color"/>  
+               <!-- END: 10 samples, yes refpairs, entry 2-->
+               <!-- START: 10 samples, yes refpairs, entry 3-->
+               <param  type="data"  name="bamfile3" label="Sample 3: Input BAM file"/>
+               <param  type="data"  name="reffile3" label="Sample 3: Reference BAM file"/>  
+               <conditional name="genelist3">
+                  <param type="select" name="usegenelist3" label="Sample 3: Gene list">
+                     <option value="no">Plot whole genome</option>
+                     <option value="yes">Provide restricted gene list</option>
+                  </param>
+                  <when value="no">                     
+                     <param type="hidden"  name="genelist3"  value="-1"/>
+                  </when>
+                  <when value="yes">
+                     <param type="data"  name="genelist3"  label="Choose the uploaded gene list for plotting"/>
+                  </when>
+               </conditional>
+               <param  type="text"  name="title3" value="plot3" label="Sample 3: Image title"/>  
+               <param  type="text"  name="fraglen3" value="150" label="Sample 3: Expected fragment length"/>  
+               <param  type="text"  name="linecol3" value="red" label="Sample 3: Line plot color"/>  
+               <!-- END: 10 samples, yes refpairs, entry 3-->
+               <!-- START: 10 samples, yes refpairs, entry 4-->
+               <param  type="data"  name="bamfile4" label="Sample 4: Input BAM file"/>
+               <param  type="data"  name="reffile4" label="Sample 4: Reference BAM file"/>  
+               <conditional name="genelist4">
+                  <param type="select" name="usegenelist4" label="Sample 4: Gene list">
+                     <option value="no">Plot whole genome</option>
+                     <option value="yes">Provide restricted gene list</option>
+                  </param>
+                  <when value="no">                     
+                     <param type="hidden"  name="genelist4"  value="-1"/>
+                  </when>
+                  <when value="yes">
+                     <param type="data"  name="genelist4"  label="Choose the uploaded gene list for plotting"/>
+                  </when>
+               </conditional>
+               <param  type="text"  name="title4" value="plot4" label="Sample 4: Image title"/>  
+               <param  type="text"  name="fraglen4" value="150" label="Sample 4: Expected fragment length"/>  
+               <param  type="text"  name="linecol4" value="pink" label="Sample 4: Line plot color"/>  
+               <!-- END: 10 samples, yes refpairs, entry 4-->
+               <!-- START: 10 samples, yes refpairs, entry 5-->
+               <param  type="data"  name="bamfile5" label="Sample 5: Input BAM file"/>
+               <param  type="data"  name="reffile5" label="Sample 5: Reference BAM file"/>  
+               <conditional name="genelist5">
+                  <param type="select" name="usegenelist5" label="Sample 5: Gene list">
+                     <option value="no">Plot whole genome</option>
+                     <option value="yes">Provide restricted gene list</option>
+                  </param>
+                  <when value="no">                     
+                     <param type="hidden"  name="genelist5"  value="-1"/>
+                  </when>
+                  <when value="yes">
+                     <param type="data"  name="genelist5"  label="Choose the uploaded gene list for plotting"/>
+                  </when>
+               </conditional>
+               <param  type="text"  name="title5" value="plot5" label="Sample 5: Image title"/>  
+               <param  type="text"  name="fraglen5" value="150" label="Sample 5: Expected fragment length"/>  
+               <param  type="text"  name="linecol5" value="slateblue" label="Sample 5: Line plot color"/>  
+               <!-- END: 10 samples, yes refpairs, entry 5-->
+               <!-- START: 10 samples, yes refpairs, entry 6-->
+               <param  type="data"  name="bamfile6" label="Sample 6: Input BAM file"/>
+               <param  type="data"  name="reffile6" label="Sample 6: Reference BAM file"/>  
+               <conditional name="genelist6">
+                  <param type="select" name="usegenelist6" label="Sample 6: Gene list">
+                     <option value="no">Plot whole genome</option>
+                     <option value="yes">Provide restricted gene list</option>
+                  </param>
+                  <when value="no">                     
+                     <param type="hidden"  name="genelist6"  value="-1"/>
+                  </when>
+                  <when value="yes">
+                     <param type="data"  name="genelist6"  label="Choose the uploaded gene list for plotting"/>
+                  </when>
+               </conditional>
+               <param  type="text"  name="title6" value="plot6" label="Sample 6: Image title"/>  
+               <param  type="text"  name="fraglen6" value="150" label="Sample 6: Expected fragment length"/>  
+               <param  type="text"  name="linecol6" value="sienna" label="Sample 6: Line plot color"/>  
+               <!-- END: 10 samples, yes refpairs, entry 6-->
+               <!-- START: 10 samples, yes refpairs, entry 7-->
+               <param  type="data"  name="bamfile7" label="Sample 7: Input BAM file"/>
+               <param  type="data"  name="reffile7" label="Sample 7: Reference BAM file"/>  
+               <conditional name="genelist7">
+                  <param type="select" name="usegenelist7" label="Sample 7: Gene list">
+                     <option value="no">Plot whole genome</option>
+                     <option value="yes">Provide restricted gene list</option>
+                  </param>
+                  <when value="no">                     
+                     <param type="hidden"  name="genelist7"  value="-1"/>
+                  </when>
+                  <when value="yes">
+                     <param type="data"  name="genelist7"  label="Choose the uploaded gene list for plotting"/>
+                  </when>
+               </conditional>
+               <param  type="text"  name="title7" value="plot7" label="Sample 7: Image title"/>  
+               <param  type="text"  name="fraglen7" value="150" label="Sample 7: Expected fragment length"/>  
+               <param  type="text"  name="linecol7" value="tomato" label="Sample 7: Line plot color"/>  
+               <!-- END: 10 samples, yes refpairs, entry 7-->
+               <!-- START: 10 samples, yes refpairs, entry 8-->
+               <param  type="data"  name="bamfile8" label="Sample 8: Input BAM file"/>
+               <param  type="data"  name="reffile8" label="Sample 8: Reference BAM file"/>  
+               <conditional name="genelist8">
+                  <param type="select" name="usegenelist8" label="Sample 8: Gene list">
+                     <option value="no">Plot whole genome</option>
+                     <option value="yes">Provide restricted gene list</option>
+                  </param>
+                  <when value="no">                     
+                     <param type="hidden"  name="genelist8"  value="-1"/>
+                  </when>
+                  <when value="yes">
+                     <param type="data"  name="genelist8"  label="Choose the uploaded gene list for plotting"/>
+                  </when>
+               </conditional>
+               <param  type="text"  name="title8" value="plot8" label="Sample 8: Image title"/>  
+               <param  type="text"  name="fraglen8" value="150" label="Sample 8: Expected fragment length"/>  
+               <param  type="text"  name="linecol8" value="turquoise" label="Sample 8: Line plot color"/>  
+               <!-- END: 10 samples, yes refpairs, entry 8-->
+               <!-- START: 10 samples, yes refpairs, entry 9-->
+               <param  type="data"  name="bamfile9" label="Sample 9: Input BAM file"/>
+               <param  type="data"  name="reffile9" label="Sample 9: Reference BAM file"/>  
+               <conditional name="genelist9">
+                  <param type="select" name="usegenelist9" label="Sample 9: Gene list">
+                     <option value="no">Plot whole genome</option>
+                     <option value="yes">Provide restricted gene list</option>
+                  </param>
+                  <when value="no">                     
+                     <param type="hidden"  name="genelist9"  value="-1"/>
+                  </when>
+                  <when value="yes">
+                     <param type="data"  name="genelist9"  label="Choose the uploaded gene list for plotting"/>
+                  </when>
+               </conditional>
+               <param  type="text"  name="title9" value="plot9" label="Sample 9: Image title"/>  
+               <param  type="text"  name="fraglen9" value="150" label="Sample 9: Expected fragment length"/>  
+               <param  type="text"  name="linecol9" value="violetred" label="Sample 9: Line plot color"/>  
+               <!-- END: 10 samples, yes refpairs, entry 9-->
+               <!-- START: 10 samples, yes refpairs, entry 10-->
+               <param  type="data"  name="bamfile10" label="Sample 10: Input BAM file"/>
+               <param  type="data"  name="reffile10" label="Sample 10: Reference BAM file"/>  
+               <conditional name="genelist10">
+                  <param type="select" name="usegenelist10" label="Sample 10: Gene list">
+                     <option value="no">Plot whole genome</option>
+                     <option value="yes">Provide restricted gene list</option>
+                  </param>
+                  <when value="no">                     
+                     <param type="hidden"  name="genelist10"  value="-1"/>
+                  </when>
+                  <when value="yes">
+                     <param type="data"  name="genelist10"  label="Choose the uploaded gene list for plotting"/>
+                  </when>
+               </conditional>
+               <param  type="text"  name="title10" value="plot10" label="Sample 10: Image title"/>  
+               <param  type="text"  name="fraglen10" value="150" label="Sample 10: Expected fragment length"/>  
+               <param  type="text"  name="linecol10" value="tan3" label="Sample 10: Line plot color"/>  
+               <!-- END: 10 samples, yes refpairs, entry 10-->
+            </when> 
+         </conditional>
+      </when>                     
+   </conditional>
+
+
+   
+   <param type="select" name="gene_database" label="Supported gene database: RefSeq, Ensembl">
+      <option value="ensembl">Ensembl</option>
+      <option value="refseq">RefSeq</option>
+   </param>
+   <param name="randomly_sample" size="10" type="text" value="1" label="Randomly sample the regions for plotting" help="This will randomly sample a portion of the whole genome or the gene lists. This option can be VERY useful if one just wants to get an overview in shorter time."/>
+   <conditional name="GO">
+      <param type="select" name="gene_order" label="Gene order algorithm">
+         <option value="total">Overall enrichment of the 1st profile</option>
+         <option value="hc">Hierarchical clustering</option>
+         <option value="max">Peak value of the 1st profile</option>
+         <option value="prod">Product of all profiles on the same region</option>
+         <option value="diff">Difference between the 1st and 2nd profiles</option>
+         <option value="km">K-means clustering</option>
+         <option value="none">No ranking algorithm applied. Use order in gene list.</option>
+      </param>
+      <when value="km">
+         <param type="text" name="KNC" value="5" label="K-means: Number of clusters" help=""/>
+         <param type="text" name="MIT" value="20" label="K-means: Number of iterations" help=""/>
+         <param type="text" name="NRS" value="30" label="K-means: Number of random starts" help="K-means is prone to local optima. Restarting it repeatedly may help to find a better solution."/>
+      </when>
+      <when value="total">
+         <param type="hidden" name="KNC" value="NA" />
+         <param type="hidden" name="MIT" value="NA" />
+         <param type="hidden" name="NRS" value="NA" />
+      </when>
+      <when value="hc">
+         <param type="hidden" name="KNC" value="NA" />
+         <param type="hidden" name="MIT" value="NA" />
+         <param type="hidden" name="NRS" value="NA" />
+      </when>
+      <when value="max">
+         <param type="hidden" name="KNC" value="NA" />
+         <param type="hidden" name="MIT" value="NA" />
+         <param type="hidden" name="NRS" value="NA" />
+      </when>
+      <when value="prod">
+         <param type="hidden" name="KNC" value="NA" />
+         <param type="hidden" name="MIT" value="NA" />
+         <param type="hidden" name="NRS" value="NA" />
+      </when>
+      <when value="diff">
+         <param type="hidden" name="KNC" value="NA" />
+         <param type="hidden" name="MIT" value="NA" />
+         <param type="hidden" name="NRS" value="NA" />
+      </when>
+      <when value="none">
+         <param type="hidden" name="KNC" value="NA" />
+         <param type="hidden" name="MIT" value="NA" />
+         <param type="hidden" name="NRS" value="NA" />
+      </when>
+   </conditional>
+   <param name="chunk_size" size="10" type="text" value="100" label="Chunk size for loading genes in batch" help="This parameter controls the behavior of coverage calculation. A smaller value implies lower memory footprint but may increase processing time."/>
+   <param name="quality_requirement" size="10" type="text" value="20" label="Mapping quality requirement" help="This is the Phred-scale mapping quality score. A score of 20 means an error rate of 1%."/>
+   <param type="select" name="standard_error" label="Plot standard errors" help="Standard errors will be rendered as shaded area around each curve.">
+      <option value="1">Yes</option>
+      <option value="0">No</option>
+   </param>
+
+   <param name="radius_size" size="10" type="text" value="0" label="Fraction of extreme values to be trimmed on both ends" help="The fraction of extreme values that will be trimmed on both ends. Eg. 0.05 will remove 5% of extreme values."/>
+   <param name="flooding_fraction" size="10" type="text" value="0.02" label="Heatmap flooding fraction" help="Default of 0.02 means that the minimum value is truncated at 2% and the maximum value is truncated at 98%. A higher fraction results in plots that have higher brightness but are less dynamic."/>
+   <param type="select" name="smooth_method" label="Moving window width to smooth avg. profiles">
+      <option value="1">No</option>
+      <option value="3">Slightly</option>
+      <option value="5">Somewhat</option>
+      <option value="9">Quite</option>
+      <option value="13">Super</option>
+   </param>
+   <param name="shaded_area" size="10" type="text" value="0" label="Opacity of shaded area under curve" help="Suggested value between 0 and 0.5."/>
+<!--
+-->
+</inputs>
+
+<help></help>
+<outputs>
+   <data format="pdf" name="out_avg_png" />
+   <data format="pdf" name="out_hm_png" />
+   <data format="zip" name="out_zip"/>
+</outputs>
+</tool>

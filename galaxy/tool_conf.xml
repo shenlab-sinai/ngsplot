@@ -2,9 +2,9 @@
 <toolbox>
    <section name="NGS PLOT Tools" id="ngs_plot">
 <!--      <tool file="ngsplot/cov.calc.xml"/>  -->
-    <tool file="ngsplot/ngs.plot.xml"/>
-    <tool file="replot/replot.xml"/>
-    <tool file="multiplot/multiplot.xml"/>   
+    <tool file="ngsplot_intro/intro.xml"/>
+    <tool file="ngsplot_main/ngsplot.xml"/>   
+    <tool file="ngsplot_replot/replot.xml"/>
   </section>
   <section name="Get Data" id="getext">
     <tool file="data_source/upload.xml"/>

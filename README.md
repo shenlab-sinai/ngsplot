@@ -34,52 +34,47 @@ If you are interested, please sign up to receive updates through E-mails.
 You need R version >= 2.15.0 and Python 2.7 to be able to use ngs.plot. Please also update related R and Bioconductor packages to the corresponding version.
 
 1. Download the ngs.plot package to a desired folder, such as ~/software, and extract it:
-```
-cd ~/software
-tar xzvf ngsplot-XXX.tar.gz
-```
-The program will be extracted into a folder called "ngsplot".
+   ```
+   cd ~/software
+   tar xzvf ngsplot-XXX.tar.gz
+   ```
+   The program will be extracted into a folder called "ngsplot".
 
-2. Add ngsplot executables to your PATH. Under bash, add line like this:
-```
-export PATH=~/software/ngsplot/bin:$PATH
-```
-to your ~/.bash_profile
+1. Add ngsplot executables to your PATH. Under bash, add line like this:
+   ```
+   export PATH=~/software/ngsplot/bin:$PATH
+   ```
+   to your ~/.bash_profile
 
-3. Set environment variable NGSPLOT like this in your ~/.bash_profile:
-```
-export NGSPLOT=~/software/ngsplot
-```
-Then in the terminal, execute:
-```
-source ~/.bash_profile
-```
+1. Set environment variable NGSPLOT like this in your ~/.bash_profile:
+   ```
+   export NGSPLOT=~/software/ngsplot
+   ```
+   Then in the terminal, execute:
+   ```
+   source ~/.bash_profile
+   ```
+   A trick to avoid setting environment variable is:
+   ```
+   NGSPLOT=/your/path/to/ngsplot bash -c 'ngs.plot.r XXX'
+   ```
 
-A trick to avoid setting environment variable is:
-```
-NGSPLOT=/your/path/to/ngsplot bash -c 'ngs.plot.r XXX'
-```
+1. Install some required libraries in R:
+   ```R
+   install.packages("doMC", dep=T)
+   install.packages("caTools", dep=T)
+   install.packages("utils", dep=T)
+   ```
+   For R 3.0+, `utils` is no longer needed. For R <3.0, you probably already have `caTools` and `utils` installed but it does not hurt to check.
+   Then execute in R:
+   ```R
+   source("http://bioconductor.org/biocLite.R")
+   biocLite( "BSgenome" )
+   biocLite( "Rsamtools" )
+   biocLite( "ShortRead" )
+   ```
 
-4. Install some required libraries in R:
-```R
-install.packages("doMC", dep=T)
-install.packages("caTools", dep=T)
-install.packages("utils", dep=T)
-```
-
-For R 3.0+, `utils` is no longer needed. For R <3.0, you probably already have caTools and utils
-installed but it does not hurt to check.
-
-Then execute in R:
-```R
-source("http://bioconductor.org/biocLite.R")
-biocLite( "BSgenome" )
-biocLite( "Rsamtools" )
-biocLite( "ShortRead" )
-```
-
-5. (Optional) Install ngsplot package in Galaxy: read the `galaxy/README.txt` for instructions. A wiki will be provided to demonstrate the workflow of ngs.plot in Galaxy.
-
+1. (Optional) Install ngsplot package in Galaxy: read the `galaxy/README.txt` for instructions. A wiki will be provided to demonstrate the workflow of ngs.plot in Galaxy.
 
 # USAGE
 A wiki-page has been created for detailed explanation of each argument: [ProgramArguments101](https://github.com/shenlab-sinai/ngsplot/wiki/ProgramArguments101)
@@ -147,100 +142,98 @@ Usage: plotCorrGram.r -I ngsplot_output.zip -O output_name [Options]
 
 # EXAMPLES
 1. ngs.plot.r needs an indexed bam file or a configuration file as an input to plot short read coverage across the genomic regions of interest. ngs.plot.r will generate multiple files including average profile, heatmap and a zip file for replotting.
+   Command like this:
+   ```
+   ngs.plot.r -G hg19 -R tss -C hesc.H3k4me3.rmdup.sort.bam -O hesc.H3k4me3.tss -T H3K4me3 -L 3000 -FL 300
+   ```
+   Data from: **Ernst, J., Kheradpour, P., Mikkelsen, T.S., Shoresh, N., Ward, L.D., Epstein, C.B., Zhang, X., Wang, L., Issner, R., Coyne, M., et al. (2011). Mapping and analysis of chromatin state dynamics in nine human cell types. Nature 473, 43-49.**
 
-Command like this:
-```
-ngs.plot.r -G hg19 -R tss -C hesc.H3k4me3.rmdup.sort.bam -O hesc.H3k4me3.tss -T H3K4me3 -L 3000 -FL 300
-```
-Data from: **Ernst, J., Kheradpour, P., Mikkelsen, T.S., Shoresh, N., Ward, L.D., Epstein, C.B., Zhang, X., Wang, L., Issner, R., Coyne, M., et al. (2011). Mapping and analysis of chromatin state dynamics in nine human cell types. Nature 473, 43-49.**
+   The avgprof and heatmap plotted by ngs.plot are like this:
 
-The avgprof and heatmap plotted by ngs.plot are like this:
+   ![hesc.H3k4me3.tss.all.png](./webimgs/hesc.H3k4me3.tss.all.png)
 
-![hesc.H3k4me3.tss.all.png](./webimgs/hesc.H3k4me3.tss.all.png)
+   ngs.plot can also accept bam-pairs for plot. A bam-pair is a pair of bam files separated by colon, such as ChIP vs. Input. Using H3K4me3 as an example, you can issue a command like this:
+   ```
+   ngs.plot.r -G hg19 -R tss -C hesc.H3k4me3.rmdup.sort.bam:hesc.Input.rmdup.sort.bam -O hesc.H3k4me3vsInp.tss -T H3K4me3 -L 3000 -FL 300
+   ```
+   The avgprof and heatmap plotted by ngs.plot are like this:
 
-ngs.plot can also accept bam-pairs for plot. A bam-pair is a pair of bam files separated by colon, such as ChIP vs. Input. Using H3K4me3 as an example, you can issue a command like this:
-```
-ngs.plot.r -G hg19 -R tss -C hesc.H3k4me3.rmdup.sort.bam:hesc.Input.rmdup.sort.bam -O hesc.H3k4me3vsInp.tss -T H3K4me3 -L 3000 -FL 300
-```
-The avgprof and heatmap plotted by ngs.plot are like this:
+   ![k4_bampair.png](./webimgs/k4_bampair.png)
 
-![k4_bampair.png](./webimgs/k4_bampair.png)
+1. ngs.plot for multiplot. If you want to draw a multiplot, you need to create a configuration file for ngs.plot.
+  1. H3K4me3. The configure file "config.hesc.k4.txt" is like this:
+      ```
+      # If you want to specify the gene list as "genome", use "-1".
+      # Use TAB to separate the three columns: coverage file<TAB>gene list<TAB>title
+      # "title" will be shown in the figure's legend.
+      hesc.H3k4me3.rmdup.sort.bam     high_expressed_genes.txt         "High"
+      hesc.H3k4me3.rmdup.sort.bam     medium_expressed_genes.txt       "Med"
+      hesc.H3k4me3.rmdup.sort.bam     low_expressed_genes.txt          "Low"
+      ```
+      Command like this:
+      ```
+      ngs.plot.r -G hg19 -R genebody -C config.hesc.k4.txt -O hesc.k4.genebody -D ensembl -FL 300
+      ```
+      Data from: **ENCODE Project Consortium, et al. (2012). An integrated encyclopedia of DNA elements in the human genome. Nature 489, 57-74.** The avgprof and heatmap plotted by ngs.plot like this:
 
-2. ngs.plot for multiplot. If you want to draw a multiplot, you need to create a configuration file for ngs.plot.
+      ![hesc.k4.genebody.all.png](./webimgs/hesc.k4.genebody.all.png)
 
-(1) H3K4me3. The configure file "config.hesc.k4.txt" is like this:
-```
-# If you want to specify the gene list as "genome", use "-1".
-# Use TAB to separate the three columns: coverage file<TAB>gene list<TAB>title
-# "title" will be shown in the figure's legend.
-hesc.H3k4me3.rmdup.sort.bam     high_expressed_genes.txt         "High"
-hesc.H3k4me3.rmdup.sort.bam     medium_expressed_genes.txt       "Med"
-hesc.H3k4me3.rmdup.sort.bam     low_expressed_genes.txt          "Low"
-```
-Command like this:
-```
-ngs.plot.r -G hg19 -R genebody -C config.hesc.k4.txt -O hesc.k4.genebody -D ensembl -FL 300
-```
-Data from: **ENCODE Project Consortium, et al. (2012). An integrated encyclopedia of DNA elements in the human genome. Nature 489, 57-74.** The avgprof and heatmap plotted by ngs.plot like this:
+  1. H3K36me3. The configure file "config.hesc.k36.txt" is like this:
+      ```
+      hesc.H3k36me3.rmdup.sort.bam     high_expressed_genes.txt         "High"
+      hesc.H3k36me3.rmdup.sort.bam     medium_expressed_genes.txt       "Med"
+      hesc.H3k36me3.rmdup.sort.bam     low_expressed_genes.txt          "Low"
+      ```
+      Command like this:
+      ```
+      ngs.plot.r -G hg19 -R genebody -C config.hesc.k36.txt -O hesc.k36.genebody -D ensembl -FL 300
+      ```
+      Data from: **ENCODE Project Consortium, et al. (2012). An integrated encyclopedia of DNA elements in the human genome. Nature 489, 57-74.** The avgprof and heatmap plotted by ngs.plot like this:
 
-![hesc.k4.genebody.all.png](./webimgs/hesc.k4.genebody.all.png)
+      ![hesc.k36.genebody.all.png](./webimgs/hesc.k36.genebody.all.png)
 
-(2) H3K36me3. The configure file "config.hesc.k36.txt" is like this:
-```
-hesc.H3k36me3.rmdup.sort.bam     high_expressed_genes.txt         "High"
-hesc.H3k36me3.rmdup.sort.bam     medium_expressed_genes.txt       "Med"
-hesc.H3k36me3.rmdup.sort.bam     low_expressed_genes.txt          "Low"
-```
-Command like this:
-```
-ngs.plot.r -G hg19 -R genebody -C config.hesc.k36.txt -O hesc.k36.genebody -D ensembl -FL 300
-```
-Data from: **ENCODE Project Consortium, et al. (2012). An integrated encyclopedia of DNA elements in the human genome. Nature 489, 57-74.** The avgprof and heatmap plotted by ngs.plot like this:
+  1. H3K9me3. The configure file "config.hesc.k9.txt" is like this:
+      ```
+      hesc.H3k9me3.rmdup.sort.bam     high_expressed_genes.txt         "High"
+      hesc.H3k9me3.rmdup.sort.bam     medium_expressed_genes.txt       "Med"
+      hesc.H3k9me3.rmdup.sort.bam     low_expressed_genes.txt          "Low"
+      ```
+      Command like this:
+      ```
+      ngs.plot.r -G hg19 -R genebody -C config.hesc.k9.txt -O hesc.k9.genebody -D ensembl -FL 300
+      ```
+      Data from: **ENCODE Project Consortium, et al. (2012). An integrated encyclopedia of DNA elements in the human genome. Nature 489, 57-74.** The avgprof and heatmap plotted by ngs.plot like this:
 
-![hesc.k36.genebody.all.png](./webimgs/hesc.k36.genebody.all.png)
+      ![hesc.k9.genebody.all.png](./webimgs/hesc.k9.genebody.all.png)
 
-(3) H3K9me3. The configure file "config.hesc.k9.txt" is like this:
-```
-hesc.H3k9me3.rmdup.sort.bam     high_expressed_genes.txt         "High"
-hesc.H3k9me3.rmdup.sort.bam     medium_expressed_genes.txt       "Med"
-hesc.H3k9me3.rmdup.sort.bam     low_expressed_genes.txt          "Low"
-```
-Command like this:
-```
-ngs.plot.r -G hg19 -R genebody -C config.hesc.k9.txt -O hesc.k9.genebody -D ensembl -FL 300
-```
-Data from: **ENCODE Project Consortium, et al. (2012). An integrated encyclopedia of DNA elements in the human genome. Nature 489, 57-74.** The avgprof and heatmap plotted by ngs.plot like this:
+  1. H3K27me3. The configure file "config.hesc.k27.txt" is like this:
+      ```
+      hesc.H3k27me3.rmdup.sort.bam     high_expressed_genes.txt         "High"
+      hesc.H3k27me3.rmdup.sort.bam     medium_expressed_genes.txt       "Med"
+      hesc.H3k27me3.rmdup.sort.bam     low_expressed_genes.txt          "Low"
+      ```
+      Command like this:
+      ```
+      ngs.plot.r -G hg19 -R genebody -C config.hesc.k27.txt -O hesc.k27.genebody -D ensembl -FL 300
+      ```
+      Data from: **ENCODE Project Consortium, et al. (2012). An integrated encyclopedia of DNA elements in the human genome. Nature 489, 57-74.** The avgprof and heatmap plotted by ngs.plot like this:
 
-![hesc.k9.genebody.all.png](./webimgs/hesc.k9.genebody.all.png)
+      ![hesc.k27.genebody.all.png](./webimgs/hesc.k27.genebody.all.png) 
 
-(4) H3K27me3. The configure file "config.hesc.k27.txt" is like this:
-```
-hesc.H3k27me3.rmdup.sort.bam     high_expressed_genes.txt         "High"
-hesc.H3k27me3.rmdup.sort.bam     medium_expressed_genes.txt       "Med"
-hesc.H3k27me3.rmdup.sort.bam     low_expressed_genes.txt          "Low"
-```
-Command like this:
-```
-ngs.plot.r -G hg19 -R genebody -C config.hesc.k27.txt -O hesc.k27.genebody -D ensembl -FL 300
-```
-Data from: **ENCODE Project Consortium, et al. (2012). An integrated encyclopedia of DNA elements in the human genome. Nature 489, 57-74.** The avgprof and heatmap plotted by ngs.plot like this:
+1. ngs.plot.r can be used to analyze RNA-seq data. Here We used an in-house RNA-seq dataset (unpublished) from human post-mortem brain tissue of schizophrenia patients as an example. One sample with acceptable RNA quality (RIN=7.8) and another sample with degraded RNA quality (RIN=3) are chosen.
+   ```
+   Individual1_3.bam     -1       "Individual1_3"
+   Individual2_7.8.bam   -1       "Individual2_7.8"
+   ```
+   Command like this:
+   ```
+   ngs.plot.r -G hg19 -R genebody -C config.RIN_number.txt -O RIN_number -F rnaseq
+   ```
+   The avgprof and heatmap plotted by ngs.plot like this:
 
-![hesc.k27.genebody.all.png](./webimgs/hesc.k27.genebody.all.png) 
+   ![RIN_number.all.png](./webimgs/RIN_number.all.png)
 
-3. ngs.plot.r can be used to analyze RNA-seq data. Here We used an in-house RNA-seq dataset (unpublished) from human post-mortem brain tissue of schizophrenia patients as an example. One sample with acceptable RNA quality (RIN=7.8) and another sample with degraded RNA quality (RIN=3) are chosen.
-```
-Individual1_3.bam     -1       "Individual1_3"
-Individual2_7.8.bam   -1       "Individual2_7.8"
-```
-Command like this:
-```
-ngs.plot.r -G hg19 -R genebody -C config.RIN_number.txt -O RIN_number -F rnaseq
-```
-The avgprof and heatmap plotted by ngs.plot like this:
-
-![RIN_number.all.png](./webimgs/RIN_number.all.png)
-
-The plot above shows that the sample with lower RIN number is significantly biased in short read coverage towards the 3’ end.
+   The plot above shows that the sample with lower RIN number is significantly biased in short read coverage towards the 3’ end.
 
 # COMMERCIAL USE
 ngs.plot uses GNU GPL2 and is free for use by academic users. If you want to use it in commercial settings, please contact Lisa Placanica at: lisa.placanica@mssm.edu

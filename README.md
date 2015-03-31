@@ -24,8 +24,8 @@ By default, the main program installation comes with basic package only. However
 ## A note about the compatibility between genome files and program versions
 The 3.0+ genome files work with ngs.plot v2.41+; The 1-2 series of genome files work with ngs.plot v2.08 and below.
 
-# RECENT CHANGES
-Recent changes, bug fixes and feature additions will be announced through this Google discussion group: [ngs.plot discussion forum](https://groups.google.com/forum/?fromgroups#!forum/ngsplot-discuss). If you are interested, please sign up to receive updates through E-mails.
+# DISCUSSION FORUM
+Recent changes, bug fixes and feature additions will be announced through this Google discussion group: [ngs.plot discussion forum](https://groups.google.com/forum/?fromgroups#!forum/ngsplot-discuss). Users are encouraged to ask questions through this forum (instead of shooting me emails) so that the answers can be shared. If you are interested, you can sign up to receive updates through E-mails.
 
 # LOCAL INSTALLATION
 You need R version >= 2.15.0 and Python 2.7 to be able to use ngs.plot. Please also update related R and Bioconductor packages to the corresponding version.

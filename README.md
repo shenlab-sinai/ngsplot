@@ -8,6 +8,9 @@ The signature advantage of ngs.plot is that it collects a large database of func
 ## Program Download Location
 For ready-to-install packages and example bam files, go to the [ngs.plot download GDrive](https://drive.google.com/folderview?id=0B1PVLadG_dCKN1liNFY0MVM1Ulk&usp=sharing).
 
+## Galaxy Tool Shed
+ngs.plot is now available on the [Galaxy tool shed](https://toolshed.g2.bx.psu.edu/view/ngsplot/ngsplot). You can also easily find it by searching "ngsplot" for repositories. The Galaxy tool shed allows you to install ngs.plot to your local Galaxy instance with a few clicks. Of course, you can always install it manually using the files provided under the "galaxy" folder.
+
 ## Supported Genomes
 ngs.plot has an approach to install genomes on demand. It can support for any genome. All you need to do is to download an archive file and install it by yourself. The genome files can be found in this Google drive folder: [ngs.plot genome folder](https://drive.google.com/folderview?id=0B1PVLadG_dCKNEsybkh5TE9XZ1E&usp=sharing).
 
@@ -22,11 +25,9 @@ By default, the main program installation comes with basic package only. However
 The 3.0+ genome files work with ngs.plot v2.41+; The 1-2 series of genome files work with ngs.plot v2.08 and below.
 
 # RECENT CHANGES
-Recent changes, bug fixes and feature additions will be announced through this Google discussion group: [ngs.plot discussion forum](https://groups.google.com/forum/?fromgroups#!forum/ngsplot-discuss)
+Recent changes, bug fixes and feature additions will be announced through this Google discussion group: [ngs.plot discussion forum](https://groups.google.com/forum/?fromgroups#!forum/ngsplot-discuss). If you are interested, please sign up to receive updates through E-mails.
 
-If you are interested, please sign up to receive updates through E-mails.
-
-# INSTALLATION
+# LOCAL INSTALLATION
 You need R version >= 2.15.0 and Python 2.7 to be able to use ngs.plot. Please also update related R and Bioconductor packages to the corresponding version.
 
 1. Download the ngs.plot package to a desired folder, such as ~/software, and extract it:
@@ -73,9 +74,7 @@ You need R version >= 2.15.0 and Python 2.7 to be able to use ngs.plot. Please a
 1. (Optional) Install ngsplot package in Galaxy: read the `galaxy/README.txt` for instructions. A wiki will be provided to demonstrate the workflow of ngs.plot in Galaxy.
 
 # USAGE
-A wiki-page has been created for detailed explanation of each argument: [ProgramArguments101](https://github.com/shenlab-sinai/ngsplot/wiki/ProgramArguments101)
-
-When you type one of the commands without specifying any argument, the program will print out a brief usage. The following are basically copy & pasted from command console and are provided for quick reference.
+A wiki-page has been created for detailed explanation of each argument: [ProgramArguments101](https://github.com/shenlab-sinai/ngsplot/wiki/ProgramArguments101). Quick tip: when you type one of the commands without specifying any argument, the program will print out a brief usage. 
 
 ## Manipulate annotation database and the use of option "-F"
 The `ngsplotdb.py` script is easy to use. Here are a few examples:
@@ -106,7 +105,7 @@ Usage: ngs.plot.r -G genome -R region -C [cov|config]file
 ```
 
 ## replot.r
-Use replot.r to re-create plots with already generated data using different parameters. There are a couple of options for you to fine-tune the figures.
+Use replot.r to re-create plots with already generated data using different parameters. There are a couple of options for you to finetune the figures.
 ```
 Usage: replot.r command -I input.zip -O name
   command: prof OR heatmap
@@ -234,10 +233,12 @@ Usage: plotCorrGram.r -I ngsplot_output.zip -O output_name [Options]
    The plot above shows that the sample with lower RIN number is significantly biased in short read coverage towards the 3’ end.
 
 # COMMERCIAL USE
-ngs.plot uses GNU GPL2 and is free for use by academic users. If you want to use it in commercial settings, please contact Lisa Placanica at: lisa.placanica@mssm.edu
+ngs.plot uses GNU GPLv2 and is free for use by academic users. If you want to use it in commercial settings, please contact Lisa Placanica at: lisa.placanica@mssm.edu.
 
 # HOW TO CITE
 **Shen, L.*, Shao, N., Liu, X. and Nestler, E. (2014) ngs.plot: Quick mining and visualization of next-generation sequencing data by integrating genomic databases, BMC Genomics, 15, 284.**
+
+Here is a [list of publications](https://scholar.google.com/scholar?hl=en&as_sdt=5,31&cites=72561154389931100&scipsc=&q=&scisbd=1) that cite ngs.plot, found by Google Scholar.
 
 # CONTACT
 ngs.plot is developed by Drs. Li Shen, Ningyi Shao, Xiaochuan Liu and Eddie Loh at the Icahn School of Medicine at Mount Sinai. If you have technical questions about ngs.plot, please use the [ngs.plot discussion forum](https://groups.google.com/forum/#!forum/ngsplot-discuss). For collaborations or any other matters, contact: li.shen**AT**mssm.edu.

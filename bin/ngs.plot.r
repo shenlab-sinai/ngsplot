@@ -26,7 +26,7 @@ source(file.path(progpath, 'lib', 'coverage.r'))
 
 # Deal with command line arguments.
 cmd.help <- function(){
-    cat("\nVisit http://code.google.com/p/ngsplot/wiki/ProgramArguments101 for details\n")
+    cat("\nVisit https://github.com/shenlab-sinai/ngsplot/wiki/ProgramArguments101 for details\n")
     cat(paste("Version:", ngsplot.version, sep=" "))
     cat("\nUsage: ngs.plot.r -G genome -R region -C [cov|config]file\n")
     cat("                  -O name [Options]\n")

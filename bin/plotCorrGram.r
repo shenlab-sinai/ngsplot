@@ -8,7 +8,7 @@
 #
 
 cmd.help <- function(){
-    cat("\nVisit http://code.google.com/p/ngsplot for details\n")
+    cat("\nVisit https://github.com/shenlab-sinai/ngsplot for details\n")
     cat("\nUsage: plotCorrGram.r -I ngsplot_output.zip -O output_name [Options]\n")
     cat("\n## Mandatory parameters:\n")
     cat("  -I   Result zip file created by ngs.plot.\n")

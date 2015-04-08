@@ -137,25 +137,25 @@ Usage: plotCorrGram.r -I ngsplot_output.zip -O output_name [Options]
 
 # EXAMPLES
 1. ngs.plot.r needs an indexed bam file or a configuration file as an input to plot short read coverage across the genomic regions of interest. ngs.plot.r will generate multiple files including average profile, heatmap and a zip file for replotting.
-   Command like this:
+   Issue a command like this:
    ```
    ngs.plot.r -G hg19 -R tss -C hesc.H3k4me3.rmdup.sort.bam -O hesc.H3k4me3.tss -T H3K4me3 -L 3000 -FL 300
    ```
    Data from: **Ernst, J., Kheradpour, P., Mikkelsen, T.S., Shoresh, N., Ward, L.D., Epstein, C.B., Zhang, X., Wang, L., Issner, R., Coyne, M., et al. (2011). Mapping and analysis of chromatin state dynamics in nine human cell types. Nature 473, 43-49.**
 
-   The avgprof and heatmap plotted by ngs.plot are like this:
+   Will produce an avgprof and a heatmap like this:
 
    ![hesc.H3k4me3.tss.all.png](./webimgs/hesc.H3k4me3.tss.all.png)
 
-   ngs.plot can also accept bam-pairs for plot. A bam-pair is a pair of bam files separated by colon, such as ChIP vs. Input. Using H3K4me3 as an example, you can issue a command like this:
+   ngs.plot can also accept bam-pairs for plotting. A bam-pair is a pair of bam files separated by colon, such as ChIP vs. Input. Using H3K4me3 as an example, you can issue a command like this:
    ```
-   ngs.plot.r -G hg19 -R tss -C hesc.H3k4me3.rmdup.sort.bam:hesc.Input.rmdup.sort.bam -O hesc.H3k4me3vsInp.tss -T H3K4me3 -L 3000 -FL 300
+   ngs.plot.r -G hg19 -R tss -C hesc.H3k4me3.rmdup.sort.bam:hesc.Input.rmdup.sort.bam -O hesc.H3k4me3vsInp.tss -T H3K4me3 -L 3000
    ```
    The avgprof and heatmap plotted by ngs.plot are like this:
 
-   ![k4_bampair.png](./webimgs/k4_bampair.png)
+   ![h3k4me3_bampair.png](./webimgs/h3k4me3_bampair.png)
 
-1. ngs.plot for multiplot. If you want to draw a multiplot, you need to create a configuration file for ngs.plot.
+1. ngs.plot for multiplot. If you want to draw a plot of multiple samples/regions, you need to create a configuration file. We demonstrate multiplot using a few examples:
   1. H3K4me3. The configure file "config.hesc.k4.txt" is like this:
       ```
       # If you want to specify the gene list as "genome", use "-1".
@@ -187,20 +187,6 @@ Usage: plotCorrGram.r -I ngsplot_output.zip -O output_name [Options]
 
       ![hesc.k36.genebody.all.png](./webimgs/hesc.k36.genebody.all.png)
 
-  1. H3K9me3. The configure file "config.hesc.k9.txt" is like this:
-      ```
-      hesc.H3k9me3.rmdup.sort.bam     high_expressed_genes.txt         "High"
-      hesc.H3k9me3.rmdup.sort.bam     medium_expressed_genes.txt       "Med"
-      hesc.H3k9me3.rmdup.sort.bam     low_expressed_genes.txt          "Low"
-      ```
-      Command like this:
-      ```
-      ngs.plot.r -G hg19 -R genebody -C config.hesc.k9.txt -O hesc.k9.genebody -D ensembl -FL 300
-      ```
-      The avgprof and heatmap plotted by ngs.plot like this:
-
-      ![hesc.k9.genebody.all.png](./webimgs/hesc.k9.genebody.all.png)
-
   1. H3K27me3. The configure file "config.hesc.k27.txt" is like this:
       ```
       hesc.H3k27me3.rmdup.sort.bam     high_expressed_genes.txt         "High"
@@ -217,7 +203,21 @@ Usage: plotCorrGram.r -I ngsplot_output.zip -O output_name [Options]
 
    For all the above examples, data are from: **ENCODE Project Consortium, et al. (2012). An integrated encyclopedia of DNA elements in the human genome. Nature 489, 57-74.**
 
-1. ngs.plot.r can be used to analyze RNA-seq data. Here We used an in-house RNA-seq dataset (unpublished) from human post-mortem brain tissue of schizophrenia patients as an example. One sample with acceptable RNA quality (RIN=7.8) and another sample with degraded RNA quality (RIN=3) are chosen.
+1. ngs.plot contains several algorithms for ranking genes/regions, including two clustering methods - hierarchical clustering and k-means. To avoid the result being dominated by the sample with the largest read coverage, the values are converted to ranks for clustering. Here we provide an example using two histone marks - H3K27me3 and H3K4me3 and K-means clustering:
+   The configuration file "config.k4k27.inp.txt" looks like this:
+   ```
+   hesc.H3k27me3.sort.bam:hesc.Input.sort.bam    -1      "H3k27me3"
+   hesc.H3k4me3.sort.bam:hesc.Input.sort.bam     -1      "H3k4me3"
+   ```
+   Use command:
+   ```
+   ngs.plot.r -G hg19 -R genebody -L 3000 -C config.k4k27.inp.txt -O k4k27_km_gb -GO km
+   ```
+   The heatmap looks like this (cluster labels are manually added):
+
+   ![k4k27_km_web_gb_mod.png](./webimgs/k4k27_km_web_gb_mod.png)
+
+1. ngs.plot can be used to analyze RNA-seq data. Here We used an in-house RNA-seq dataset (unpublished) from human post-mortem brain tissue of schizophrenia patients as an example. One sample with acceptable RNA quality (RIN=7.8) and another sample with degraded RNA quality (RIN=3) are chosen.
    ```
    Individual1_3.bam     -1       "Individual1_3"
    Individual2_7.8.bam   -1       "Individual2_7.8"

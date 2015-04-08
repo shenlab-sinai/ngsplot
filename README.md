@@ -204,6 +204,7 @@ Usage: plotCorrGram.r -I ngsplot_output.zip -O output_name [Options]
    For all the above examples, data are from: **ENCODE Project Consortium, et al. (2012). An integrated encyclopedia of DNA elements in the human genome. Nature 489, 57-74.**
 
 1. ngs.plot contains several algorithms for ranking genes/regions, including two clustering methods - hierarchical clustering and k-means. To avoid the result being dominated by the sample with the largest read coverage, the values are converted to ranks for clustering. Here we provide an example using two histone marks - H3K27me3 and H3K4me3 and K-means clustering:
+
    The configuration file "config.k4k27.inp.txt" looks like this:
    ```
    hesc.H3k27me3.sort.bam:hesc.Input.sort.bam    -1      "H3k27me3"
@@ -238,7 +239,7 @@ ngs.plot uses GNU GPLv2 and is free for use by academic users. If you want to us
 # HOW TO CITE
 **Shen, L.*, Shao, N., Liu, X. and Nestler, E. (2014) ngs.plot: Quick mining and visualization of next-generation sequencing data by integrating genomic databases, BMC Genomics, 15, 284.**
 
-Here is a [list of publications](https://scholar.google.com/scholar?hl=en&as_sdt=5,31&cites=72561154389931100&scipsc=&q=&scisbd=1) that cite ngs.plot, found by Google Scholar.
+Here is a [list of publications](https://scholar.google.com/scholar?start=0&hl=en&as_sdt=5,31&cites=72561154389931100&scipsc=) that cite ngs.plot, found by Google Scholar.
 
 # CONTACT
 ngs.plot is developed by Drs. Li Shen, Ningyi Shao, Xiaochuan Liu and Eddie Loh at the Icahn School of Medicine at Mount Sinai. If you have technical questions about ngs.plot, please use the [ngs.plot discussion forum](https://groups.google.com/forum/#!forum/ngsplot-discuss). For collaborations or any other matters, contact: li.shen**AT**mssm.edu.

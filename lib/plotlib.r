@@ -587,7 +587,7 @@ plotheat <- function(reg.list, uniq.reg, enrichList, v.low.cutoff, go.algo,
             axis(1, at=xticks$pos, labels=xticks$lab, lwd=1, lwd.ticks=1)
         }
     }
-    list(go.list,g.cluster)
+    list(go.list,go.cluster)
 }
 
 trim <- function(x, p){

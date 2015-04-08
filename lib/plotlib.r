@@ -386,26 +386,26 @@ OrderGenesHeatmap <- function(enrichList, lowCutoffs,
         # Clustering and order genes.
         hc <- hclust(dist(rankCombined, method='euclidean'), 
                      method='complete')
-        hc$order
+        list(hc$order,NULL)
     } else if(method == 'km') {
         rankCombined <- do.call('cbind', rankList)
         km <- kmeans(rankCombined, centers=go.paras$knc, 
                      iter.max=go.paras$max.iter, nstart=go.paras$nrs)
-        order(km$cluster)
+        list(order(km$cluster), km$cluster[order(km$cluster)])
     } else if(method == 'total' || method == 'diff' && np == 1) {  
-        order(rowSums(rankList[[1]]))
+        list(order(rowSums(rankList[[1]])),NULL)
     } else if(method == 'max') {  # peak enrichment value of the 1st profile.
-        order(apply(rankList[[1]], 1, max))
+        list(order(apply(rankList[[1]], 1, max)), NULL)
     } else if(method == 'prod') {  # product of all profiles.
         rs.mat <- sapply(rankList, rowSums)
         g.prod <- apply(rs.mat, 1, prod)
-        order(g.prod)
+        list(order(g.prod), NULL)
     } else if(method == 'diff' && np > 1) {  # difference between 2 profiles.
-        order(rowSums(rankList[[1]]) - rowSums(rankList[[2]]))
+        list(order(rowSums(rankList[[1]]) - rowSums(rankList[[2]])), NULL)
     } else if(method == 'none') {  # according to the order of input gene list.
         # Because the image function draws from bottom to top, the rows are 
         # reversed to give a more natural look.
-        rev(1:nrow(enrichList[[1]]))
+        list(rev(1:nrow(enrichList[[1]])),NULL)
     } else {
         # pass.
     }
@@ -536,11 +536,14 @@ plotheat <- function(reg.list, uniq.reg, enrichList, v.low.cutoff, go.algo,
             } else {
                 lowCutoffs <- v.low.cutoff[plist]
             }
-            g.order <- OrderGenesHeatmap(enrichSelected, lowCutoffs, go.algo, 
-                                         go.paras)
+            g.order.list <- OrderGenesHeatmap(enrichSelected, lowCutoffs, go.algo,
+                                              go.paras)
+            g.order <- g.order.list[[1]]
+            g.cluster <- g.order.list[[2]]
             go.list[[ur]] <- rev(rownames(enrichSelected[[1]][g.order, ]))
         } else {
             g.order <- NULL
+            g.cluster <- NULL
             go.list[[ur]] <- g.order
         }
 
@@ -581,7 +584,7 @@ plotheat <- function(reg.list, uniq.reg, enrichList, v.low.cutoff, go.algo,
             axis(1, at=xticks$pos, labels=xticks$lab, lwd=1, lwd.ticks=1)
         }
     }
-    go.list
+    list(go.list,g.cluster)
 }
 
 trim <- function(x, p){

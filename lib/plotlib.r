@@ -391,7 +391,7 @@ OrderGenesHeatmap <- function(enrichList, lowCutoffs,
         rankCombined <- do.call('cbind', rankList)
         km <- kmeans(rankCombined, centers=go.paras$knc, 
                      iter.max=go.paras$max.iter, nstart=go.paras$nrs)
-        list(order(km$cluster), km$cluster[order(km$cluster)])
+        list(order(km$cluster), km$cluster)
     } else if(method == 'total' || method == 'diff' && np == 1) {  
         list(order(rowSums(rankList[[1]])),NULL)
     } else if(method == 'max') {  # peak enrichment value of the 1st profile.
@@ -513,6 +513,8 @@ plotheat <- function(reg.list, uniq.reg, enrichList, v.low.cutoff, go.algo,
     # Do NOT use "dopar" in the "foreach" loops here because this will disturb
     # the image order.
     go.list <- vector('list', length(uniq.reg))
+    go.cluster <- vector('list', length(uniq.reg))
+
     names(go.list) <- uniq.reg
     for(ur in uniq.reg) {
         # ur <- uniq.reg[i]
@@ -540,6 +542,7 @@ plotheat <- function(reg.list, uniq.reg, enrichList, v.low.cutoff, go.algo,
                                               go.paras)
             g.order <- g.order.list[[1]]
             g.cluster <- g.order.list[[2]]
+            go.cluster[[ur]] <- rev(g.cluster[g.order])
             go.list[[ur]] <- rev(rownames(enrichSelected[[1]][g.order, ]))
         } else {
             g.order <- NULL

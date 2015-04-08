@@ -10,7 +10,7 @@ zip.fname <- paste(fname, 'zip', sep='.')
 heatmap.dat <- file.path(fname, 'heatmap.RData')
 load(unz(zip.fname, heatmap.dat))
 
-gene.list <- as.data.frame(go.list)
+gene.list <- as.data.frame(go.list, stringsAsFactors = FALSE)
 gname.list <- str_split_fixed(gene.list[,1],':',2)[,1]
 write.table(gname.list, file=paste(fname, 'gname.txt', sep='.'), 
             col.names=F, row.names=F)

@@ -386,14 +386,15 @@ OrderGenesHeatmap <- function(enrichList, lowCutoffs,
         # Clustering and order genes.
         hc <- hclust(dist(rankCombined, method='euclidean'), 
                      method='complete')
-        list(hc$order,NULL)
+        memb <- cutree(hc, k = go.paras$knc)
+        list(hc$order,memb)
     } else if(method == 'km') {
         rankCombined <- do.call('cbind', rankList)
         km <- kmeans(rankCombined, centers=go.paras$knc, 
                      iter.max=go.paras$max.iter, nstart=go.paras$nrs)
         list(order(km$cluster), km$cluster)
     } else if(method == 'total' || method == 'diff' && np == 1) {  
-        list(order(rowSums(rankList[[1]])),NULL)
+        list(order(rowSums(rankList[[1]])), NULL)
     } else if(method == 'max') {  # peak enrichment value of the 1st profile.
         list(order(apply(rankList[[1]], 1, max)), NULL)
     } else if(method == 'prod') {  # product of all profiles.

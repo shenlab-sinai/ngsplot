@@ -419,6 +419,10 @@ REDUCEsampler.ngsplot <- function(sampleSize=500, verbose=FALSE){
 # Adapted from Martin Morgan's post:
 # https://support.bioconductor.org/p/64231/
 # Require library: GenomicFiles
+# Args:
+#   sampleSize: reads sampled from bam file.
+#   verbose: turn on verbose output.
+
     tot <- 0L
     function(x, y, ...) {
         if (length(x) < sampleSize)
@@ -455,7 +459,7 @@ estiMapqStyle <- function(bam.file){
     sbp <- ScanBamParam(what=sbw, flag=scanBamFlag(
                         isUnmappedQuery=F, isDuplicate=F))
     samp <- BamFile(bam.file, yieldSize=500)
-    yield <- function(x) readGAlignments(x, param=ScanBamParam(what=sbw))
+    yield <- function(x) readGAlignments(x, param=sbp)
     map <- identity
     samp.reads <- reduceByYield(samp, yield, map, REDUCEsampler.ngsplot(500, FALSE))
     samp.len <- length(samp.reads)

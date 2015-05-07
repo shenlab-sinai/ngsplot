@@ -70,12 +70,13 @@ You need R version >= 2.15.0 and Python 2.7 to be able to use ngs.plot. Please a
    biocLite( "BSgenome" )
    biocLite( "Rsamtools" )
    biocLite( "ShortRead" )
+   biocLite( "GenomicFiles" )
    ```
 
 1. (Optional) Install ngsplot package in Galaxy: read the `galaxy/README.txt` for instructions. A wiki will be provided to demonstrate the workflow of ngs.plot in Galaxy.
 
 # USAGE
-A wiki-page has been created for detailed explanation of each argument: [ProgramArguments101](https://github.com/shenlab-sinai/ngsplot/wiki/ProgramArguments101). Quick tip: when you type one of the commands without specifying any argument, the program will print out a brief usage. 
+A wiki-page has been created for detailed explanation of each argument: [ProgramArguments101](https://github.com/shenlab-sinai/ngsplot/wiki/ProgramArguments101). Quick tip: when you type one of the commands without specifying any argument, the program will print out a brief usage.
 
 ## Manipulate annotation database and the use of option "-F"
 The `ngsplotdb.py` script is easy to use. Here are a few examples:
@@ -200,7 +201,7 @@ Usage: plotCorrGram.r -I ngsplot_output.zip -O output_name [Options]
       ```
       The avgprof and heatmap plotted by ngs.plot like this:
 
-      ![hesc.k27.genebody.all.png](./webimgs/hesc.k27.genebody.all.png) 
+      ![hesc.k27.genebody.all.png](./webimgs/hesc.k27.genebody.all.png)
 
    For all the above examples, data are from: **ENCODE Project Consortium, et al. (2012). An integrated encyclopedia of DNA elements in the human genome. Nature 489, 57-74.**
 

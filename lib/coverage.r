@@ -20,7 +20,7 @@ Bin <- function(v, n) {
 }
 
 SplineRev3Sec <- function(cov.list, v.fls, pts.list, v.strand, algo="spline") {
-# For 3 sections of continuous coverage, spline each according to specified 
+# For 3 sections of continuous coverage, spline each according to specified
 # data points and return concatenated, interpolated curves.
 # Args:
 #   cov.list: a list of coverage vectors. Each vector represents a gene.
@@ -28,7 +28,7 @@ SplineRev3Sec <- function(cov.list, v.fls, pts.list, v.strand, algo="spline") {
 #   pts.list: a list of three integers for data points.
 #   v.strand: factor vector of strands.
 #   algo: algorithm used to normalize coverage vectors (spline, bin).
-# Return: matrix of interpolated coverage: each row represents a gene; each 
+# Return: matrix of interpolated coverage: each row represents a gene; each
 #         column represents a data point. Coverage from exons are concatenated.
 # Notes: the names of cov.list and pts.list must be the same for index purpose.
 # Suggested: use 'l', 'm', and 'r' for the names.
@@ -40,7 +40,7 @@ SplineRev3Sec <- function(cov.list, v.fls, pts.list, v.strand, algo="spline") {
     for(i in 1:length(cov.list)) {
         left.cov <- head(cov.list[[i]], n=v.fls[i])
         right.cov <- tail(cov.list[[i]], n=v.fls[i])
-        mid.cov <- window(cov.list[[i]], start=v.fls[i] + 1, 
+        mid.cov <- window(cov.list[[i]], start=v.fls[i] + 1,
                           width=length(cov.list[[i]]) - 2*v.fls[i])
         if(algo == "spline") {
             left.cov <- spline(1:length(left.cov), left.cov, n=pts.list$l)$y
@@ -56,8 +56,8 @@ SplineRev3Sec <- function(cov.list, v.fls, pts.list, v.strand, algo="spline") {
         # Fuse the two points at the boundary and concatenate.
         f1 <- (tail(left.cov, n=1) + head(mid.cov, n=1)) / 2
         f2 <- (tail(mid.cov, n=1) + head(right.cov, n=1)) / 2
-        con.cov <- c(left.cov[-length(left.cov)], f1, 
-                     mid.cov[-c(1, length(mid.cov))], 
+        con.cov <- c(left.cov[-length(left.cov)], f1,
+                     mid.cov[-c(1, length(mid.cov))],
                      f2, right.cov[-1])
         # browser()
         if(v.strand[i] == '+') {
@@ -70,7 +70,7 @@ SplineRev3Sec <- function(cov.list, v.fls, pts.list, v.strand, algo="spline") {
     cov.mat
 }
 
-extrCov3Sec <- function(v.chrom, v.start, v.end, v.fls, v.strand, m.pts, f.pts, 
+extrCov3Sec <- function(v.chrom, v.start, v.end, v.fls, v.strand, m.pts, f.pts,
                         bufsize, algo, ...) {
 # Extract and interpolate coverage vectors from genomic regions with 3 sections.
 # Args:
@@ -83,11 +83,11 @@ extrCov3Sec <- function(v.chrom, v.start, v.end, v.fls, v.strand, m.pts, f.pts,
 #   f.pts: data points for flanking region.
 #   bufsize: integer; buffers are added to both ends of each region.
 #   algo: algorithm used to normalize coverage vectors.
-# Return: matrix of interpolated coverage: each row represents a gene; each 
+# Return: matrix of interpolated coverage: each row represents a gene; each
 #         column represents a data point.
 
     interflank.gr <- GRanges(seqnames=v.chrom, ranges=IRanges(
-                             start=v.start - v.fls - bufsize, 
+                             start=v.start - v.fls - bufsize,
                              end=v.end + v.fls + bufsize))
     interflank.cov <- covBamExons(interflank.gr, v.strand, ...)
 
@@ -97,7 +97,7 @@ extrCov3Sec <- function(v.chrom, v.start, v.end, v.fls, v.strand, m.pts, f.pts,
         })
 
     # Interpolate and reverse coverage vectors.
-    SplineRev3Sec(interflank.cov, v.fls, list(l=f.pts, m=m.pts, r=f.pts), 
+    SplineRev3Sec(interflank.cov, v.fls, list(l=f.pts, m=m.pts, r=f.pts),
                   v.strand, algo)
 }
 
@@ -123,7 +123,7 @@ sub3CovList <- function(all.cov, v.left, v.right) {
     list(l=left.cov, m=mid.cov, r=right.cov)
 }
 
-extrCovExons <- function(v.chrom, exonranges.list, v.fls, v.strand, 
+extrCovExons <- function(v.chrom, exonranges.list, v.fls, v.strand,
                          m.pts, f.pts, bufsize, algo, ...) {
 # Extract coverage vectors for transcripts with exon models.
 # Args:
@@ -135,7 +135,7 @@ extrCovExons <- function(v.chrom, exonranges.list, v.fls, v.strand,
 #   f.pts: data points for flanking region.
 #   bufsize: integer; buffers are added to both ends of each region.
 #   algo: algorithm used to normalize coverage vectors.
-# Return: matrix of interpolated coverage: each row represents a gene; each 
+# Return: matrix of interpolated coverage: each row represents a gene; each
 #         column represents a data point. Coverage from exons are concatenated.
 
     # Construct ranges including exon and flanking regions.
@@ -156,12 +156,12 @@ extrCovExons <- function(v.chrom, exonranges.list, v.fls, v.strand,
             window(v, start=bufsize + 1, width=length(v) - 2 * bufsize)
         })
 
-    SplineRev3Sec(exonflank.cov, v.fls, list(l=f.pts, m=m.pts, r=f.pts), 
+    SplineRev3Sec(exonflank.cov, v.fls, list(l=f.pts, m=m.pts, r=f.pts),
                   v.strand, algo)
 }
 
 
-extrCovMidp <- function(v.chrom, v.midp, flanksize, v.strand, pts, bufsize, 
+extrCovMidp <- function(v.chrom, v.midp, flanksize, v.strand, pts, bufsize,
                         algo, ...) {
 # Extract coverage vectors with a middle point and symmetric flanking regions.
 # Args:
@@ -172,11 +172,11 @@ extrCovMidp <- function(v.chrom, v.midp, flanksize, v.strand, pts, bufsize,
 #   pts: data points to spline into.
 #   bufsize: integer; buffers are added to both ends of each region.
 #   algo: algorithm used to normalize coverage vectors.
-# Return: matrix of interpolated coverage: each row represents a gene; each 
+# Return: matrix of interpolated coverage: each row represents a gene; each
 #         column represents a data point.
-    
+
     granges <- GRanges(seqnames=v.chrom, ranges=IRanges(
-                       start=v.midp - flanksize - bufsize, 
+                       start=v.midp - flanksize - bufsize,
                        end=v.midp + flanksize + bufsize))
     cov.list <- covBamExons(granges, v.strand, ...)
 
@@ -192,7 +192,7 @@ extrCovMidp <- function(v.chrom, v.midp, flanksize, v.strand, pts, bufsize,
             cov.mat[i, ] <- vector('integer', length=pts)
         } else {
             if(algo == "spline") {
-                cov.mat[i, ] <- spline(1:length(cov.list[[i]]), cov.list[[i]], 
+                cov.mat[i, ] <- spline(1:length(cov.list[[i]]), cov.list[[i]],
                                        n=pts)$y
             } else if(algo == "bin") {
                 cov.mat[i, ] <- Bin(cov.list[[i]], n=pts)
@@ -208,7 +208,7 @@ extrCovMidp <- function(v.chrom, v.midp, flanksize, v.strand, pts, bufsize,
 }
 
 scanBamRevOrder <- function(org.gr, sbp) {
-# ScanBamParam re-arranges the input genomic ranges. Use range info to 
+# ScanBamParam re-arranges the input genomic ranges. Use range info to
 # construct a string vector to find the order to reverse it.
     org.grnames <- with(org.gr, paste(seqnames, start, end, sep=':'))
     sbw.gr <- as.data.frame(bamWhich(sbp))  # scan-bam-ed
@@ -217,15 +217,15 @@ scanBamRevOrder <- function(org.gr, sbp) {
     } else if('group_name' %in% names(sbw.gr)) {
         sbw.grnames <- with(sbw.gr, paste(group_name, start, end, sep=':'))
     } else {
-        stop("Cannot locate chromosome names in extracted short reads. Report 
+        stop("Cannot locate chromosome names in extracted short reads. Report
 this problem using issue tracking or discussion forum.\n")
     }
-    
+
     match(org.grnames, sbw.grnames)
 }
 
 genZeroList <- function(llen, v.vlen) {
-# Generate a list of specific length with each element being an Rle vector of 
+# Generate a list of specific length with each element being an Rle vector of
 # zeros with specific length.
 # Args:
 #   llen: list length
@@ -240,15 +240,15 @@ genZeroList <- function(llen, v.vlen) {
     res
 }
 
-covBamExons <- function(granges.dat, v.strand, bam.file, sn.inbam, fraglen, 
-                        map.qual=20, bowtie=F, 
+covBamExons <- function(granges.dat, v.strand, bam.file, sn.inbam, fraglen,
+                        map.qual=20, bowtie=F,
                         strand.spec=c('both', 'same', 'opposite')) {
 # Extract coverage vectors from bam file for a list of transcripts of multiple
 # exons.
 # Args:
-#   granges.dat: a GRanges object representing a set of genomic ranges or a 
-#                list of GRanges objects each representing a set of exonic 
-#                ranges. 
+#   granges.dat: a GRanges object representing a set of genomic ranges or a
+#                list of GRanges objects each representing a set of exonic
+#                ranges.
 #   v.strand: vector of strand info.
 #   bam.file: character string refers to the path of a bam file.
 #   sn.inbam: vector of chromosome names in the bam file.
@@ -262,11 +262,11 @@ covBamExons <- function(granges.dat, v.strand, bam.file, sn.inbam, fraglen,
 
     if(class(granges.dat) == 'list') {
         # Construct a GRanges object representing DNA sequences.
-        v.seqnames <- sapply(granges.dat, 
+        v.seqnames <- sapply(granges.dat,
                              function(x) as.character(seqnames(x)[1]))
         v.start <- sapply(granges.dat, function(x) start(ranges(x))[1])
         v.end <- sapply(granges.dat, function(x) tail(end(ranges(x)), n=1))
-        granges.dna <- GRanges(seqnames=v.seqnames, 
+        granges.dna <- GRanges(seqnames=v.seqnames,
                                ranges=IRanges(start=v.start, end=v.end))
         # Obtain mRNA(including flanking) length for each gene.
         repr.lens <- sapply(granges.dat, function(g) {
@@ -288,11 +288,11 @@ covBamExons <- function(granges.dat, v.strand, bam.file, sn.inbam, fraglen,
     }
 
     # scanBamWhat: the info that need to be extracted from a bam file.
-    sbw <- c('pos', 'qwidth', 'mapq', 'strand', 'rname', 
+    sbw <- c('pos', 'qwidth', 'mapq', 'strand', 'rname',
              'mrnm', 'mpos', 'isize')
-    sbp <- ScanBamParam(what=sbw, which=granges.dna[inbam.mask], 
-                        flag=scanBamFlag(isUnmappedQuery=F, 
-                                         isNotPassingQualityControls=F, 
+    sbp <- ScanBamParam(what=sbw, which=granges.dna[inbam.mask],
+                        flag=scanBamFlag(isUnmappedQuery=F,
+                                         isNotPassingQualityControls=F,
                                          isDuplicate=F))
 
     # Scan bam file to retrieve short reads.
@@ -354,22 +354,22 @@ covBamExons <- function(granges.dat, v.strand, bam.file, sn.inbam, fraglen,
                 cov.wd <- abs(srg$isize)
             } else {
                 # Adjust negative read positions for physical coverage.
-                cov.pos <- with(srg, ifelse(strand == '-', 
+                cov.pos <- with(srg, ifelse(strand == '-',
                                             pos - fraglen + qwidth, pos))
                 cov.wd <- fraglen
             }
             # Shift reads by subtracting start positions.
             cov.pos <- cov.pos - start + 1
             # Calculate physical coverage on the whole genebody.
-            covg <- coverage(IRanges(start=cov.pos, width=cov.wd), 
+            covg <- coverage(IRanges(start=cov.pos, width=cov.wd),
                              width=end - start + 1, method='sort')
 
             if(!is.null(gr.rna)) {  # RNA-seq.
                 # Shift exonic ranges by subtracting start positions.
                 # BE careful with negative start positions! Need to adjust end
-                # positions first(or the GRanges lib will emit errors if 
-                # start > end). 
-                # Negative start positions happen when flanking region exceeds 
+                # positions first(or the GRanges lib will emit errors if
+                # start > end).
+                # Negative start positions happen when flanking region exceeds
                 # the chromosomal start.
                 if(start > 0) {
                     start(gr.rna) <- start(gr.rna) - start + 1
@@ -388,13 +388,13 @@ covBamExons <- function(granges.dat, v.strand, bam.file, sn.inbam, fraglen,
         }
     }
 
-    covg.allgenes <- mapply(CalcReadsCov, srg=sr.in.ranges, 
-                            start=v.start, end=v.end, gr.rna=granges.dat, 
+    covg.allgenes <- mapply(CalcReadsCov, srg=sr.in.ranges,
+                            start=v.start, end=v.end, gr.rna=granges.dat,
                             repr.len=repr.lens, strand=v.strand, SIMPLIFY=F)
 }
 
 bamFileList <- function(ctg.tbl) {
-# Determine the bam files involved in the configuration and whether it is a 
+# Determine the bam files involved in the configuration and whether it is a
 # bam file pair setup.
 # Args:
 #   ctg.tbl: coverage-genelist-title table.
@@ -414,6 +414,35 @@ bamFileList <- function(ctg.tbl) {
     list(bbp=bbp, bam.list=unique(unlist(cov.list)))
 }
 
+REDUCEsampler.ngsplot <- function(sampleSize=500, verbose=FALSE){
+# Randomly sample reads from large bam file.
+# Adapted from Martin Morgan's post:
+# https://support.bioconductor.org/p/64231/
+# Require library: GenomicFiles
+    tot <- 0L
+    function(x, y, ...) {
+        if (length(x) < sampleSize)
+            sampleSize <- x
+
+        if (tot == 0L) {
+            ## first time through
+            tot <<- length(x)
+            x <- x[sample(length(x), sampleSize)]
+        }
+        yld_n <- length(y)
+        tot <<- tot + yld_n
+
+        if (verbose)
+            message("REDUCEsampler total=", tot)
+
+        keep <- rbinom(1L, min(sampleSize, yld_n), yld_n / tot)
+        i <- sample(sampleSize, keep)
+        j <- sample(yld_n, keep)
+        x[i] <- y[j]
+        x
+    }
+}
+
 estiMapqStyle <- function(bam.file){
 # Estimate the mapping quality style. Return TRUE if it is SAM standard.
 # Sample 1000 mapped reads from bam file, and if the mapq of reads
@@ -425,10 +454,12 @@ estiMapqStyle <- function(bam.file){
     sbw <- c('pos', 'qwidth', 'mapq', 'strand')
     sbp <- ScanBamParam(what=sbw, flag=scanBamFlag(
                         isUnmappedQuery=F, isDuplicate=F))
-    samp <- BamSampler(bam.file, yieldSize=500)
-    samp.reads <- scanBam(samp, param=sbp)[[1]]
-    samp.len <- length(samp.reads[["mapq"]])
-    mapq.255 <- sum(is.na(samp.reads[["mapq"]]))
+    samp <- BamFile(bam.file, yieldSize=500)
+    yield <- function(x) readGAlignments(x, param=ScanBamParam(what=sbw))
+    map <- identity
+    samp.reads <- reduceByYield(samp, yield, map, REDUCEsampler.ngsplot(500, FALSE))
+    samp.len <- length(samp.reads)
+    mapq.255 <- sum(is.na(samp.reads@elementMetadata$mapq))
     if(mapq.255/samp.len >= 0.5){
         return(FALSE)
     }else{
@@ -453,39 +484,39 @@ headerIndexBam <- function(bam.list) {
 
         # Derive mapping program.
         header <- scanBamHeader(bam.file)
-        map.prog <- try(strsplit(header[[1]]$text$'@PG'[[1]], ':')[[1]][2], 
+        map.prog <- try(strsplit(header[[1]]$text$'@PG'[[1]], ':')[[1]][2],
                         silent=T)
         if(class(map.prog) != "try-error") {
-            map.style <- grepl('tophat|bowtie|bedtools|star', map.prog, 
+            map.style <- grepl('tophat|bowtie|bedtools|star', map.prog,
                                      ignore.case=T)
             if(map.style){
                 v.map.bowtie[i] <- TRUE
                 next
             }
-            map.style <- grepl('bwa|casava', map.prog, 
+            map.style <- grepl('bwa|casava', map.prog,
                                      ignore.case=T)
             if(map.style){
                 v.map.bowtie[i] <- FALSE
                 next
             }
             if(estiMapqStyle(bam.file)){
-                warning(sprintf("Aligner for: %s cannot be determined. Style of 
+                warning(sprintf("Aligner for: %s cannot be determined. Style of
 standard SAM mapping score will be used.", bam.file))
                 v.map.bowtie[i] <- FALSE
             }else{
-                warning(sprintf("Aligner for: %s cannot be determined. Style of 
-Bowtie-like SAM mapping score will be used. Would you mind to tell us what 
+                warning(sprintf("Aligner for: %s cannot be determined. Style of
+Bowtie-like SAM mapping score will be used. Would you mind to tell us what
 aligner you are using?", bam.file))
                 v.map.bowtie[i] <- TRUE
             }
         } else {
             cat("\n")
             if(estiMapqStyle(bam.file)){
-                warning(sprintf("Aligner for: %s cannot be determined. Style of 
+                warning(sprintf("Aligner for: %s cannot be determined. Style of
 standard SAM mapping score will be used.", bam.file))
                 v.map.bowtie[i] <- FALSE
             }else{
-                warning(sprintf("Aligner for: %s cannot be determined. Style of 
+                warning(sprintf("Aligner for: %s cannot be determined. Style of
 Bowtie-like SAM mapping score will be used.", bam.file))
                 v.map.bowtie[i] <- TRUE
             }
@@ -501,9 +532,9 @@ libSizeBam <- function(bam.list) {
 # Args:
 #   ctg.tbl: coverage-genelist-title table.
 
-    # Count only reads that are mapped, primary, passed quality control and 
+    # Count only reads that are mapped, primary, passed quality control and
     # un-duplicated.
-    sbp <- ScanBamParam(flag=scanBamFlag(isUnmappedQuery=F, isNotPrimaryRead=F, 
+    sbp <- ScanBamParam(flag=scanBamFlag(isUnmappedQuery=F, isNotPrimaryRead=F,
                         isNotPassingQualityControls=F, isDuplicate=F))
     v.lib.size <- vector('integer', length=length(bam.list))
     for(i in 1:length(bam.list)) {
@@ -572,7 +603,7 @@ chunkIndex <- function(tot.gene, gcs) {
     chkidx.list
 }
 
-covMatrix <- function(debug, chkidx.list, coord, rnaseq.gb, exonmodel, libsize, 
+covMatrix <- function(debug, chkidx.list, coord, rnaseq.gb, exonmodel, libsize,
                       spit.dot=T, ...) {
 # Function to generate a coverage matrix for all genes.
 # Args:
@@ -588,7 +619,7 @@ covMatrix <- function(debug, chkidx.list, coord, rnaseq.gb, exonmodel, libsize,
 
     if(!debug) {
         # Extract coverage and combine into a matrix.
-        result.matrix <- foreach(chk=chkidx.list, .combine='rbind', 
+        result.matrix <- foreach(chk=chkidx.list, .combine='rbind',
                                  .multicombine=T) %dopar% {
             if(spit.dot) {
                 cat(".")
@@ -633,7 +664,7 @@ covMatrix <- function(debug, chkidx.list, coord, rnaseq.gb, exonmodel, libsize,
 }
 
 
-doCov <- function(coord.mat, exonranges.list, chr.tag, pint, reg2plot, 
+doCov <- function(coord.mat, exonranges.list, chr.tag, pint, reg2plot,
                   flanksize, flankfactor, m.pts, f.pts, ...) {
 # Extract coverage from bam file into a matrix. According to the parameter
 # values, call corresponding functions.
@@ -646,7 +677,7 @@ doCov <- function(coord.mat, exonranges.list, chr.tag, pint, reg2plot,
 #   flankfactor: flanking region factor.
 #   m.pts: data points for middle interval.
 #   f.pts: data points for flanking region.
-# Return: matrix of interpolated coverage: each row represents a gene; each 
+# Return: matrix of interpolated coverage: each row represents a gene; each
 #         column represents a data point. Coverage from exons are concatenated.
 
     v.chrom <- coord.mat$chrom
@@ -666,7 +697,7 @@ doCov <- function(coord.mat, exonranges.list, chr.tag, pint, reg2plot,
             } else {
                 v.fls <- rep(flanksize, length=nrow(coord.mat))
             }
-            extrCovExons(v.chrom, exonranges.list, v.fls, v.strand, 
+            extrCovExons(v.chrom, exonranges.list, v.fls, v.strand,
                          m.pts, f.pts, ...)
         } else {  # ChIP-seq with intervals.
             v.start <- coord.mat$start
@@ -676,13 +707,13 @@ doCov <- function(coord.mat, exonranges.list, chr.tag, pint, reg2plot,
             } else {
                 v.fls <- rep(flanksize, length=nrow(coord.mat))
             }
-            extrCov3Sec(v.chrom, v.start, v.end, v.fls, v.strand, 
+            extrCov3Sec(v.chrom, v.start, v.end, v.fls, v.strand,
                         m.pts, f.pts, ...)
         }
     } else {  # point center with flanking regions.
         v.midp <- vector('integer', length=nrow(coord.mat))
         for(r in 1:nrow(coord.mat)) {
-            if(reg2plot == 'tss' && v.strand[r] == '+' || 
+            if(reg2plot == 'tss' && v.strand[r] == '+' ||
                reg2plot == 'tes' && v.strand[r] == '-') {
                 # the left site is center.
                 v.midp[r] <- coord.mat$start[r]

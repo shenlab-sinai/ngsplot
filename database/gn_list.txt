@@ -1,1 +1,2 @@
 ID	Assembly	Species	EnsVer	NPVer
+mm10	GRCm38	mus_musculus	79.0	3.0

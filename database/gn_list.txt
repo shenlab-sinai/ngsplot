@@ -1,1 +1,0 @@
-ID	Assembly	Species	EnsVer	NPVer

@@ -462,8 +462,8 @@ headerIndexBam <- function(bam.list) {
                 v.map.bowtie[i] <- TRUE
                 next
             }
-            map.style <- grepl('bwa|casava', map.prog, ignore.case=T)
-            if(map.style){
+            map.style <- grepl('bwa|casava|gem', map.prog, ignore.case=T)
+            if(map.style) {
                 v.map.bowtie[i] <- FALSE
                 next
             }

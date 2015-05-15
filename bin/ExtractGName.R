@@ -4,16 +4,19 @@
 # Input should be the file name of the zip file without .zip suffix.
 
 help<-function(){
-	cat("Usage: ExtractGname.R file\n\n")
-  cat("Extract function for ngsplot\n")
-  cat("file can either be the zip file containing the RData file or the RData file directly\n")
-	cat("Output varies depending on input. If input data file has no cluster information, only one gene_name.txt file produced for each plot.\n")
-	cat("If cluster information present, an additional cluster.*.txt file produced for each cluster for each plot.\n")
+	cat("Usage: ExtractGname.R file\n")
+  cat("Extract gene names and cluster info for ngsplot\n\n")
+  cat("File can either be the zip file containing the RData file or the RData 
+file directly.\n")
+	cat("Output varies depending on input. If input data file has no cluster 
+information, only one gene_name.txt file produced for each region.\n")
+	cat("If cluster information present, an additional C*.txt file 
+produced for each cluster for each region.\n")
 	q(status=1)
 }
 
 fname <- commandArgs(T)
-if( length(fname) < 1 || length(fname) > 1){
+if(length(fname) != 1) {
 	help()
 }
 

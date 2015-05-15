@@ -545,12 +545,15 @@ plotheat <- function(reg.list, uniq.reg, enrichList, v.low.cutoff, go.algo,
                                               go.paras)
             g.order <- g.order.list[[1]]
             g.cluster <- g.order.list[[2]]
-            go.cluster[[ur]] <- rev(g.cluster[g.order])
+            if(is.null(g.cluster)) {
+                go.cluster[[ur]] <- NA
+            } else{
+                go.cluster[[ur]] <- rev(g.cluster[g.order])
+            }
             go.list[[ur]] <- rev(rownames(enrichSelected[[1]][g.order, ]))
         } else {
-            g.order <- NULL
-            g.cluster <- NULL
-            go.list[[ur]] <- g.order
+            go.cluster[[ur]] <- NULL
+            go.list[[ur]] <- NULL
         }
 
         if(!do.plot) {

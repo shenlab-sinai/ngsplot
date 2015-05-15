@@ -17,40 +17,34 @@ if( length(fname) < 1 || length(fname) > 1){
 	help()
 }
 
-if(grepl(".zip",fname)){
-  root<-strsplit(fname,'.',T)[[1]][1]
-	heatmap.dat <- file.path(root, 'heatmap.RData')
+require(tools)
+fname.ext <- file_ext(fname)
+fname.root <- file_path_sans_ext(fname)
+if(fname.ext == "zip"){
+	heatmap.dat <- file.path(fname.root, 'heatmap.RData')
 	load(unz(fname, heatmap.dat))
-} else if (grepl(".RData",fname)) {
-  root<-strsplit(fname,'.',T)[[1]][1]
+} else if (fname.ext == "RData") {
   load(fname)
-} else { #assume zip file missing .zip suffix. maintains compatibility
+} else { # assume zip file missing .zip suffix. maintains compatibility
   heatmap.dat <- file.path(fname, 'heatmap.RData')
-  load(unz(paste(fname,"zip",sep='.'), heatmap.dat))
+  load(unz(paste(fname, "zip", sep='.'), heatmap.dat))
 }
 
 ###Step through each gene list
 for(i in 1:length(go.list[[1]])){
-  if(is.na(go.list[[2]][i])){ #no cluster information
-    gene.list <- data.frame(go.list[[1]][i], stringsAsFactors = FALSE)
-
-    gname.list <- strsplit(gene.list[,1], ':')
-    gene.list <- data.frame(do.call(rbind, gname.list))
-
-    write.table(gene.list, file=paste(root, i,'gene_name.txt', sep='.'),
-                col.names=F, row.names=F)
-  } else{ # With Clusters
-    gene.list <- data.frame(gene=go.list[[1]][i],cluster=go.list[[2]][i], stringsAsFactors = FALSE)
-
-    gname.list <- strsplit(gene.list[,1], ':')
-    gene.list <- data.frame(do.call(rbind, gname.list),gene.list[,2])
-
-    write.table(gene.list, file=paste(root, i,'gene_name.txt', sep='.'),
-                col.names=F, row.names=F)
-    clusters <- max(gene.list[,3])
-    for( j in 1:clusters ){ # Write Clusters
-      filename <- paste("cluster",j,".txt",sep="")
-      write.table(gene.list[gene.list[,3]==j,1], file=paste(root,i, filename, sep='.'),  col.names=F, row.names=F, quote = FALSE)
-    }
+  split.gname.list <- strsplit(go.list[[1]][[i]], ':')
+  gene.tab <- data.frame(do.call(rbind, split.gname.list))
+  colnames(gene.tab) <- c("Gene", "Transcript")
+  if(!is.na(go.list[[2]][i])) { # with cluster info.
+    gene.tab <- data.frame(gene.tab, Cluster=go.list[[2]][[i]])
+    gene.cluster.list <- with(gene.tab, split(gene.tab, Cluster, T))
+    dumb <- sapply(names(gene.cluster.list), function(cluster) {
+      cluster.fname <- paste(fname.root, '.R', i, '.C', cluster, '.csv', 
+                             sep='')
+      write.csv(gene.cluster.list[[cluster]], row.names=F, file=cluster.fname)
+    })
   }
+  write.csv(gene.tab, row.names=F,
+            file=paste(fname.root, '.R', i, '.gene_name.csv', sep=''))
+
 }

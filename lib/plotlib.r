@@ -375,7 +375,9 @@ OrderGenesHeatmap <- function(enrichList, lowCutoffs,
 #   lowCutoffs: low count cutoff for normalized count data.
 #   method: algorithm used to order genes.
 #   go.paras: gene ordering parameters.
-# Returns: a vector of gene orders. 
+# Returns: a vector of REVERSED gene orders. 
+# NOTE: due to the design of image function, the order needs to be reversed
+#       so that the genes will be shown correctly. 
 
     rankList <- mapply(RankNormalizeMatrix, 
                        mat=enrichList, low.cutoff=lowCutoffs, SIMPLIFY=F)
@@ -387,12 +389,12 @@ OrderGenesHeatmap <- function(enrichList, lowCutoffs,
         hc <- hclust(dist(rankCombined, method='euclidean'), 
                      method='complete')
         memb <- cutree(hc, k = go.paras$knc)
-        list(hc$order,memb)
+        list(rev(hc$order), memb)  # reversed!
     } else if(method == 'km') {
         rankCombined <- do.call('cbind', rankList)
         km <- kmeans(rankCombined, centers=go.paras$knc, 
                      iter.max=go.paras$max.iter, nstart=go.paras$nrs)
-        list(order(km$cluster), km$cluster)
+        list(rev(order(km$cluster)), km$cluster)  # reversed!
     } else if(method == 'total' || method == 'diff' && np == 1) {  
         list(order(rowSums(rankList[[1]])), NULL)
     } else if(method == 'max') {  # peak enrichment value of the 1st profile.
@@ -541,8 +543,8 @@ plotheat <- function(reg.list, uniq.reg, enrichList, v.low.cutoff, go.algo,
             } else {
                 lowCutoffs <- v.low.cutoff[plist]
             }
-            g.order.list <- OrderGenesHeatmap(enrichSelected, lowCutoffs, go.algo,
-                                              go.paras)
+            g.order.list <- OrderGenesHeatmap(enrichSelected, lowCutoffs, 
+                                              go.algo, go.paras)
             g.order <- g.order.list[[1]]
             g.cluster <- g.order.list[[2]]
             if(is.null(g.cluster)) {

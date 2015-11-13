@@ -546,7 +546,7 @@ chrTag <- function(sn.inbam) {
 # Args:
 #   sn.inbam: seqnames in the bam file.
 
-    n.chr <- length(grep('chr', sn.inbam))
+    n.chr <- length(grep('^chr', sn.inbam))
     if(n.chr == 0) {
         chr.tag <- F
     } else if(n.chr == length(sn.inbam)) {

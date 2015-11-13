@@ -475,7 +475,7 @@ EchoPlotArgs <- function() {
     cat("    -GO  Gene order algorithm used in heatmaps: total(default), hc, max,\n")
     cat("           prod, diff, km and none(according to gene list supplied)\n")
     cat("    -LOW Low count cutoff(default=10) in rank-based normalization\n")
-    cat("    -KNC K-means number of clusters(default=5)\n")
+    cat("    -KNC K-means or HC number of clusters(default=5)\n")
     cat("    -MIT Maximum number of iterations(default=20) for K-means\n")
     cat("    -NRS Number of random starts(default=30) in K-means\n")
     cat("    -RR  Reduce ratio(default=30). The parameter controls the heatmap height\n")

@@ -17,7 +17,7 @@ source(file.path(progpath, 'lib', 'parse.args.r'))
 source(file.path(progpath, 'lib', 'plotlib.r'))
 
 cmd.help <- function(){
-    cat("\nVisit http://code.google.com/p/ngsplot/wiki/ProgramArguments101 for details\n")
+    cat("\nVisit https://github.com/shenlab-sinai/ngsplot/wiki/ProgramArguments101 for details\n")
     cat("\nUsage: replot.r command -I input.zip -O name\n")
     cat("\n  command: prof OR heatmap\n\n")
     cat("## Mandatory parameters:\n")

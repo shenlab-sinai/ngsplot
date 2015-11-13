@@ -1,6 +1,14 @@
 Revision history for ngs.plot.
 ==============================
 
+2.61 November 13, 2015
+    - New Galaxy plug-in with re-designed GUI and some enhancements.
+    - Update ExtractGName.R to allow extraction of cluster information.
+    - Fix some gene ordering issue in km and hc.
+    - Remove the use of estiMapqStyle entirely to improve performance.
+    - Tiny bug fixes.
+    - Misc documentation improvements.
+
 2.47 November 20, 2014
     - Change default bam-pair colors to blue:yellow.
     - Change bam-pair color from pair to tri.

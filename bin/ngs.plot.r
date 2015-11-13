@@ -11,7 +11,7 @@
 # library(compiler)
 # enableJIT(3)
 
-ngsplot.version <- '2.47.1'
+ngsplot.version <- '2.61'
 # Program environment variable.
 progpath <- Sys.getenv('NGSPLOT')
 if(progpath == "") {
@@ -26,7 +26,7 @@ source(file.path(progpath, 'lib', 'coverage.r'))
 
 # Deal with command line arguments.
 cmd.help <- function(){
-    cat("\nVisit http://code.google.com/p/ngsplot/wiki/ProgramArguments101 for details\n")
+    cat("\nVisit https://github.com/shenlab-sinai/ngsplot/wiki/ProgramArguments101 for details\n")
     cat(paste("Version:", ngsplot.version, sep=" "))
     cat("\nUsage: ngs.plot.r -G genome -R region -C [cov|config]file\n")
     cat("                  -O name [Options]\n")
@@ -47,7 +47,7 @@ cmd.help <- function(){
 ###########################################################################
 #################### Deal with program input arguments ####################
 args <- commandArgs(T)
-# args <- unlist(strsplit('-G hg19 -R tss -C temp_config.txt -O tempXXX -D ensembl -L 2000 -S 0.1 -GO km -CS 100 -MQ 20 -SE 1 -RB 0 -FC 0.02 -MW 1 -H 0 -Debug 1', ' '))
+# args <- unlist(strsplit('-G hg19 -C config.k4k27.inp.txt -R tss -O test_extr_cluster -S 0.1 -Debug 1', ' '))
 
 # Input argument parser.
 args.tbl <- parseArgs(args, c('-G', '-C', '-R', '-O'))

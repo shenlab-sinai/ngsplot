@@ -141,7 +141,7 @@ given in "cufflinks_eg" folder.
 
 
 For more details of the usage, please visit project website:
-http://code.google.com/p/ngsplot/
+https://github.com/shenlab-sinai/ngsplot
 
 
 

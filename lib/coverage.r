@@ -508,7 +508,7 @@ libSizeBam <- function(bam.list) {
 
     # Count only reads that are mapped, primary, passed quality control and 
     # un-duplicated.
-    sbp <- ScanBamParam(flag=scanBamFlag(isUnmappedQuery=F, isNotPrimaryRead=F, 
+    sbp <- ScanBamParam(flag=scanBamFlag(isUnmappedQuery=F, isSecondaryAlignment=F, 
                         isNotPassingQualityControls=F, isDuplicate=F))
     v.lib.size <- vector('integer', length=length(bam.list))
     for(i in 1:length(bam.list)) {
@@ -655,9 +655,9 @@ doCov <- function(coord.mat, exonranges.list, chr.tag, pint, reg2plot,
 #         column represents a data point. Coverage from exons are concatenated.
 
     v.chrom <- coord.mat$chrom
-    if(!chr.tag) {
-        v.chrom <- sub('chr', '', v.chrom)
-    }
+    # if(!chr.tag) {
+    #     v.chrom <- sub('chr', '', v.chrom)
+    # }
     v.chrom <- as.factor(v.chrom)
     v.strand <- as.factor(coord.mat$strand)
 

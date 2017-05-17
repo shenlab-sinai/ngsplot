@@ -183,11 +183,12 @@ for(r in 1:nrow(ctg.tbl)) {  # r: index of plots/profiles.
     v.low.cutoff[r] <- low.count / libsize * 1e6
     result.pseudo.rpm <- 1e6 / libsize
     sn.inbam <- sn.list[[bam.files[1]]]
-    chr.tag <- chrTag(sn.inbam)
+    # chr.tag <- chrTag(sn.inbam)
+    chr.tag <- FALSE  # i.e. do NOT modify the chromosome names.
     is.bowtie <- v.map.bowtie[bam.files[1]]
-    if(class(chr.tag) == 'character') {
-        stop(sprintf("Read %s error: %s", bam.files[1], chr.tag))
-    }
+    # if(class(chr.tag) == 'character') {
+    #     stop(sprintf("Read %s error: %s", bam.files[1], chr.tag))
+    # }
     # browser()
     # Rprof("Rprof_covBamExons2.out", append=T)
     result.matrix <- covMatrix(debug, chkidx.list, coord.list[[reg]], rnaseq.gb, 

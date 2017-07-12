@@ -11,7 +11,7 @@
 # library(compiler)
 # enableJIT(3)
 
-ngsplot.version <- '2.61'
+ngsplot.version <- '2.63'
 # Program environment variable.
 progpath <- Sys.getenv('NGSPLOT')
 if(progpath == "") {
@@ -47,7 +47,7 @@ cmd.help <- function(){
 ###########################################################################
 #################### Deal with program input arguments ####################
 args <- commandArgs(T)
-# args <- unlist(strsplit('-G hg19 -C config.k4k27.inp.txt -R tss -O test_extr_cluster -S 0.1 -Debug 1', ' '))
+# args <- unlist(strsplit('-G mm10 -R tss -C K27M_no_stim_3_GATCAG_L006_R1_001Aligned.out.srt.rmdup.bam -O test -Debug 1', ' '))
 
 # Input argument parser.
 args.tbl <- parseArgs(args, c('-G', '-C', '-R', '-O'))
@@ -183,11 +183,12 @@ for(r in 1:nrow(ctg.tbl)) {  # r: index of plots/profiles.
     v.low.cutoff[r] <- low.count / libsize * 1e6
     result.pseudo.rpm <- 1e6 / libsize
     sn.inbam <- sn.list[[bam.files[1]]]
-    chr.tag <- chrTag(sn.inbam)
+    # chr.tag <- chrTag(sn.inbam)
+    chr.tag <- NA  # do NOT modify the chromosome names.
     is.bowtie <- v.map.bowtie[bam.files[1]]
-    if(class(chr.tag) == 'character') {
-        stop(sprintf("Read %s error: %s", bam.files[1], chr.tag))
-    }
+    # if(class(chr.tag) == 'character') {
+    #     stop(sprintf("Read %s error: %s", bam.files[1], chr.tag))
+    # }
     # browser()
     # Rprof("Rprof_covBamExons2.out", append=T)
     result.matrix <- covMatrix(debug, chkidx.list, coord.list[[reg]], rnaseq.gb, 
@@ -202,11 +203,12 @@ for(r in 1:nrow(ctg.tbl)) {  # r: index of plots/profiles.
         libsize <- v.lib.size[bam.files[2]]
         bkg.pseudo.rpm <- 1e6 / libsize
         sn.inbam <- sn.list[[bam.files[2]]]
-        chr.tag <- chrTag(sn.inbam)
+        # chr.tag <- chrTag(sn.inbam)
+        chr.tag <- NA
         is.bowtie <- v.map.bowtie[bam.files[2]]
-        if(class(chr.tag) == 'character') {
-            stop(sprintf("Read %s error: %s", bam.files[2], chr.tag))
-        }
+        # if(class(chr.tag) == 'character') {
+        #     stop(sprintf("Read %s error: %s", bam.files[2], chr.tag))
+        # }
         bkg.matrix <- covMatrix(debug, chkidx.list, coord.list[[reg]], rnaseq.gb, 
                                 exonmodel, libsize, TRUE, chr.tag, pint, 
                                 reg2plot, flanksize, flankfactor, m.pts, f.pts, 

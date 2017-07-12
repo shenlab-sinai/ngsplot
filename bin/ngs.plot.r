@@ -11,7 +11,7 @@
 # library(compiler)
 # enableJIT(3)
 
-ngsplot.version <- '2.61'
+ngsplot.version <- '2.63'
 # Program environment variable.
 progpath <- Sys.getenv('NGSPLOT')
 if(progpath == "") {

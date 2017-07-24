@@ -456,7 +456,7 @@ headerIndexBam <- function(bam.list) {
         map.prog <- try(strsplit(header[[1]]$text$'@PG'[[1]], ':')[[1]][2], 
                         silent=T)
         if(class(map.prog) != "try-error") {
-            map.style <- grepl('tophat|bowtie|bedtools|star', map.prog, 
+            map.style <- grepl('tophat|bowtie|bedtools|star|hisat', map.prog, 
                                ignore.case=T)
             if(map.style){
                 v.map.bowtie[i] <- TRUE
@@ -467,29 +467,7 @@ headerIndexBam <- function(bam.list) {
                 v.map.bowtie[i] <- FALSE
                 next
             }
-#             if(estiMapqStyle(bam.file)){
-#                 warning(sprintf("Aligner for: %s cannot be determined. Style of 
-# standard SAM mapping score will be used.", bam.file))
-#                 v.map.bowtie[i] <- FALSE
-#             }else{
-#                 warning(sprintf("Aligner for: %s cannot be determined. Style of 
-# Bowtie-like SAM mapping score will be used. Would you mind to tell us what 
-# aligner you are using?", bam.file))
-#                 v.map.bowtie[i] <- TRUE
-#             }
-        } 
-#         else {
-#             cat("\n")
-#             if(estiMapqStyle(bam.file)){
-#                 warning(sprintf("Aligner for: %s cannot be determined. Style of 
-# standard SAM mapping score will be used.", bam.file))
-#                 v.map.bowtie[i] <- FALSE
-#             }else{
-#                 warning(sprintf("Aligner for: %s cannot be determined. Style of 
-# Bowtie-like SAM mapping score will be used.", bam.file))
-#                 v.map.bowtie[i] <- TRUE
-#             }
-#         }
+        }
         warning(sprintf("Aligner for: %s cannot be determined. Style of 
 standard SAM mapping score will be used. Would you mind submitting an issue 
 report to us on Github? This will benefit people using the same aligner.", 

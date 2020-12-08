@@ -66,10 +66,12 @@ You need R version >= 2.15.0 and Python 2.7 to be able to use ngs.plot. Please a
    For R 3.0+, `utils` is no longer needed. For R <3.0, you probably already have `caTools` and `utils` installed but it does not hurt to check.
    Then execute in R:
    ```R
-   source("http://bioconductor.org/biocLite.R")
-   biocLite( "BSgenome" )
-   biocLite( "Rsamtools" )
-   biocLite( "ShortRead" )
+   if (!requireNamespace("BiocManager", quietly = TRUE)){
+       install.packages("BiocManager")
+   }
+   BiocManager::install("ShortRead")
+   BiocManager::install( "BSgenome" )
+   BiocManager::install( "Rsamtools" )
    ```
 
 1. (Optional) Install ngsplot package in Galaxy: read the `galaxy/README.txt` for instructions. A wiki will be provided to demonstrate the workflow of ngs.plot in Galaxy.

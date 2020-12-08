@@ -79,15 +79,15 @@ if(is.null(args.tbl)){
 
 # Load required libraries.
 if(!suppressMessages(require(ShortRead, warn.conflicts=F))) {
-    source("http://bioconductor.org/biocLite.R")
-    biocLite(ShortRead)
+    if (!requireNamespace("BiocManager", quietly = TRUE)) install.packages("BiocManager")
+    BiocManager::install(ShortRead)
     if(!suppressMessages(require(ShortRead, warn.conflicts=F))) {
         stop('Loading package ShortRead failed!')
     }
 }
 if(!suppressMessages(require(BSgenome, warn.conflicts=F))) {
-    source("http://bioconductor.org/biocLite.R")
-    biocLite(BSgenome)
+    if (!requireNamespace("BiocManager", quietly = TRUE)) install.packages("BiocManager")
+    BiocManager::install(BSgenome)
     if(!suppressMessages(require(BSgenome, warn.conflicts=F))) {
         stop('Loading package BSgenome failed!')
     }

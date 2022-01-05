@@ -1,3 +1,14 @@
+Shield: [![CC BY-NC-SA 4.0][cc-by-nc-sa-shield]][cc-by-nc-sa]
+
+This work is licensed under a
+[Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License][cc-by-nc-sa].
+
+[![CC BY-NC-SA 4.0][cc-by-nc-sa-image]][cc-by-nc-sa]
+
+[cc-by-nc-sa]: http://creativecommons.org/licenses/by-nc-sa/4.0/
+[cc-by-nc-sa-image]: https://licensebuttons.net/l/by-nc-sa/4.0/88x31.png
+[cc-by-nc-sa-shield]: https://img.shields.io/badge/License-CC%20BY--NC--SA%204.0-lightgrey.svg
+
 # INTRODUCTION
 **To be brief: ngs.plot is a program that allows you to easily visualize your next-generation sequencing (NGS) samples at functional genomic regions.**
 
@@ -234,8 +245,8 @@ Usage: plotCorrGram.r -I ngsplot_output.zip -O output_name [Options]
 
    The plot above shows that the sample with lower RIN number is significantly biased in short read coverage towards the 3’ end.
 
-# COMMERCIAL USE
-ngs.plot uses GNU GPLv2 and is free for use by academic users. If you want to use it in commercial settings, please contact Lisa Placanica at: lisa.placanica@mssm.edu.
+# TERMS OF USE
+All data is free to use for non-commercial purposes. For commercial use please contact [MSIP](https://www.ip.mountsinai.org/).
 
 # HOW TO CITE
 **Shen, L.*, Shao, N., Liu, X. and Nestler, E. (2014) ngs.plot: Quick mining and visualization of next-generation sequencing data by integrating genomic databases, BMC Genomics, 15, 284.**

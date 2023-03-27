@@ -280,8 +280,6 @@ if(!fi_tag){
     par(mai=heatmap.mar)
     layout(lay.mat, heights=reg.hei)
 
-    ## Testing color distribution
-    print(color.distr)
     # Do heatmap plotting.
     go.list <- plotheat(reg.list, uniq.reg, enrichList, v.low.cutoff, go.algo, 
                         go.paras, ctg.tbl$title, bam.pair, xticks, flood.frac, 

@@ -7,10 +7,6 @@
 # Created:      Jan 2014.
 #
 
-## Temporary workaround to unwritable R path
-.libPaths( c("/sc/arion/scratch/estilm01/R_repos", .libPaths() ) )
-## remove workaround for general user
-
 cmd.help <- function(){
     cat("\nVisit https://github.com/shenlab-sinai/ngsplot for details\n")
     cat("\nUsage: plotCorrGram.r -I ngsplot_output.zip -O output_name [Options]\n")

@@ -71,16 +71,16 @@ def read_gnlist(root_path, mode):
     try:
         db_f = open(gn_list, "r")
     except IOError:
-        print "Open {0} error: your ngs.plot database may be corrupted.".\
-              format(gn_list)
+        print("Open {0} error: your ngs.plot database may be corrupted.".\
+              format(gn_list))
         sys.exit()
 
     default_list = root_path + "/database/default.tbl"
     try:
         default_f = open(default_list, "r")
     except IOError:
-        print "Open {0} error: your ngs.plot database may be corrupted.".\
-              format(default_list)
+        print("Open {0} error: your ngs.plot database may be corrupted.".\
+              format(default_list))
         sys.exit()
     default_l = []
     header = default_f.readline() # skip the header
@@ -157,13 +157,13 @@ def write_gnlist(root_path, g_tbl):
     try:
         db_f = open(gn_list, "w")
     except IOError:
-        print "Open {0} error: your ngs.plot database may be corrupted.".\
-              format(gn_list)
+        print("Open {0} error: your ngs.plot database may be corrupted.".\
+              format(gn_list))
         sys.exit()
 
     db_f.write("\t".join(output_order) + "\n")
 
-    for k in g_tbl.viewkeys():
+    for k in g_tbl.keys():
         rec = []
         for col in output_order:
             rec.append(str(g_tbl[k][col]))
@@ -188,11 +188,24 @@ def listgn(root_path, args):
     # Format column widths to beautify output.
     tab_u = 4
     v_cw = map(lambda x: int(math.ceil(float(x) / tab_u) * tab_u + 1), v_cw)
-
+    # print(g_tbl)
+    # print(h_sp)
+    # print(v_cw)
+    # print(list(v_cw))
     # List genomes to screen.
-    print "".join(map(lambda x, y: x.ljust(y), h_sp, v_cw))  # header.
-    for k in sorted(g_tbl.viewkeys(), key=str.lower):
-        print "".join(map(lambda x, y: x.ljust(y), g_tbl[k], v_cw))
+    # print(list(map(lambda x, y: x.ljust(y), h_sp, v_cw)))
+    print("".join(map(lambda x, y: x.ljust(y), h_sp, v_cw)))  # header.
+    for k in sorted(g_tbl.keys(), key=str.lower):
+        my_table=g_tbl[k]
+        # print(my_table)
+        print("\t".join(my_table))
+        ## Cannot format properly for some reason.........
+        # print("".join(map(lambda x, y: str(x).ljust(y), my_table, v_cw)))
+        # print("".join(map(lambda x, y: str(x.ljust(y)), my_table, v_cw)))
+        # print("".join(map(lambda x, y: x.ljust(y), my_table, v_cw)))
+        # print("".join(map(lambda x, y: x, my_table, v_cw)))
+        # print("".join(map(lambda x, y: x.ljust(y), 
+        #     [str(b) for b in my_table], v_cw)))
 
 def isExAnno(pkg_files):
     """If the package is an extension package based on cell lines for ngs.plot, 
@@ -206,9 +219,7 @@ def isExAnno(pkg_files):
                   if not an extension package.
          RDcount: number of RData tables in the package.
     """
-
     import os.path
-
     exclusive_files = [".chrnames.refseq", ".chrnames.ensembl", ".metainfo"]
     isEx = False
     RDcount = 0
@@ -244,36 +255,41 @@ def install(root_path, args):
     try:
         pkg_f = tarfile.open(pkg_file, "r:gz")
     except tarfile.ReadError:
-        print "Read package file {0} error.".format(pkg_file),
-        print "The downloaded file may be corrupted."
+        print("Read package file {0} error.".format(pkg_file)),
+        print("The downloaded file may be corrupted.")
         sys.exit()
 
-    print "Extracting information from package...",
+    print("Extracting information from package..."),
     sys.stdout.flush()
     pkg_files = pkg_f.getnames()
     g_folder = pkg_files[0]
     # Minus folder name and .metainfo file name.
     (isEx, feature, RDcount) = isExAnno(pkg_files)
     if isEx:
-        print feature + " extension package, ",
-        print "contains " + str(RDcount + 2) + " tables."
+        print(feature + " extension package, "),
+        print("contains " + str(RDcount + 2) + " tables.")
     else:
-        print "contains " + str(RDcount + 2) + " tables."
+        print("contains " + str(RDcount + 2) + " tables.")
     # .metainfo file:
     # "ID"<TAB>mm10
     # "Assembly"<TAB>GRCm38
     # "Species"<TAB>mus_musculus
     # "EnsVer"<TAB>71
     # "NPVer"<TAB>1.0
+    # ID      hg38
+    # Assembly        GRCh38
+    # Species homo_sapiens
+    # EnsVer  76
+    # NPVer   3.00
     meta_f = pkg_f.extractfile(g_folder + "/.metainfo")
     meta_tbl = {}
     if meta_f:
         for rec in meta_f:
-            rec_sp = rec.strip().split("\t")
+            rec_sp = rec.decode().strip().split("\t")
             meta_tbl[rec_sp[0]] = rec_sp[1]  # format: Variable<TAB>Value
     else:
-        print "No meta information found in the package file.",
-        print "The downloaded file may be corrupted."
+        print("No meta information found in the package file."),
+        print("The downloaded file may be corrupted.")
         sys.exit()
     meta_f.close()
     pkg_f.close()
@@ -283,6 +299,8 @@ def install(root_path, args):
     species = meta_tbl["Species"]
     ens_ver = float(meta_tbl["EnsVer"])
     np_ver = float(meta_tbl["NPVer"])
+    # print(meta_tbl)
+    # print(gn_inst)
 
     # Database file.
     (h_sp, g_tbl, v_cw) = read_gnlist(root_path, "hash")
@@ -295,91 +313,91 @@ def install(root_path, args):
         # Only the same version with basic package could be installed.
         if isEx:
             if ens_ver == installed_ens and np_ver == installed_np:
-                print "Will upgrade the genome {0} with {1} annotation:".format(gn_inst, \
-                    feature),
-                print "Ensembl: {0}; ngs.plot: {1}.".\
-                    format(installed_ens, np_ver)
+                print("Will upgrade the genome {0} with {1} annotation:".format(gn_inst, \
+                    feature)),
+                print("Ensembl: {0}; ngs.plot: {1}.".\
+                    format(installed_ens, np_ver))
                 if yestoall:
                     install_pkg(root_path, pkg_file, gn_inst)
                     update_gnlist(root_path, g_tbl, gn_inst, assembly, \
                         species, ens_ver, np_ver)
                 else:
-                    ans = raw_input("Continue?(y/n): ")
+                    ans = input("Continue?(y/n): ")
                     while True:
                         if(ans == "y" or ans == "Y" or ans == "n" or ans == "N"):
                             break
                         else:
-                            ans = raw_input("Answer must be y/Y or n/N: ")
+                            ans = input("Answer must be y/Y or n/N: ")
                     if(ans == "y" or ans == "Y"):
                         install_pkg(root_path, pkg_file, gn_inst)
                         update_gnlist(root_path, g_tbl, gn_inst, assembly, \
                             species, ens_ver, np_ver)
                 return
             else:
-                print "This is an extension package of " + feature + \
+                print("This is an extension package of " + feature + \
                     ", ENS version " + str(ens_ver) + ", NPVer" + str(np_ver) + \
-                    ", please install the same version basic genome annotation first!"
+                    ", please install the same version basic genome annotation first!")
                 return
 
         # For basic package.
         # Install a newer version.
         if ens_ver > installed_ens or \
            ens_ver == installed_ens and np_ver > installed_np:
-            print "Will upgrade the genome {0}:".format(gn_inst)
-            print "Ensembl: {0}==>{1}; ngs.plot: {2}==>{3}.".\
-                  format(installed_ens, ens_ver, installed_np, np_ver),
+            print("Will upgrade the genome {0}:".format(gn_inst))
+            print("Ensembl: {0}==>{1}; ngs.plot: {2}==>{3}.".\
+                  format(installed_ens, ens_ver, installed_np, np_ver)),
             if yestoall:
                 install_pkg(root_path, pkg_file, gn_inst, gn_inst)
                 update_gnlist(root_path, g_tbl, gn_inst, assembly, \
                               species, ens_ver, np_ver)
             else:
-                ans = raw_input("Continue?(y/n): ")
+                ans = input("Continue?(y/n): ")
                 while True:
                     if(ans == "y" or ans == "Y" or ans == "n" or ans == "N"):
                         break
                     else:
-                        ans = raw_input("Answer must be y/Y or n/N: ")
+                        ans = input("Answer must be y/Y or n/N: ")
                 if(ans == "y" or ans == "Y"):
                     install_pkg(root_path, pkg_file, gn_inst, gn_inst)
                     update_gnlist(root_path, g_tbl, gn_inst, assembly, \
                                   species, ens_ver, np_ver)
         # Install an older version.
         else:
-            print "Will install the same or older version",
-            print "of the genome {0}:".format(gn_inst)
-            print "Ensembl: {0}==>{1}; ngs.plot: {2}==>{3}.".\
-                  format(installed_ens, ens_ver, installed_np, np_ver),
+            print("Will install the same or older version"),
+            print("of the genome {0}:".format(gn_inst))
+            print("Ensembl: {0}==>{1}; ngs.plot: {2}==>{3}.".\
+                  format(installed_ens, ens_ver, installed_np, np_ver)),
             if yestoall:
                 install_pkg(root_path, pkg_file, gn_inst, gn_inst)
                 update_gnlist(root_path, g_tbl, gn_inst, assembly, \
                               species, ens_ver, np_ver)
             else:
-                ans = raw_input("Continue?(y/n): ")
+                ans = input("Continue?(y/n): ")
                 while True:
                     if(ans == "y" or ans == "Y" or ans == "n" or ans == "N"):
                         break
                     else:
-                        ans = raw_input("Answer must be y/Y or n/N: ")
+                        ans = input("Answer must be y/Y or n/N: ")
                 if(ans == "y" or ans == "Y"):
                     install_pkg(root_path, pkg_file, gn_inst, gn_inst)
                     update_gnlist(root_path, g_tbl, gn_inst, assembly, \
                                   species, ens_ver, np_ver)
     # Totally new installation, only basic package could be installed.
     else:
-        print "Will install new genome {0}:".format(gn_inst),
-        print "Ensembl=> v{0}; ngs.plot=> v{1}.".format(ens_ver, np_ver),
+        print("Will install new genome {0}:".format(gn_inst)),
+        print("Ensembl=> v{0}; ngs.plot=> v{1}.".format(ens_ver, np_ver)),
         if yestoall:
             install_pkg(root_path, pkg_file, gn_inst)
             update_gnlist(root_path, g_tbl, gn_inst, assembly, \
                           species, ens_ver, np_ver)
         else:
-            ans = raw_input("Continue?(y/n): ")
+            ans = input("Continue?(y/n): ")
                             
             while True:
                 if(ans == "y" or ans == "Y" or ans == "n" or ans == "N"):
                     break
                 else:
-                    ans = raw_input("Answer must be y/Y or n/N:")
+                    ans = input("Answer must be y/Y or n/N:")
             if(ans == "y" or ans == "Y"):
                 install_pkg(root_path, pkg_file, gn_inst)
                 update_gnlist(root_path, g_tbl, gn_inst, assembly, \
@@ -402,30 +420,30 @@ def install_pkg(root_path, pkg_file, new_gn, old_gn=None):
     import sys
 
     if old_gn:
-        print "Removing installed genome:{0}...".format(old_gn),
+        print("Removing installed genome:{0}...".format(old_gn)),
         sys.stdout.flush()
         shutil.rmtree(root_path + '/database/' + old_gn)
         rm_dbtbl(root_path, old_gn)
-        print "Done"
+        print("Done")
 
-    print "Installing new genome...",
+    print("Installing new genome..."),
     sys.stdout.flush()
     try:
         tar_f = tarfile.open(pkg_file, "r:gz")
     except tarfile.ReadError:
-        print "Read package file {0} error: ".format(pkg_file),
-        print "downloaded file may be corrupted."
+        print("Read package file {0} error: ".format(pkg_file)),
+        print("downloaded file may be corrupted.")
         sys.exit()
 
     try:
         tar_f.extractall(root_path + "/database")
     except tarfile.ExtractError:
-        print "Extract files from package error.", 
-        print "The downloaded file may be corrupted."
+        print("Extract files from package error."), 
+        print("The downloaded file may be corrupted.")
 
     add_dbtbl(root_path, new_gn)
 
-    print "Done"
+    print("Done")
 
 
 def add_dbtbl(root_path, gn):
@@ -454,25 +472,33 @@ def add_dbtbl(root_path, gn):
     exm_rdata = root_path + '/database/{0}/{1}*exonmodel*.RData'.format(gn, gn)
     exm_set = set(map(os.path.basename, glob.glob(exm_rdata)))
     nex_list = sorted(list(all_set - exm_set))
-
+    # print(nex_list) ##comment
     # DB file list.
     gn_ens_list = {}  # Ensembl genome name unique list.
     desired_ncols = 6
-    for fname in nex_list:
-        tokens = fname.split('.')
-        tokens = tokens[:6]
-        if tokens[-1] == 'RData':
-            tokens[-1] = 'NA'
-        tokens.extend(['NA'] * (desired_ncols - len(tokens)))
-        os.write(dblist_f, fname + "\t" + "\t".join(tokens) + "\n")
-        if tokens[1] == 'ensembl':
-            gn_ens_list[".".join(tokens[:3])] = 1
-    os.close(dblist_f)
+    fp = open(dblist_f,'w')
+    with fp:
+        for fname in nex_list:
+            tokens = fname.split('.')
+            tokens = tokens[:6]
+            if tokens[-1] == 'RData':
+                tokens[-1] = 'NA'
+            tokens.extend(['NA'] * (desired_ncols - len(tokens)))
+            fp.write(fname + "\t" + "\t".join(tokens) + "\n")
+            # os.write(dblist_f, fname + "\t" + "\t".join(tokens) + "\n")
+            if tokens[1] == 'ensembl':
+                gn_ens_list[".".join(tokens[:3])] = 1
+        # os.close(dblist_f)
+    fp.close()
 
     # Ensembl genome name list.
-    for gn in sorted(gn_ens_list.viewkeys()):
-        os.write(gnlist_f, gn.replace(".", "\t") + "\n")
-    os.close(gnlist_f)    
+    fp = open(gnlist_f,'w')
+    with fp:
+        for gn in sorted(gn_ens_list.keys()):
+            fp.write(gn.replace(".", "\t") + "\n")
+    fp.close()   
+        # os.write(gnlist_f, gn.replace(".", "\t") + "\n")
+    # os.close(gnlist_f)    
 
     # Call external program to create table default file.
     (default_f, default_n) = tempfile.mkstemp(text=True)
@@ -508,53 +534,53 @@ def remove(root_path, args):
     gn = args.gn
 
     if gn in g_tbl and sub_ftr is None:
-        print "Will remove genome {0} from database.".format(gn),
+        print("Will remove genome {0} from database.".format(gn)),
         do_rm = False
         if yestoall:
             do_rm = True
         else:
-            ans = raw_input("Continue?(y/n): ")
+            ans = input("Continue?(y/n): ")
             while True:
                 if ans == 'y' or ans == 'Y' or ans == 'n' or ans == 'N':
                     break
                 else:
-                    ans = raw_input("The answer must be y/Y or n/N: ")
+                    ans = input("The answer must be y/Y or n/N: ")
             if ans == 'y' or ans == 'Y':
                 do_rm = True
         if do_rm:
             folder_to_rm = root_path + "/database/" + gn
-            print "Removing genome...",
+            print("Removing genome..."),
             sys.stdout.flush()
             shutil.rmtree(folder_to_rm)
             del g_tbl[gn]
             write_gnlist(root_path, g_tbl)
             rm_dbtbl(root_path, gn)
-            print "Done"
+            print("Done")
     elif gn in g_tbl and sub_ftr is not None:
-        print "Will remove genomic feature {0} of genome {1} from database."\
-            .format(sub_ftr, gn)
+        print("Will remove genomic feature {0} of genome {1} from database."\
+            .format(sub_ftr, gn))
         do_rm = False
         if yestoall:
             do_rm = True
         else:
-            ans = raw_input("Continue?(y/n): ")
+            ans = input("Continue?(y/n): ")
             while True:
                 if ans == 'y' or ans == 'Y' or ans == 'n' or ans == 'N':
                     break
                 else:
-                    ans = raw_input("The answer must be y/Y or n/N: ")
+                    ans = input("The answer must be y/Y or n/N: ")
             if ans == 'y' or ans == 'Y':
                 do_rm = True
         if do_rm:
             folder_to_rm = root_path + "/database/" + gn + "/" + sub_ftr
-            print "Removing genome...",
+            print("Removing genome..."),
             sys.stdout.flush()
             shutil.rmtree(folder_to_rm)
             # g_tbl does't need to be updated
             rm_dbtbl(root_path, gn, sub_ftr)
-            print "Done"
+            print("Done")
     else:
-        print "Cannot find the genome in database. Nothing was done."
+        print("Cannot find the genome in database. Nothing was done.")
 
 
 def rm_dbtbl(root_path, gn, sub_ftr=None):
@@ -589,7 +615,7 @@ def chrnames(root_path, args):
     gn = args.gn
 
     if db != "ensembl" and db != "refseq":
-        print "Unrecognized database name: database must be ensembl or refseq."
+        print("Unrecognized database name: database must be ensembl or refseq.")
         sys.exit()
 
     chrnames_file = root_path + "/database/" + gn + "/.chrnames." + db
@@ -597,15 +623,16 @@ def chrnames(root_path, args):
     try:
         chrf = open(chrnames_file)
     except IOError:
-        print "Open file: {0} error.".format(chrnames_file),
-        print "Your database may be corrupted or you have an older version."
+        print("Open file: {0} error.".format(chrnames_file)),
+        print("Your database may be corrupted, is not installed, or you may \n \
+            have an older version.")
         sys.exit()
 
     chr_list = chrf.read(1000000)  # set 1MB limit to avoid nasty input.
     chrf.close()
 
     chr_list = chr_list.strip()
-    print chr_list
+    print(chr_list)
 
 
 
@@ -620,7 +647,7 @@ if __name__ == "__main__":
     try:
         root_path = os.environ["NGSPLOT"]
     except KeyError:
-        print "Environmental variable NGSPLOT is not set! Exit.\n"
+        print("Environmental variable NGSPLOT is not set! Exit.\n")
         sys.exit()
 
     # Main parser.

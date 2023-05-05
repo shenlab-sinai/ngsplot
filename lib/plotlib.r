@@ -460,8 +460,18 @@ plotheat <- function(reg.list, uniq.reg, enrichList, v.low.cutoff, go.algo,
                                                interpolate='spline')
         }
     } else {
+        ## allow for different base color to be used in non-pair plots
+        ## parse
         if(hm.color != "default") {
-            enrich.palette <- colorRampPalette(c('snow', hm.color))
+            base.color <- unlist(strsplit(hm.color, ':'))
+            if(length(base.color)!=1 && length(base.color)!=2){
+                ## raise error
+                stop('You have specified more than two colors for your heatmap.\n\
+                    Please provide only one or two colors.\n \
+                    For example; "red" provides a white to red gradient, while \n\
+                    "yellow:red" provides a yellow to red gradient')
+            }
+            enrich.palette <- colorRampPalette(c(base.color[1], base.color[2]))
         } else {
             enrich.palette <- colorRampPalette(c('snow', 'red2'))    
         }

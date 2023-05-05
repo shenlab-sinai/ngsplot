@@ -33,8 +33,12 @@ pointLabDict = {
 #     "dhs":"subregion"
 # }
 
-in_f = file(sys.argv[1])
-out_f = file(sys.argv[2], "w")
+print(sys.argv[1])
+print(sys.argv[2])
+
+# db_f = open(gn_list, "r")
+in_f = open(sys.argv[1], "r")
+out_f = open(sys.argv[2], "w")
 out_f.write("\t".join(["Genome", "DefaultDB", "Region", "DefaultFI1", \
                        "DefaultFI2", "DefaultFI3", "PointLab", "Flank"]) + \
             "\n")

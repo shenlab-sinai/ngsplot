@@ -447,7 +447,7 @@ CheckHMColorConfig <- function(hm.color, bam.pair) {
     if(hm.color != 'default') {
         v.colors <- unlist(strsplit(hm.color, ":"))
         if(bam.pair && length(v.colors) != 2 && length(v.colors) != 3 || 
-           !bam.pair && length(v.colors) != 1) {
+           !bam.pair && length(v.colors) != 1 && length(v.colors) != 2) {
             stop("Heatmap color specifications must correspond to bam-pair!\n")
         }
     }

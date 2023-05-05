@@ -40,7 +40,7 @@ The 3.0+ genome files work with ngs.plot v2.41+; The 1-2 series of genome files 
 Recent changes, bug fixes and feature additions will be announced through this Google discussion group: [ngs.plot discussion forum](https://groups.google.com/forum/?fromgroups#!forum/ngsplot-discuss). Users are encouraged to ask questions through this forum (instead of shooting me emails) so that the answers can be shared. If you are interested, you can sign up to receive updates through E-mails.
 
 # LOCAL INSTALLATION
-You need R version >= 2.15.0 and Python 2.7 to be able to use ngs.plot. Please also update related R and Bioconductor packages to the corresponding version.
+ngs.plot has been updated to work with Python 3, as well as the current versions of R and Perl. The update has been successfully tested on R version 4.2.2, Python version 3.11.0, and Perl version 5.36.0. The reference genome files for mm10 and hg38 have been successfully tested for use in this update.
 
 1. Download the ngs.plot package to a desired folder, such as ~/software, and extract it:
    ```
@@ -73,10 +73,6 @@ You need R version >= 2.15.0 and Python 2.7 to be able to use ngs.plot. Please a
    install.packages("doMC", dep=T)
    install.packages("caTools", dep=T)
    install.packages("utils", dep=T)
-   ```
-   For R 3.0+, `utils` is no longer needed. For R <3.0, you probably already have `caTools` and `utils` installed but it does not hurt to check.
-   Then execute in R:
-   ```R
    source("http://bioconductor.org/biocLite.R")
    biocLite( "BSgenome" )
    biocLite( "Rsamtools" )
@@ -166,6 +162,22 @@ Usage: plotCorrGram.r -I ngsplot_output.zip -O output_name [Options]
    The avgprof and heatmap plotted by ngs.plot are like this:
 
    ![h3k4me3_bampair.png](./webimgs/h3k4me3_bampair.png)
+
+   Regarding the color selection for your heatmap: Both bam-pairs and single-bam selections can be drawn with customized R color selections using the "CO" parameter:
+   ```
+   ## Produce a bam-pair heatmap with colors yellow -> white -> royalblue
+   ngs.plot.r -G mm10 -R tss -C sample_A.bam:sample_B.bam -O output/A.vs.B 
+   -T A.vs.B -CO yellow:white:royalblue
+   ## Produce a bam-pair heatmap with colors yellow -> black -> royalblue
+   ngs.plot.r -G mm10 -R tss -C sample_A.bam:sample_B.bam -O output/A.vs.B 
+   -T A.vs.B -CO yellow:royalblue
+   ## Produce a single-bam heatmap with colors white -> royalblue
+   ngs.plot.r -G mm10 -R tss -C sample_A.bam:sample_B.bam -O output/A.vs.B 
+   -T A.vs.B -CO royalblue
+   ## Produce a single-bam heatmap with colors yellow -> royalblue
+   ngs.plot.r -G mm10 -R tss -C sample_A.bam:sample_B.bam -O output/A.vs.B 
+   -T A.vs.B -CO yellow:royalblue
+   ```
 
 1. ngs.plot for multiplot. If you want to draw a plot of multiple samples/regions, you need to create a configuration file. We demonstrate multiplot using a few examples:
   1. H3K4me3. The configure file "config.hesc.k4.txt" is like this:

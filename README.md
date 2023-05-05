@@ -9,6 +9,9 @@ This work is licensed under a
 [cc-by-nc-sa-image]: https://licensebuttons.net/l/by-nc-sa/4.0/88x31.png
 [cc-by-nc-sa-shield]: https://img.shields.io/badge/License-CC%20BY--NC--SA%204.0-lightgrey.svg
 
+# Development note:
+## ngs.plot has been updated to work with Python 3, as well as the current versions of R and Perl. It has successfully been tested on a Linux system. Further testing on additional operating systems (e.g. MAC) may be needed. Please submit an issue for errors that you may encounter, so that we can improve this tool!
+
 # INTRODUCTION
 **To be brief: ngs.plot is a program that allows you to easily visualize your next-generation sequencing (NGS) samples at functional genomic regions.**
 
